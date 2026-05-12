@@ -6,7 +6,7 @@ function BcStudentAvatar() {
   return (
     <div className="flex-[1_0_0] h-full min-w-px relative" data-name="BC Student Avatar">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgBcStudentAvatar} />
+        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgBcStudentAvatar.src} />
       </div>
     </div>
   );
@@ -574,7 +574,7 @@ function DataChartPlaceholder() {
   return (
     <div className="absolute inset-px mix-blend-multiply opacity-20" data-name="Data Chart Placeholder">
       <div className="absolute bg-clip-padding border-0 border-[transparent] border-solid inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute h-[160.57%] left-0 max-w-none top-[-30.28%] w-full" src={imgDataChartPlaceholder} />
+        <img alt="" className="absolute h-[160.57%] left-0 max-w-none top-[-30.28%] w-full" src={imgDataChartPlaceholder.src} />
       </div>
     </div>
   );

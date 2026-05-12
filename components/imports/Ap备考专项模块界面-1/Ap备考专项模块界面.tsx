@@ -37,7 +37,7 @@ function BcStudentAvatar() {
   return (
     <div className="max-w-[231px] pointer-events-none relative rounded-[9999px] shrink-0 size-[48px]" data-name="BC Student Avatar">
       <div className="absolute inset-0 overflow-hidden rounded-[9999px]">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgBcStudentAvatar} />
+        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgBcStudentAvatar.src} />
       </div>
       <div aria-hidden="true" className="absolute border-2 border-[#e7e8e9] border-solid inset-0 rounded-[9999px]" />
     </div>

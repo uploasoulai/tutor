@@ -484,19 +484,17 @@ function HomePage() {
         )}
       >
         {/* ── Logo ── */}
-        <motion.img
-          src="/logo-horizontal.png"
-          alt="CoastalTutor"
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            delay: 0.1,
-            type: 'spring',
-            stiffness: 200,
-            damping: 20,
-          }}
-          className="h-12 md:h-16 mb-2 -ml-2 md:-ml-3"
-        />
+          transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
+          className="flex items-center gap-2 mb-2"
+        >
+          <img src="/logo-horizontal.png" alt="CoastalTutor" className="h-10 md:h-12" />
+          <span className="text-xs font-medium text-muted-foreground/50 border border-muted-foreground/20 rounded-full px-2 py-0.5">
+            自由探索
+          </span>
+        </motion.div>
 
         {/* ── Slogan ── */}
         <motion.p

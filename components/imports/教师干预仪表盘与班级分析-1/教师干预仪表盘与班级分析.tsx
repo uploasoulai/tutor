@@ -30,7 +30,7 @@ function TeacherProfile() {
   return (
     <div className="flex-[1_0_0] h-full min-w-px relative" data-name="Teacher Profile">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgTeacherProfile} />
+        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgTeacherProfile.src} />
       </div>
     </div>
   );
@@ -123,7 +123,7 @@ function StudentProfile() {
   return (
     <div className="flex-[1_0_0] min-h-px relative w-full" data-name="Student Profile">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute h-full left-[-4.86%] max-w-none top-0 w-[109.71%]" src={imgStudentProfile} />
+        <img alt="" className="absolute h-full left-[-4.86%] max-w-none top-0 w-[109.71%]" src={imgStudentProfile.src} />
       </div>
     </div>
   );
@@ -282,7 +282,7 @@ function StudentProfile1() {
   return (
     <div className="flex-[1_0_0] min-h-px relative w-full" data-name="Student Profile">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute h-full left-[-9.7%] max-w-none top-0 w-[119.4%]" src={imgStudentProfile1} />
+        <img alt="" className="absolute h-full left-[-9.7%] max-w-none top-0 w-[119.4%]" src={imgStudentProfile1.src} />
       </div>
     </div>
   );
@@ -1071,7 +1071,7 @@ function MayaLin() {
   return (
     <div className="max-w-[279.3800048828125px] relative rounded-[9999px] shrink-0 size-[32px]" data-name="Maya Lin">
       <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[9999px]">
-        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgMayaLin} />
+        <img alt="" className="absolute left-0 max-w-none size-full top-0" src={imgMayaLin.src} />
       </div>
     </div>
   );

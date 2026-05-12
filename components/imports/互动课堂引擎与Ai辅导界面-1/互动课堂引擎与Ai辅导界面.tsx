@@ -234,7 +234,7 @@ function TrajectoryDiagram() {
   return (
     <div className="flex-[1_0_0] h-full min-w-px opacity-80 relative" data-name="Trajectory diagram">
       <div className="absolute bg-clip-padding border-0 border-[transparent] border-solid inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute h-[256.69%] left-0 max-w-none top-[-78.35%] w-full" src={imgTrajectoryDiagram} />
+        <img alt="" className="absolute h-[256.69%] left-0 max-w-none top-[-78.35%] w-full" src={imgTrajectoryDiagram.src} />
       </div>
     </div>
   );

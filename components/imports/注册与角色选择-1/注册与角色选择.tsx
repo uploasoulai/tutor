@@ -5,7 +5,7 @@ function AbstractBackgroundImage() {
   return (
     <div className="absolute content-stretch flex flex-col inset-0 items-start justify-center" data-name="Abstract Background Image">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img alt="" className="absolute h-full left-[-30%] max-w-none top-0 w-[160%]" src={imgAbstractBackgroundImage} />
+        <img alt="" className="absolute h-full left-[-30%] max-w-none top-0 w-[160%]" src={imgAbstractBackgroundImage.src} />
       </div>
       <div className="backdrop-blur-[1px] bg-[rgba(0,52,97,0.2)] flex-[1_0_0] min-h-px relative w-full" data-name="Overlay to ensure text readability while keeping the image visible" />
     </div>
@@ -151,7 +151,7 @@ function ContentOverlay() {
   );
 }
 
-function LeftPanelBrandAcademicImageryHiddenOnMobile() {
+export function LeftPanelBrandAcademicImageryHiddenOnMobile() {
   return (
     <div className="bg-[#e7e8e9] content-stretch flex flex-[1_0_0] flex-col items-start justify-center min-w-px overflow-clip relative self-stretch" data-name="Left Panel: Brand & Academic Imagery (Hidden on mobile)">
       <AbstractBackgroundImage />

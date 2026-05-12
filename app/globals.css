@@ -204,6 +204,15 @@
   }
 }
 
+/* Fade-in animation for page transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
 /* Breathing animation for interactive mode button */
 @keyframes interactive-mode-breathe {
   0%,
