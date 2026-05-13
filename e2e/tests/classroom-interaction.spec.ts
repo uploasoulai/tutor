@@ -14,9 +14,9 @@ async function seedDatabase(page: import('@playwright/test').Page) {
     localStorage.setItem('settings-storage', settings);
   }, SETTINGS_STORAGE);
 
-  // Navigate to home page first — this causes Dexie to open/create the DB at v8
-  // with the correct schema. We wait for network idle to ensure Dexie is done.
-  await page.goto('/', { waitUntil: 'networkidle' });
+  // Navigate to signup page first — it's stable and doesn't redirect immediately,
+  // making it safer for seeding IndexedDB.
+  await page.goto('/signup', { waitUntil: 'networkidle' });
 
   // Now seed data by opening the DB at its current version (no upgrade).
   // Opening without a version number returns the current version without triggering
@@ -25,7 +25,7 @@ async function seedDatabase(page: import('@playwright/test').Page) {
     ({ stageId, theme }) => {
       return new Promise<void>((resolve, reject) => {
         // Open without specifying version — uses current DB version, no upgrade event
-        const request = indexedDB.open('MAIC-Database');
+        const request = indexedDB.open('CoastalTutor-Database');
 
         request.onsuccess = (event) => {
           const db = (event.target as IDBOpenDBRequest).result;

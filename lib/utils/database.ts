@@ -193,7 +193,7 @@ export function mediaFileKey(stageId: string, elementId: string): string {
 
 // ==================== Database Definition ====================
 
-const DATABASE_NAME = 'MAIC-Database';
+const DATABASE_NAME = 'CoastalTutor-Database';
 const _DATABASE_VERSION = 10;
 
 /**
