@@ -142,8 +142,7 @@ function gradeAreaIndex(paragraphs: string[], docArea: string, grade: Grade) {
 
 function nextGradeAreaIndex(paragraphs: string[], docArea: string, startIndex: number) {
   const next = paragraphs.findIndex(
-    (paragraph, index) =>
-      index > startIndex && paragraph.includes(`Area of Learning: ${docArea}`),
+    (paragraph, index) => index > startIndex && paragraph.includes(`Area of Learning: ${docArea}`),
   );
 
   return next === -1 ? paragraphs.length : next;
@@ -190,7 +189,9 @@ function extractElaborationSection(paragraphs: string[], docArea: string, grade:
 
   const nextContent = paragraphs.findIndex(
     (paragraph, index) =>
-      index > start && paragraph.includes(`${docArea}Content`) && paragraph.includes('Elaborations'),
+      index > start &&
+      paragraph.includes(`${docArea}Content`) &&
+      paragraph.includes('Elaborations'),
   );
   const nextArea = nextGradeAreaIndex(paragraphs, docArea, start);
   const end = Math.min(nextContent === -1 ? paragraphs.length : nextContent, nextArea);
@@ -239,7 +240,9 @@ function buildChunks(fileName: string, paragraphs: string[]) {
       if (headerIndex !== -1) {
         const nextHeaderIndex = section.findIndex(
           (paragraph, index) =>
-            index > headerIndex && paragraph.endsWith(':') && isHeaderForStandard(paragraph, standards),
+            index > headerIndex &&
+            paragraph.endsWith(':') &&
+            isHeaderForStandard(paragraph, standards),
         );
         const end = nextHeaderIndex === -1 ? section.length : nextHeaderIndex;
         elaboration = section

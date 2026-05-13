@@ -24,7 +24,17 @@ import {
   Zap,
 } from 'lucide-react';
 
-const GRADES = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'];
+const GRADES = [
+  'Grade 1',
+  'Grade 2',
+  'Grade 3',
+  'Grade 4',
+  'Grade 5',
+  'Grade 6',
+  'Grade 7',
+  'Grade 8',
+  'Grade 9',
+];
 const SUBJECTS = ['Math', 'Language Arts', 'Arts', 'ADST'];
 const SUBJECT_PREFIX: Record<string, string> = {
   Math: 'MATH',
@@ -124,7 +134,8 @@ export default function StudentDashboard() {
     return Math.round(value * 100);
   }, [todayGoals]);
 
-  const firstName = user?.user_metadata?.first_name ?? user?.user_metadata?.preferred_name ?? 'Student';
+  const firstName =
+    user?.user_metadata?.first_name ?? user?.user_metadata?.preferred_name ?? 'Student';
 
   async function loadTodayPlan() {
     if (!user) return;
@@ -168,14 +179,19 @@ export default function StudentDashboard() {
           .in('outcome_id', outcomeIds),
         supabase
           .from('learning_sessions')
-          .select('id,bc_outcome_ids,status,coastaltutor_lesson_id,lesson_payload,lesson_title,started_at')
+          .select(
+            'id,bc_outcome_ids,status,coastaltutor_lesson_id,lesson_payload,lesson_title,started_at',
+          )
           .eq('student_id', user.id)
           .order('started_at', { ascending: false })
           .limit(50),
       ]);
 
       const masteryByOutcome = new Map(
-        (masteryRows ?? []).map((row) => [row.outcome_id as string, Number(row.mastery_level ?? 0)]),
+        (masteryRows ?? []).map((row) => [
+          row.outcome_id as string,
+          Number(row.mastery_level ?? 0),
+        ]),
       );
       const sessionByOutcome = new Map<string, Session>();
 
@@ -195,7 +211,8 @@ export default function StudentDashboard() {
             outcomeCode: outcome.outcome_code,
             mastery,
             priority: outcome.sequence_order ?? 999,
-            reusedSessionId: session?.coastaltutor_lesson_id || session?.lesson_payload ? session.id : undefined,
+            reusedSessionId:
+              session?.coastaltutor_lesson_id || session?.lesson_payload ? session.id : undefined,
           };
         })
         .sort((a, b) => a.mastery - b.mastery || a.priority - b.priority)

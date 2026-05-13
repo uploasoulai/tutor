@@ -19,7 +19,17 @@ import {
   UserRound,
 } from 'lucide-react';
 
-const GRADES = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'];
+const GRADES = [
+  'Grade 1',
+  'Grade 2',
+  'Grade 3',
+  'Grade 4',
+  'Grade 5',
+  'Grade 6',
+  'Grade 7',
+  'Grade 8',
+  'Grade 9',
+];
 const SUBJECTS = [
   { id: 'Math', label: 'Math', icon: Calculator },
   { id: 'Language Arts', label: 'English Language Arts', icon: BookOpen },
@@ -180,30 +190,32 @@ export default function OnboardingPage() {
           </div>
 
           <div className="space-y-2">
-            {['Learner', 'Grade & subject', 'Goals', 'Tutor style', 'Schedule'].map((label, index) => (
-              <button
-                key={label}
-                onClick={() => setStep(index)}
-                className={cn(
-                  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium',
-                  index === step ? 'bg-[#003461] text-white' : 'text-[#424750] hover:bg-white',
-                )}
-              >
-                <span
+            {['Learner', 'Grade & subject', 'Goals', 'Tutor style', 'Schedule'].map(
+              (label, index) => (
+                <button
+                  key={label}
+                  onClick={() => setStep(index)}
                   className={cn(
-                    'flex h-5 w-5 items-center justify-center rounded-full text-[11px]',
-                    index < step
-                      ? 'bg-emerald-500 text-white'
-                      : index === step
-                        ? 'bg-white text-[#003461]'
-                        : 'bg-[#e7e8e9] text-[#727781]',
+                    'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium',
+                    index === step ? 'bg-[#003461] text-white' : 'text-[#424750] hover:bg-white',
                   )}
                 >
-                  {index < step ? <Check className="h-3 w-3" /> : index + 1}
-                </span>
-                {label}
-              </button>
-            ))}
+                  <span
+                    className={cn(
+                      'flex h-5 w-5 items-center justify-center rounded-full text-[11px]',
+                      index < step
+                        ? 'bg-emerald-500 text-white'
+                        : index === step
+                          ? 'bg-white text-[#003461]'
+                          : 'bg-[#e7e8e9] text-[#727781]',
+                    )}
+                  >
+                    {index < step ? <Check className="h-3 w-3" /> : index + 1}
+                  </span>
+                  {label}
+                </button>
+              ),
+            )}
           </div>
         </aside>
 
@@ -308,7 +320,9 @@ export default function OnboardingPage() {
                     <Choice
                       key={minutes}
                       selected={profile.dailyMinutes === minutes}
-                      onClick={() => setProfile((current) => ({ ...current, dailyMinutes: minutes }))}
+                      onClick={() =>
+                        setProfile((current) => ({ ...current, dailyMinutes: minutes }))
+                      }
                     >
                       {minutes} min
                     </Choice>
@@ -328,8 +342,8 @@ export default function OnboardingPage() {
               </label>
               <div className="rounded-lg border border-[#e7e8e9] bg-[#f8f9fa] p-4 text-sm text-[#424750]">
                 First path: {firstName} starts with {profile.grade} {profile.subjects[0]}. The
-                dashboard will read mastery, choose today&apos;s 3 goals, and reuse generated lessons
-                when a matching session already exists.
+                dashboard will read mastery, choose today&apos;s 3 goals, and reuse generated
+                lessons when a matching session already exists.
               </div>
             </StepShell>
           )}
