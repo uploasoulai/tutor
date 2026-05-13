@@ -683,8 +683,8 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
     models: [
       // DeepSeek Series
       {
-        id: 'deepseek-ai/DeepSeek-V3.2',
-        name: 'DeepSeek-V3.2',
+        id: 'deepseek-ai/DeepSeek-V3',
+        name: 'DeepSeek-V3',
         contextWindow: 128000,
         outputWindow: 8192,
         capabilities: { streaming: true, tools: true, vision: false },
@@ -704,6 +704,13 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
         capabilities: { streaming: true, tools: true, vision: false },
       },
       // Qwen Series
+      {
+        id: 'Qwen/Qwen2.5-7B-Instruct',
+        name: 'Qwen2.5-7B-Instruct',
+        contextWindow: 32000,
+        outputWindow: 8192,
+        capabilities: { streaming: true, tools: true, vision: false },
+      },
       {
         id: 'Qwen/Qwen3-VL-32B-Instruct',
         name: 'Qwen3-VL-32B-Instruct',
@@ -1007,6 +1014,63 @@ export const PROVIDERS: Record<ProviderId, ProviderConfig> = {
       {
         id: 'Gemma-4-26B-A4B-it-GGUF',
         name: 'Gemma 4 26B A4B IT GGUF',
+        capabilities: { streaming: true, tools: true, vision: false },
+      },
+    ],
+  },
+
+  groq: {
+    id: 'groq',
+    name: 'Groq',
+    type: 'openai',
+    defaultBaseUrl: 'https://api.groq.com/openai/v1',
+    requiresApiKey: true,
+    icon: '/logos/openai.svg', // Fallback icon since we may not have groq.svg
+    models: [
+      {
+        id: 'llama-3.3-70b-versatile',
+        name: 'Llama 3.3 70B Versatile',
+        contextWindow: 128000,
+        outputWindow: 8192,
+        capabilities: { streaming: true, tools: true, vision: false },
+      },
+      {
+        id: 'llama-3.1-8b-instant',
+        name: 'Llama 3.1 8B Instant',
+        contextWindow: 128000,
+        outputWindow: 8192,
+        capabilities: { streaming: true, tools: true, vision: false },
+      },
+      {
+        id: 'mixtral-8x7b-32768',
+        name: 'Mixtral 8x7B',
+        contextWindow: 32768,
+        outputWindow: 8192,
+        capabilities: { streaming: true, tools: true, vision: false },
+      },
+      {
+        id: 'gemma2-9b-it',
+        name: 'Gemma 2 9B IT',
+        contextWindow: 8192,
+        outputWindow: 8192,
+        capabilities: { streaming: true, tools: true, vision: false },
+      },
+    ],
+  },
+
+  auto: {
+    id: 'auto' as ProviderId,
+    name: 'Smart Auto (Free Tier)',
+    type: 'openai',
+    defaultBaseUrl: '',
+    requiresApiKey: false,
+    icon: '/logos/openai.svg', // using a generic icon
+    models: [
+      {
+        id: 'free',
+        name: 'Auto Load-Balanced Free Models',
+        contextWindow: 128000,
+        outputWindow: 8192,
         capabilities: { streaming: true, tools: true, vision: false },
       },
     ],

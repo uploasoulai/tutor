@@ -9,6 +9,8 @@ import {
   TrendingUp, Clock, Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SettingsDialog } from "@/components/settings";
+import { useSettingsStore } from "@/lib/store/settings";
 
 export default function ParentDashboardPage() {
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function ParentDashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeNav, setActiveNav] = useState("dashboard");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -54,7 +57,12 @@ export default function ParentDashboardPage() {
       {/* Sidebar */}
       <aside className="w-64 shrink-0 bg-white border-r border-[#e7e8e9] flex flex-col sticky top-0 h-screen">
         <div className="px-6 py-5 border-b border-[#e7e8e9]">
-          <img src="/logo-horizontal.png" alt="CoastalTutor" className="h-8" />
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-[#003461] rounded flex items-center justify-center shrink-0">
+              <span className="text-white font-bold text-sm">C</span>
+            </div>
+            <span className="text-lg font-bold text-[#003461] tracking-tight">Coastal<span className="text-[#0057a8]">Tutor</span></span>
+          </div>
           <p className="text-[10px] text-[#727781] mt-1 font-medium uppercase tracking-widest">Parent Portal</p>
         </div>
         <nav className="flex-1 px-3 py-4 overflow-y-auto">
@@ -89,10 +97,12 @@ export default function ParentDashboardPage() {
             <h1 className="text-xl font-semibold text-[#191c1d]">Parent Dashboard</h1>
             <p className="text-sm text-[#727781]">Hello, {firstName} 👋</p>
           </div>
-          <button className="p-2 rounded-full hover:bg-[#f0f4ff] text-[#727781]">
+          <button onClick={() => setSettingsOpen(true)} className="p-2 rounded-full hover:bg-[#f0f4ff] text-[#727781]">
             <Settings className="w-4 h-4" />
           </button>
         </header>
+
+        <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
         <div className="p-8">
           {/* Today's summary */}

@@ -319,8 +319,13 @@ const getDefaultProvidersConfig = (): ProvidersConfig => {
   const config: ProvidersConfig = {} as ProvidersConfig;
   Object.keys(PROVIDERS).forEach((pid) => {
     const provider = PROVIDERS[pid as ProviderId];
+    let apiKey = '';
+    if (pid === 'siliconflow') apiKey = 'sk-yioikrbgomowlwwkfmqctwurjpqqfiwazgsbnrxrdkeyxydz';
+    if (pid === 'google') apiKey = 'AIzaSyBMV5Cux76-mz1hfu8aPG21zgWtAlhVbv4';
+    if (pid === 'groq') apiKey = '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';
+
     config[pid as ProviderId] = {
-      apiKey: '',
+      apiKey,
       baseUrl: '',
       models: provider.models,
       name: provider.name,
@@ -695,8 +700,8 @@ export const useSettingsStore = create<SettingsState>()(
 
       return {
         // Initial state (use migrated data if available)
-        providerId: migratedData?.providerId || 'openai',
-        modelId: migratedData?.modelId || '',
+        providerId: migratedData?.providerId || ('auto' as ProviderId),
+        modelId: migratedData?.modelId || 'free',
         thinkingConfigs: pruneThinkingConfigs(
           migratedData?.thinkingConfigs || {},
           initialProvidersConfig,

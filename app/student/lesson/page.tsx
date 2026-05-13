@@ -44,7 +44,12 @@ function LessonContent() {
           <h1 className="text-lg font-semibold text-[#191c1d]">{subject}</h1>
           <p className="text-sm text-[#727781]">{grade} · BC Curriculum</p>
         </div>
-        <img src="/logo-horizontal.png" alt="CoastalTutor" className="h-7 ml-auto" />
+        <div className="flex items-center gap-1.5 ml-auto">
+          <div className="w-6 h-6 bg-[#003461] rounded flex items-center justify-center shrink-0">
+            <span className="text-white font-bold text-xs">C</span>
+          </div>
+          <span className="text-base font-bold text-[#003461] tracking-tight">Coastal<span className="text-[#0057a8]">Tutor</span></span>
+        </div>
       </header>
 
       {/* Main */}

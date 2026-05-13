@@ -9,6 +9,8 @@ import {
   GraduationCap, Zap, Home, BookMarked, Users, Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SettingsDialog } from "@/components/settings";
+import { useSettingsStore } from "@/lib/store/settings";
 
 // ─── BC Curriculum Data ────────────────────────────────────────────────────
 const GRADES = [
@@ -78,6 +80,7 @@ export default function StudentDashboard() {
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
   const [apMode, setApMode] = useState(false);
   const [activeNav, setActiveNav] = useState("dashboard");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -141,7 +144,12 @@ export default function StudentDashboard() {
       <aside className="w-64 shrink-0 bg-white border-r border-[#e7e8e9] flex flex-col sticky top-0 h-screen">
         {/* Logo */}
         <div className="px-6 py-5 border-b border-[#e7e8e9]">
-          <img src="/logo-horizontal.png" alt="CoastalTutor" className="h-8" />
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-[#003461] rounded flex items-center justify-center shrink-0">
+              <span className="text-white font-bold text-sm">C</span>
+            </div>
+            <span className="text-lg font-bold text-[#003461] tracking-tight">Coastal<span className="text-[#0057a8]">Tutor</span></span>
+          </div>
           <p className="text-[10px] text-[#727781] mt-1 font-medium uppercase tracking-widest">Student Portal</p>
         </div>
 
@@ -212,11 +220,13 @@ export default function StudentDashboard() {
                 ← Back to Dashboard
               </button>
             )}
-            <button onClick={() => router.push("/settings")} className="p-2 rounded-full hover:bg-[#f0f4ff] text-[#727781] transition-all">
+            <button onClick={() => setSettingsOpen(true)} className="p-2 rounded-full hover:bg-[#f0f4ff] text-[#727781] transition-all">
               <Settings className="w-4 h-4" />
             </button>
           </div>
         </header>
+
+        <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
         <div className="p-8">
 

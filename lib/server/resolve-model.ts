@@ -38,8 +38,21 @@ export async function resolveModel(params: {
   providerType?: string;
   thinkingConfig?: ThinkingConfig;
 }): Promise<ResolvedModel> {
-  const modelString = params.modelString || process.env.DEFAULT_MODEL || 'gpt-5.4-mini';
-  const { providerId, modelId } = parseModelString(modelString);
+  let modelString = params.modelString || process.env.DEFAULT_MODEL || 'auto:free';
+  let { providerId, modelId } = parseModelString(modelString);
+
+  if (providerId === 'auto') {
+    const freeModels = [
+      { p: 'siliconflow', m: 'Qwen/Qwen2.5-7B-Instruct' },
+      { p: 'siliconflow', m: 'deepseek-ai/DeepSeek-V3' },
+      { p: 'google', m: 'gemini-1.5-flash' },
+      { p: 'groq', m: 'llama-3.3-70b-versatile' },
+    ];
+    const choice = freeModels[Math.floor(Math.random() * freeModels.length)];
+    providerId = choice.p as any;
+    modelId = choice.m;
+    modelString = `${providerId}:${modelId}`;
+  }
 
   // SSRF validation applies only to client-supplied base URLs.
   // Server-configured URLs (e.g. OLLAMA_BASE_URL from env/YAML) flow through

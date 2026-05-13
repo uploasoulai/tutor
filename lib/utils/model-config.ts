@@ -9,8 +9,27 @@ import {
  * Get current model configuration from settings store
  */
 export function getCurrentModelConfig() {
-  const { providerId, modelId, providersConfig, thinkingConfigs } = useSettingsStore.getState();
+  const storeState = useSettingsStore.getState();
+  let providerId = storeState.providerId;
+  let modelId = storeState.modelId;
+
+  // Implement auto free model load-balancing
+  if (providerId === 'auto') {
+    const freeModels = [
+      { p: 'siliconflow', m: 'Qwen/Qwen2.5-7B-Instruct' },
+      { p: 'siliconflow', m: 'deepseek-ai/DeepSeek-V3' },
+      { p: 'google', m: 'gemini-3.1-pro-preview' }, // user mentioned gemini 3 flash, or other free
+      { p: 'groq', m: 'llama-3.3-70b-versatile' },
+    ];
+    // pick one randomly
+    const choice = freeModels[Math.floor(Math.random() * freeModels.length)];
+    providerId = choice.p as any;
+    modelId = choice.m;
+  }
+
   const modelString = `${providerId}:${modelId}`;
+  const providersConfig = storeState.providersConfig;
+  const thinkingConfigs = storeState.thinkingConfigs;
 
   // Get current provider's config
   const providerConfig = providersConfig[providerId];
