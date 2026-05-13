@@ -1,33 +1,36 @@
-"use client";
+'use client';
 
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 
 function LessonContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
 
-  const grade = searchParams.get("grade") ?? "Grade 1";
-  const subject = searchParams.get("subject") ?? "Math";
+  const grade = searchParams.get('grade') ?? 'Grade 1';
+  const subject = searchParams.get('subject') ?? 'Math';
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) { router.replace("/login"); return; }
+      if (!data.user) {
+        router.replace('/login');
+        return;
+      }
       setUser(data.user);
     });
   }, []);
 
-  const firstName = user?.user_metadata?.first_name ?? "Student";
+  const firstName = user?.user_metadata?.first_name ?? 'Student';
 
   const handleOpenFreeExplore = () => {
     // Pass context to the generation engine
     const prompt = `I am a ${grade} student. Please create an interactive lesson on ${subject} aligned with the BC Ministry of Education curriculum.`;
-    sessionStorage.setItem("coastaltutor_lesson_prompt", prompt);
-    router.push("/openmaic");
+    sessionStorage.setItem('coastaltutor_lesson_prompt', prompt);
+    router.push('/openmaic');
   };
 
   return (
@@ -48,7 +51,9 @@ function LessonContent() {
           <div className="w-6 h-6 bg-[#003461] rounded flex items-center justify-center shrink-0">
             <span className="text-white font-bold text-xs">C</span>
           </div>
-          <span className="text-base font-bold text-[#003461] tracking-tight">Coastal<span className="text-[#0057a8]">Tutor</span></span>
+          <span className="text-base font-bold text-[#003461] tracking-tight">
+            Coastal<span className="text-[#0057a8]">Tutor</span>
+          </span>
         </div>
       </header>
 
@@ -60,12 +65,10 @@ function LessonContent() {
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold text-[#191c1d] mb-3">
-              Ready to learn {subject}?
-            </h2>
+            <h2 className="text-3xl font-bold text-[#191c1d] mb-3">Ready to learn {subject}?</h2>
             <p className="text-[#424750] text-lg leading-relaxed">
-              Hi {firstName}! Your AI tutor will guide you through <strong>{grade}</strong> {subject}{" "}
-              topics aligned with the BC Ministry of Education curriculum.
+              Hi {firstName}! Your AI tutor will guide you through <strong>{grade}</strong>{' '}
+              {subject} topics aligned with the BC Ministry of Education curriculum.
             </p>
           </div>
 
@@ -88,11 +91,13 @@ function LessonContent() {
 
 export default function LessonPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-[#f8f9fa]">
-        <div className="w-8 h-8 border-4 border-[#003461] border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen bg-[#f8f9fa]">
+          <div className="w-8 h-8 border-4 border-[#003461] border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
       <LessonContent />
     </Suspense>
   );

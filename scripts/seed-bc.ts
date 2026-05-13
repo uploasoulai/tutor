@@ -26,15 +26,87 @@ const subjects = [
 ];
 
 const outcomes = [
-  { subjectCode: 'MATH-K', code: 'MATH-K-N1', idea: 'Numbers to 10 represent quantities', content: 'Number concepts to 10', unit: 'Numbers', seq: 1, diff: 1 },
-  { subjectCode: 'MATH-1', code: 'MATH-1-N1', idea: 'Numbers to 20 represent quantities', content: 'Number concepts to 20', unit: 'Numbers', seq: 1, diff: 2 },
-  { subjectCode: 'MATH-1', code: 'MATH-1-C1', idea: 'Addition and subtraction with numbers to 20', content: 'Addition and subtraction facts to 20', unit: 'Computation', seq: 2, diff: 2 },
-  { subjectCode: 'MATH-2', code: 'MATH-2-N1', idea: 'Numbers to 100 represent quantities', content: 'Number concepts to 100', unit: 'Numbers', seq: 1, diff: 3 },
-  { subjectCode: 'MATH-2', code: 'MATH-2-C1', idea: 'Addition and subtraction with numbers to 100', content: 'Addition and subtraction facts to 100', unit: 'Computation', seq: 2, diff: 3 },
-  { subjectCode: 'MATH-3', code: 'MATH-3-F1', idea: 'Fractions represent parts of a whole', content: 'Fractions', unit: 'Fractions', seq: 1, diff: 3 },
-  { subjectCode: 'MATH-3', code: 'MATH-3-C1', idea: 'Addition and subtraction to 1000', content: 'Addition and subtraction to 1000', unit: 'Computation', seq: 2, diff: 3 },
-  { subjectCode: 'MATH-4', code: 'MATH-4-D1', idea: 'Decimals represent quantities', content: 'Decimals', unit: 'Decimals', seq: 1, diff: 4 },
-  { subjectCode: 'MATH-4', code: 'MATH-4-C1', idea: 'Multiplication and division of larger numbers', content: 'Multiplication and division', unit: 'Computation', seq: 2, diff: 4 },
+  {
+    subjectCode: 'MATH-K',
+    code: 'MATH-K-N1',
+    idea: 'Numbers to 10 represent quantities',
+    content: 'Number concepts to 10',
+    unit: 'Numbers',
+    seq: 1,
+    diff: 1,
+  },
+  {
+    subjectCode: 'MATH-1',
+    code: 'MATH-1-N1',
+    idea: 'Numbers to 20 represent quantities',
+    content: 'Number concepts to 20',
+    unit: 'Numbers',
+    seq: 1,
+    diff: 2,
+  },
+  {
+    subjectCode: 'MATH-1',
+    code: 'MATH-1-C1',
+    idea: 'Addition and subtraction with numbers to 20',
+    content: 'Addition and subtraction facts to 20',
+    unit: 'Computation',
+    seq: 2,
+    diff: 2,
+  },
+  {
+    subjectCode: 'MATH-2',
+    code: 'MATH-2-N1',
+    idea: 'Numbers to 100 represent quantities',
+    content: 'Number concepts to 100',
+    unit: 'Numbers',
+    seq: 1,
+    diff: 3,
+  },
+  {
+    subjectCode: 'MATH-2',
+    code: 'MATH-2-C1',
+    idea: 'Addition and subtraction with numbers to 100',
+    content: 'Addition and subtraction facts to 100',
+    unit: 'Computation',
+    seq: 2,
+    diff: 3,
+  },
+  {
+    subjectCode: 'MATH-3',
+    code: 'MATH-3-F1',
+    idea: 'Fractions represent parts of a whole',
+    content: 'Fractions',
+    unit: 'Fractions',
+    seq: 1,
+    diff: 3,
+  },
+  {
+    subjectCode: 'MATH-3',
+    code: 'MATH-3-C1',
+    idea: 'Addition and subtraction to 1000',
+    content: 'Addition and subtraction to 1000',
+    unit: 'Computation',
+    seq: 2,
+    diff: 3,
+  },
+  {
+    subjectCode: 'MATH-4',
+    code: 'MATH-4-D1',
+    idea: 'Decimals represent quantities',
+    content: 'Decimals',
+    unit: 'Decimals',
+    seq: 1,
+    diff: 4,
+  },
+  {
+    subjectCode: 'MATH-4',
+    code: 'MATH-4-C1',
+    idea: 'Multiplication and division of larger numbers',
+    content: 'Multiplication and division',
+    unit: 'Computation',
+    seq: 2,
+    diff: 4,
+  },
 ];
 
 async function seed() {
@@ -60,11 +132,11 @@ async function seed() {
           code: subject.code,
           name: subject.name,
           grade_level: subject.grade_level,
-          is_ap_course: subject.is_ap_course
+          is_ap_course: subject.is_ap_course,
         })
         .select()
         .single();
-      
+
       if (insertErr) {
         console.error('Error inserting subject', subject.code, insertErr);
         continue;
@@ -74,30 +146,28 @@ async function seed() {
     }
 
     // 2. Seed Outcomes for this subject
-    const subjectOutcomes = outcomes.filter(o => o.subjectCode === subject.code);
+    const subjectOutcomes = outcomes.filter((o) => o.subjectCode === subject.code);
     for (const outcome of subjectOutcomes) {
       const { data: existingOutcome } = await supabase
         .from('bc_learning_outcomes')
         .select('id')
         .eq('outcome_code', outcome.code)
         .single();
-      
+
       if (existingOutcome) {
         console.log(`Outcome ${outcome.code} already exists.`);
       } else {
-        const { error: outcomeErr } = await supabase
-          .from('bc_learning_outcomes')
-          .insert({
-            subject_id: subjectId,
-            outcome_code: outcome.code,
-            big_idea: outcome.idea,
-            content_knowledge: outcome.content,
-            unit_name: outcome.unit,
-            sequence_order: outcome.seq,
-            difficulty_level: outcome.diff,
-            embedding: `[${mockEmbedding.join(',')}]`
-          });
-        
+        const { error: outcomeErr } = await supabase.from('bc_learning_outcomes').insert({
+          subject_id: subjectId,
+          outcome_code: outcome.code,
+          big_idea: outcome.idea,
+          content_knowledge: outcome.content,
+          unit_name: outcome.unit,
+          sequence_order: outcome.seq,
+          difficulty_level: outcome.diff,
+          embedding: `[${mockEmbedding.join(',')}]`,
+        });
+
         if (outcomeErr) {
           console.error('Error inserting outcome', outcome.code, outcomeErr);
         } else {

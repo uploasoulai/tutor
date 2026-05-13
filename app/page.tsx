@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
 export default function RootPage() {
   const router = useRouter();
@@ -11,14 +11,14 @@ export default function RootPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
-        router.replace("/signup");
+        router.replace('/signup');
         return;
       }
       // User is logged in — route by role
-      const role = data.user.user_metadata?.role ?? "student";
-      if (role === "teacher") router.replace("/teacher");
-      else if (role === "parent") router.replace("/parent");
-      else router.replace("/student");
+      const role = data.user.user_metadata?.role ?? 'student';
+      if (role === 'teacher') router.replace('/teacher');
+      else if (role === 'parent') router.replace('/parent');
+      else router.replace('/student');
     });
   }, []);
 

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import FigmaComponent from "@/components/imports/学生入职引导/学生入职引导";
+import { useRouter } from 'next/navigation';
+import FigmaComponent from '@/components/imports/学生入职引导/学生入职引导';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -16,20 +16,25 @@ export default function OnboardingPage() {
 
       {/* Interactive overlay — absolute covers full rendered height */}
       <div className="absolute inset-0 pointer-events-none">
-
         {/* ── Header area ── */}
         {/* GlobalNav header: pt-[48px] + centered max-w-[800px] row */}
         {/* "Save & Exit" button — top right of centered 800px header */}
         {/* Approximate position: within the first 96px of the page, right side */}
         <div
           className="absolute flex items-center justify-end"
-          style={{ top: 48, left: "50%", transform: "translateX(-50%)", width: "800px", height: "28px" }}
+          style={{
+            top: 48,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '800px',
+            height: '28px',
+          }}
         >
           <button
             className="h-[28px] px-4 cursor-pointer pointer-events-auto opacity-0 hover:opacity-10 hover:bg-gray-200 rounded transition-opacity"
-            onClick={() => router.push("/")}
+            onClick={() => router.push('/')}
             aria-label="Save & Exit"
-            style={{ minWidth: "80px" }}
+            style={{ minWidth: '80px' }}
           />
         </div>
 
@@ -54,13 +59,20 @@ export default function OnboardingPage() {
         */}
         <div
           className="absolute flex items-center justify-end"
-          style={{ top: 815, left: "50%", transform: "translateX(-50%)", width: "800px", height: "36px", paddingRight: "48px" }}
+          style={{
+            top: 815,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '800px',
+            height: '36px',
+            paddingRight: '48px',
+          }}
         >
           <button
             className="h-[36px] cursor-pointer pointer-events-auto opacity-0 hover:opacity-10 hover:bg-blue-100 rounded-lg transition-opacity"
-            onClick={() => router.push("/student")}
+            onClick={() => router.push('/student')}
             aria-label="Continue to Goals"
-            style={{ minWidth: "200px" }}
+            style={{ minWidth: '200px' }}
           />
         </div>
 
@@ -71,13 +83,19 @@ export default function OnboardingPage() {
         */}
         <div
           className="absolute flex items-center justify-end"
-          style={{ top: 168, left: "50%", transform: "translateX(-50%)", width: "800px", height: "90px" }}
+          style={{
+            top: 168,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '800px',
+            height: '90px',
+          }}
         >
           <button
             className="h-10 px-4 cursor-pointer pointer-events-auto opacity-0 hover:opacity-10 hover:bg-gray-100 rounded-lg transition-opacity mr-6"
-            onClick={() => router.push("/")}
+            onClick={() => router.push('/')}
             aria-label="Edit Step 1"
-            style={{ minWidth: "60px" }}
+            style={{ minWidth: '60px' }}
           />
         </div>
       </div>

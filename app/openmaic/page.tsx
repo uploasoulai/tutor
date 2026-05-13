@@ -494,7 +494,9 @@ function HomePage() {
             <div className="w-8 h-8 bg-[#003461] rounded-lg flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-lg">C</span>
             </div>
-            <span className="text-xl font-bold text-[#003461] tracking-tight">Coastal<span className="text-[#0057a8]">Tutor</span></span>
+            <span className="text-xl font-bold text-[#003461] tracking-tight">
+              Coastal<span className="text-[#0057a8]">Tutor</span>
+            </span>
           </div>
           <span className="text-xs font-medium text-muted-foreground/50 border border-muted-foreground/20 rounded-full px-2 py-0.5">
             自由探索

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import FigmaComponent from "@/components/imports/Ap备考专项模块界面-1/Ap备考专项模块界面";
+import { useRouter } from 'next/navigation';
+import FigmaComponent from '@/components/imports/Ap备考专项模块界面-1/Ap备考专项模块界面';
 
 /**
  * AP Preparation Center Page
@@ -35,56 +35,55 @@ export default function ApPrepPage() {
 
       {/* Interactive overlay */}
       <div className="absolute inset-0 pointer-events-none">
-
         {/* ── Sidebar Navigation ── */}
         {/* The AP Prep page sidebar has a different structure than the student dashboard */}
         {/* From the screenshot, sidebar width is ~200px and nav items appear lower */}
 
         {/* Dashboard nav link */}
         <button
-          style={{ position: "absolute", top: 248, left: 0, width: 200, height: 44 }}
+          style={{ position: 'absolute', top: 248, left: 0, width: 200, height: 44 }}
           className="cursor-pointer pointer-events-auto opacity-0 hover:opacity-5 hover:bg-gray-400 rounded-lg transition-opacity"
-          onClick={() => router.push("/student")}
+          onClick={() => router.push('/student')}
           aria-label="Dashboard"
         />
 
         {/* My Learning */}
         <button
-          style={{ position: "absolute", top: 298, left: 0, width: 200, height: 44 }}
+          style={{ position: 'absolute', top: 298, left: 0, width: 200, height: 44 }}
           className="cursor-pointer pointer-events-auto opacity-0 hover:opacity-5 hover:bg-gray-400 rounded-lg transition-opacity"
-          onClick={() => router.push("/student")}
+          onClick={() => router.push('/student')}
           aria-label="My Learning"
         />
 
         {/* AP Prep (current — active) */}
         <button
-          style={{ position: "absolute", top: 312, left: 0, width: 200, height: 44 }}
+          style={{ position: 'absolute', top: 312, left: 0, width: 200, height: 44 }}
           className="cursor-pointer pointer-events-auto opacity-0 hover:opacity-5 hover:bg-blue-600 rounded-lg transition-opacity"
-          onClick={() => router.push("/student/ap-prep")}
+          onClick={() => router.push('/student/ap-prep')}
           aria-label="AP Prep"
         />
 
         {/* Mastery Reports */}
         <button
-          style={{ position: "absolute", top: 348, left: 0, width: 200, height: 44 }}
+          style={{ position: 'absolute', top: 348, left: 0, width: 200, height: 44 }}
           className="cursor-pointer pointer-events-auto opacity-0 hover:opacity-5 hover:bg-gray-400 rounded-lg transition-opacity"
-          onClick={() => router.push("/student")}
+          onClick={() => router.push('/student')}
           aria-label="Mastery Reports"
         />
 
         {/* Community */}
         <button
-          style={{ position: "absolute", top: 395, left: 0, width: 200, height: 44 }}
+          style={{ position: 'absolute', top: 395, left: 0, width: 200, height: 44 }}
           className="cursor-pointer pointer-events-auto opacity-0 hover:opacity-5 hover:bg-gray-400 rounded-lg transition-opacity"
-          onClick={() => router.push("/student")}
+          onClick={() => router.push('/student')}
           aria-label="Community"
         />
 
         {/* Start AI Tutor button (bottom of sidebar) */}
         <button
-          style={{ position: "absolute", bottom: 130, left: 8, width: 190, height: 44 }}
+          style={{ position: 'absolute', bottom: 130, left: 8, width: 190, height: 44 }}
           className="cursor-pointer pointer-events-auto opacity-0 hover:opacity-10 hover:bg-blue-900 rounded-lg transition-opacity"
-          onClick={() => router.push("/student/lesson")}
+          onClick={() => router.push('/student/lesson')}
           aria-label="Start AI Tutor"
         />
 
@@ -92,25 +91,25 @@ export default function ApPrepPage() {
 
         {/* "Start Diagnostic" button */}
         <button
-          style={{ position: "absolute", top: 400, right: 24, width: 170, height: 44 }}
+          style={{ position: 'absolute', top: 400, right: 24, width: 170, height: 44 }}
           className="cursor-pointer pointer-events-auto opacity-0 hover:opacity-10 hover:bg-blue-900 rounded-lg transition-opacity"
-          onClick={() => router.push("/student/lesson")}
+          onClick={() => router.push('/student/lesson')}
           aria-label="Start Diagnostic"
         />
 
         {/* "Start Exam" button (Practice Exam A) */}
         <button
-          style={{ position: "absolute", top: 608, left: 240, width: 150, height: 40 }}
+          style={{ position: 'absolute', top: 608, left: 240, width: 150, height: 40 }}
           className="cursor-pointer pointer-events-auto opacity-0 hover:opacity-10 hover:bg-gray-200 rounded-lg transition-opacity"
-          onClick={() => router.push("/student/lesson")}
+          onClick={() => router.push('/student/lesson')}
           aria-label="Start Exam"
         />
 
         {/* "Start Section" button (Section 1 Focus) */}
         <button
-          style={{ position: "absolute", top: 608, left: 440, width: 150, height: 40 }}
+          style={{ position: 'absolute', top: 608, left: 440, width: 150, height: 40 }}
           className="cursor-pointer pointer-events-auto opacity-0 hover:opacity-10 hover:bg-gray-200 rounded-lg transition-opacity"
-          onClick={() => router.push("/student/lesson")}
+          onClick={() => router.push('/student/lesson')}
           aria-label="Start Section"
         />
       </div>
