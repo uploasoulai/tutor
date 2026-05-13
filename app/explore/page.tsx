@@ -20,7 +20,6 @@ import {
   BotOff,
   ChevronUp,
   Upload,
-  Sparkles,
   Atom,
   X,
 } from 'lucide-react';
@@ -336,7 +335,7 @@ function HomePage() {
       router.push('/generation-preview');
     } catch (err) {
       log.error('Error preparing generation:', err);
-      setError(err instanceof Error ? err.message : t('upload.generateFailed'));
+      setError(err instanceof Error ? (err as Error).message : t('upload.generateFailed'));
     }
   };
 

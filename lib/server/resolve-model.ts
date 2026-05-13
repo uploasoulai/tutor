@@ -49,7 +49,7 @@ export async function resolveModel(params: {
       { p: 'groq', m: 'llama-3.3-70b-versatile' },
     ];
     const choice = freeModels[Math.floor(Math.random() * freeModels.length)];
-    providerId = choice.p as any;
+    providerId = choice.p as 'siliconflow' | 'google' | 'groq';
     modelId = choice.m;
     modelString = `${providerId}:${modelId}`;
   }

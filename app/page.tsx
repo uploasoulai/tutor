@@ -20,7 +20,7 @@ export default function RootPage() {
       else if (role === 'parent') router.replace('/parent');
       else router.replace('/student');
     });
-  }, []);
+  }, [router, supabase.auth]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#f8f9fa]">

@@ -114,7 +114,7 @@ async function seed() {
 
   // 1. Seed Subjects
   for (const subject of subjects) {
-    const { data: existing, error: checkErr } = await supabase
+    const { data: existing } = await supabase
       .from('bc_subjects')
       .select('id')
       .eq('code', subject.code)

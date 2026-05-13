@@ -23,7 +23,7 @@ export function getCurrentModelConfig() {
     ];
     // pick one randomly
     const choice = freeModels[Math.floor(Math.random() * freeModels.length)];
-    providerId = choice.p as any;
+    providerId = choice.p as 'siliconflow' | 'google' | 'groq';
     modelId = choice.m;
   }
 

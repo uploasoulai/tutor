@@ -12,7 +12,7 @@ function LessonContent() {
 
   const grade = searchParams.get('grade') ?? 'Grade 1';
   const subject = searchParams.get('subject') ?? 'Math';
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -22,7 +22,7 @@ function LessonContent() {
       }
       setUser(data.user);
     });
-  }, []);
+  }, [router, supabase.auth]);
 
   const firstName = user?.user_metadata?.first_name ?? 'Student';
 

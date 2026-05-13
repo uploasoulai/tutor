@@ -11,7 +11,6 @@ import {
   Palette,
   Dumbbell,
   ChevronRight,
-  Sparkles,
   BarChart3,
   Calendar,
   LogOut,
@@ -19,6 +18,7 @@ import {
   Zap,
   Home,
   BookMarked,
+  Sparkles,
   Users,
   Settings,
 } from 'lucide-react';
@@ -56,7 +56,7 @@ const AP_COURSES = [
   'AP Economics',
 ];
 
-const SUBJECTS_BY_GRADE: Record<string, { name: string; icon: React.FC<any>; color: string }[]> = {
+const SUBJECTS_BY_GRADE: Record<string, { name: string; icon: React.ElementType; color: string }[]> = {
   Kindergarten: [
     { name: 'Reading & Writing', icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
     { name: 'Math', icon: BookMarked, color: 'bg-green-100 text-green-600' },
@@ -106,7 +106,7 @@ export default function StudentDashboard() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
   const [apMode, setApMode] = useState(false);
@@ -125,7 +125,7 @@ export default function StudentDashboard() {
       if (savedGrade) setSelectedGrade(savedGrade);
       setLoading(false);
     });
-  }, []);
+  }, [router, supabase.auth]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

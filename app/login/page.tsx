@@ -34,8 +34,8 @@ export default function LoginPage() {
       if (role === 'teacher') router.push('/teacher');
       else if (role === 'parent') router.push('/parent');
       else router.push('/student');
-    } catch (err: any) {
-      setError(err.message || 'Invalid email or password.');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }

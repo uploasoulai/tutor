@@ -10,10 +10,9 @@ import {
   Calendar,
   Settings,
   LogOut,
-  Sparkles,
   AlertTriangle,
   MessageSquare,
-  BookOpen,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
@@ -22,7 +21,7 @@ import { useSettingsStore } from '@/lib/store/settings';
 export default function TeacherDashboardPage() {
   const router = useRouter();
   const supabase = createClient();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeNav, setActiveNav] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -40,7 +39,7 @@ export default function TeacherDashboardPage() {
       setUser(data.user);
       setLoading(false);
     });
-  }, []);
+  }, [router, supabase.auth]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

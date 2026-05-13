@@ -32,7 +32,7 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -54,8 +54,8 @@ export default function RegisterPage() {
       } else {
         router.push('/parent');
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during signup.');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'An error occurred during signup.');
     } finally {
       setLoading(false);
     }
