@@ -495,7 +495,7 @@ function HomePage() {
             <div className="w-8 h-8 bg-[#003461] rounded-lg flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-lg">C</span>
             </div>
-            <span className="text-xl font-bold text-[#003461] tracking-tight">
+            <span data-testid="logo" className="text-xl font-bold text-[#003461] tracking-tight">
               Coastal<span className="text-[#0057a8]">Tutor</span>
             </span>
           </div>
@@ -602,6 +602,7 @@ function HomePage() {
 
               {/* Send button */}
               <button
+                data-testid="enter-classroom-button"
                 onClick={handleGenerate}
                 disabled={!canGenerate}
                 className={cn(

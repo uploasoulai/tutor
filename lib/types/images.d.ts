@@ -9,26 +9,49 @@ declare module '*.png' {
 }
 
 declare module '*.svg' {
-  const content: any;
+  const content: {
+    src: string;
+    height: number;
+    width: number;
+  };
   export default content;
 }
 
 declare module '*.jpg' {
-  const content: any;
+  const content: {
+    src: string;
+    height: number;
+    width: number;
+    blurDataURL?: string;
+  };
   export default content;
 }
 
 declare module '*.jpeg' {
-  const content: any;
+  const content: {
+    src: string;
+    height: number;
+    width: number;
+    blurDataURL?: string;
+  };
   export default content;
 }
 
 declare module '*.gif' {
-  const content: any;
+  const content: {
+    src: string;
+    height: number;
+    width: number;
+  };
   export default content;
 }
 
 declare module '*.webp' {
-  const content: any;
+  const content: {
+    src: string;
+    height: number;
+    width: number;
+    blurDataURL?: string;
+  };
   export default content;
 }

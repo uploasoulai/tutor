@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
-import { useSettingsStore } from '@/lib/store/settings';
 
 export default function ParentDashboardPage() {
   const router = useRouter();

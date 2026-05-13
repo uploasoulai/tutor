@@ -410,7 +410,7 @@ function Label() {
   );
 }
 
-function Image() {
+function ImageIcon() {
   return (
     <div className="relative shrink-0 size-[20px]" data-name="image">
       <svg
@@ -434,7 +434,7 @@ function Input() {
       data-name="Input"
     >
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center justify-center overflow-clip p-px relative rounded-[inherit] size-full">
-        <Image />
+        <ImageIcon />
       </div>
       <div
         aria-hidden="true"

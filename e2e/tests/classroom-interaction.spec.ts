@@ -14,9 +14,9 @@ async function seedDatabase(page: import('@playwright/test').Page) {
     localStorage.setItem('settings-storage', settings);
   }, SETTINGS_STORAGE);
 
-  // Navigate to signup page first — it's stable and doesn't redirect immediately,
-  // making it safer for seeding IndexedDB.
-  await page.goto('/signup', { waitUntil: 'networkidle' });
+  // Navigate to a stable static page first — it doesn't have any React logic or redirects,
+  // making it perfect for seeding IndexedDB without context destruction.
+  await page.goto('/e2e-seed.html', { waitUntil: 'networkidle' });
 
   // Now seed data by opening the DB at its current version (no upgrade).
   // Opening without a version number returns the current version without triggering
@@ -24,99 +24,115 @@ async function seedDatabase(page: import('@playwright/test').Page) {
   await page.evaluate(
     ({ stageId, theme }) => {
       return new Promise<void>((resolve, reject) => {
-        // Open without specifying version — uses current DB version, no upgrade event
-        const request = indexedDB.open('CoastalTutor-Database');
+        // Open with explicit version to ensure schema is created if DB is fresh
+        const request = indexedDB.open('CoastalTutor-Database', 10);
 
-        request.onsuccess = (event) => {
+        request.onupgradeneeded = (event) => {
           const db = (event.target as IDBOpenDBRequest).result;
-          const tx = db.transaction(['stages', 'scenes', 'stageOutlines'], 'readwrite');
-          const now = Date.now();
-
-          tx.objectStore('stages').put({
-            id: stageId,
-            name: '光合作用',
-            description: '',
-            language: 'zh-CN',
-            style: 'professional',
-            createdAt: now,
-            updatedAt: now,
-          });
-
-          // Scene content uses SlideContent shape: { type: 'slide', canvas: Slide }
-          const makeSlideContent = (title: string, elId: string) => ({
-            type: 'slide',
-            canvas: {
-              id: `slide-${elId}`,
-              viewportSize: 1000,
-              viewportRatio: 0.5625,
-              theme,
-              elements: [
-                {
-                  type: 'text',
-                  id: `el-${elId}`,
-                  content: title,
-                  left: 50,
-                  top: 50,
-                  width: 900,
-                  height: 100,
-                },
-              ],
-            },
-          });
-
-          const scenes = [
-            {
-              id: 'scene-0',
-              stageId,
-              type: 'slide',
-              title: '基本概念',
-              order: 0,
-              content: makeSlideContent('基本概念', '0'),
-              createdAt: now,
-              updatedAt: now,
-            },
-            {
-              id: 'scene-1',
-              stageId,
-              type: 'slide',
-              title: '光反应',
-              order: 1,
-              content: makeSlideContent('光反应', '1'),
-              createdAt: now,
-              updatedAt: now,
-            },
-            {
-              id: 'scene-2',
-              stageId,
-              type: 'slide',
-              title: '暗反应',
-              order: 2,
-              content: makeSlideContent('暗反应', '2'),
-              createdAt: now,
-              updatedAt: now,
-            },
-          ];
-          for (const scene of scenes) {
-            tx.objectStore('scenes').put(scene);
+          if (!db.objectStoreNames.contains('stages')) {
+            db.createObjectStore('stages', { keyPath: 'id' });
           }
-
-          // Empty outlines = all scenes generated, no pending work
-          // StageOutlinesRecord requires createdAt + updatedAt
-          tx.objectStore('stageOutlines').put({
-            stageId,
-            outlines: [],
-            createdAt: now,
-            updatedAt: now,
-          });
-
-          tx.oncomplete = () => {
-            db.close();
-            resolve();
-          };
-          tx.onerror = () => reject(tx.error);
+          if (!db.objectStoreNames.contains('scenes')) {
+            db.createObjectStore('scenes', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('stageOutlines')) {
+            db.createObjectStore('stageOutlines', { keyPath: 'stageId' });
+          }
         };
 
-        request.onerror = () => reject(request.error);
+        request.onsuccess = (event) => {
+          try {
+            const db = (event.target as IDBOpenDBRequest).result;
+            const tx = db.transaction(['stages', 'scenes', 'stageOutlines'], 'readwrite');
+            const now = Date.now();
+
+            tx.objectStore('stages').put({
+              id: stageId,
+              name: '光合作用',
+              description: '',
+              language: 'zh-CN',
+              style: 'professional',
+              createdAt: now,
+              updatedAt: now,
+            });
+
+            // Scene content uses SlideContent shape: { type: 'slide', canvas: Slide }
+            const makeSlideContent = (title: string, elId: string) => ({
+              type: 'slide',
+              canvas: {
+                id: `slide-${elId}`,
+                viewportSize: 1000,
+                viewportRatio: 0.5625,
+                theme,
+                elements: [
+                  {
+                    type: 'text',
+                    id: `el-${elId}`,
+                    content: title,
+                    left: 50,
+                    top: 50,
+                    width: 900,
+                    height: 100,
+                  },
+                ],
+              },
+            });
+
+            const scenes = [
+              {
+                id: 'scene-0',
+                stageId,
+                type: 'slide',
+                title: '基本概念',
+                order: 0,
+                content: makeSlideContent('基本概念', '0'),
+                createdAt: now,
+                updatedAt: now,
+              },
+              {
+                id: 'scene-1',
+                stageId,
+                type: 'slide',
+                title: '光反应',
+                order: 1,
+                content: makeSlideContent('光反应', '1'),
+                createdAt: now,
+                updatedAt: now,
+              },
+              {
+                id: 'scene-2',
+                stageId,
+                type: 'slide',
+                title: '暗反应',
+                order: 2,
+                content: makeSlideContent('暗反应', '2'),
+                createdAt: now,
+                updatedAt: now,
+              },
+            ];
+            for (const scene of scenes) {
+              tx.objectStore('scenes').put(scene);
+            }
+
+            tx.objectStore('stageOutlines').put({
+              stageId,
+              outlines: [],
+              createdAt: now,
+              updatedAt: now,
+            });
+
+            tx.oncomplete = () => {
+              db.close();
+              resolve();
+            };
+            tx.onerror = () => reject(new Error('Transaction failed: ' + tx.error?.message));
+          } catch (err) {
+            reject(new Error('Seeding failed: ' + (err as Error).message));
+          }
+        };
+
+        request.onerror = () => reject(new Error('Open failed: ' + request.error?.message));
+        request.onblocked = () => reject(new Error('Open blocked'));
       });
     },
     { stageId: TEST_STAGE_ID, theme: defaultTheme },

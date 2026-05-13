@@ -203,6 +203,7 @@ export default function RegisterPage() {
 // Subcomponents for the form to keep it clean
 
 function RoleCard({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   role,
   title,
   selected,
