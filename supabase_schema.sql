@@ -1,3 +1,6 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS vector;
+
 -- Profiles (Base account for all roles)
 CREATE TABLE profiles (
     id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
@@ -56,10 +59,11 @@ CREATE TABLE bc_subjects (
     code TEXT UNIQUE NOT NULL, -- e.g. MATH-4
     name TEXT NOT NULL,
     grade_level INTEGER,
-    is_ap_course BOOLEAN DEFAULT false
+    subject_area TEXT,
+    is_ap_course BOOLEAN DEFAULT false,
+    source_file TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
-
-CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE bc_learning_outcomes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -67,11 +71,62 @@ CREATE TABLE bc_learning_outcomes (
     outcome_code TEXT UNIQUE NOT NULL,
     big_idea TEXT,
     content_knowledge TEXT,
+    elaboration TEXT,
+    chunk_text TEXT,
     unit_name TEXT,
     sequence_order INTEGER,
     difficulty_level INTEGER CHECK (difficulty_level BETWEEN 1 AND 5),
-    embedding vector(1536) -- For pgvector (Assuming OpenAI ada-002 dimensionality)
+    source_file TEXT,
+    chunk_index INTEGER,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    embedding vector(512), -- Voyage voyage-3-lite dimensionality
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+CREATE INDEX bc_learning_outcomes_subject_idx ON bc_learning_outcomes(subject_id);
+CREATE INDEX bc_learning_outcomes_embedding_idx
+    ON bc_learning_outcomes USING ivfflat (embedding vector_cosine_ops)
+    WITH (lists = 100);
+
+CREATE OR REPLACE FUNCTION match_bc_learning_outcomes(
+    query_embedding vector(512),
+    match_count integer DEFAULT 5,
+    filter_grade integer DEFAULT NULL,
+    filter_subject_area text DEFAULT NULL
+)
+RETURNS TABLE (
+    id uuid,
+    subject_id uuid,
+    outcome_code text,
+    big_idea text,
+    content_knowledge text,
+    elaboration text,
+    chunk_text text,
+    grade_level integer,
+    subject_area text,
+    similarity float
+)
+LANGUAGE sql STABLE
+AS $$
+    SELECT
+        o.id,
+        o.subject_id,
+        o.outcome_code,
+        o.big_idea,
+        o.content_knowledge,
+        o.elaboration,
+        o.chunk_text,
+        s.grade_level,
+        s.subject_area,
+        1 - (o.embedding <=> query_embedding) AS similarity
+    FROM bc_learning_outcomes o
+    JOIN bc_subjects s ON s.id = o.subject_id
+    WHERE o.embedding IS NOT NULL
+      AND (filter_grade IS NULL OR s.grade_level = filter_grade)
+      AND (filter_subject_area IS NULL OR s.subject_area = filter_subject_area)
+    ORDER BY o.embedding <=> query_embedding
+    LIMIT match_count;
+$$;
 
 -- Mastery System
 CREATE TABLE student_mastery (
@@ -99,11 +154,18 @@ CREATE TABLE learning_sessions (
     duration_seconds INTEGER,
     coastaltutor_lesson_id TEXT,
     bc_outcome_ids UUID[],
+    lesson_title TEXT,
+    lesson_payload JSONB,
+    reuse_key TEXT,
+    status TEXT CHECK (status IN ('planned', 'generated', 'started', 'completed')) DEFAULT 'planned',
     accuracy_rate FLOAT,
     emotion_trajectory JSONB,
     xp_earned INTEGER DEFAULT 0,
     needs_tutor_review BOOLEAN DEFAULT false
 );
+
+CREATE INDEX learning_sessions_student_started_idx ON learning_sessions(student_id, started_at DESC);
+CREATE INDEX learning_sessions_reuse_key_idx ON learning_sessions(student_id, reuse_key);
 
 CREATE TABLE question_attempts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

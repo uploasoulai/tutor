@@ -1,117 +1,99 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import {
-  BookOpen,
-  FlaskConical,
-  Globe,
-  Music,
-  Palette,
-  Dumbbell,
-  ChevronRight,
-  BarChart3,
-  Calendar,
-  LogOut,
-  GraduationCap,
-  Zap,
-  Home,
-  BookMarked,
-  Sparkles,
-  Users,
-  Settings,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
+import {
+  BarChart3,
+  BookOpen,
+  BookMarked,
+  Calendar,
+  CheckCircle2,
+  ChevronRight,
+  GraduationCap,
+  Home,
+  Loader2,
+  LogOut,
+  RefreshCw,
+  Settings,
+  Sparkles,
+  Target,
+  Users,
+  Zap,
+} from 'lucide-react';
 
-// ─── BC Curriculum Data ────────────────────────────────────────────────────
-const GRADES = [
-  'Kindergarten',
-  'Grade 1',
-  'Grade 2',
-  'Grade 3',
-  'Grade 4',
-  'Grade 5',
-  'Grade 6',
-  'Grade 7',
-  'Grade 8',
-  'Grade 9',
-  'Grade 10',
-  'Grade 11',
-  'Grade 12',
-];
-
-const AP_COURSES = [
-  'AP Calculus BC',
-  'AP Physics C',
-  'AP Chemistry',
-  'AP Biology',
-  'AP English Literature',
-  'AP English Language',
-  'AP World History',
-  'AP Computer Science A',
-  'AP Statistics',
-  'AP Economics',
-];
-
-const SUBJECTS_BY_GRADE: Record<
-  string,
-  { name: string; icon: React.ElementType; color: string }[]
-> = {
-  Kindergarten: [
-    { name: 'Reading & Writing', icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
-    { name: 'Math', icon: BookMarked, color: 'bg-green-100 text-green-600' },
-    { name: 'Science', icon: FlaskConical, color: 'bg-purple-100 text-purple-600' },
-    { name: 'Social Studies', icon: Globe, color: 'bg-orange-100 text-orange-600' },
-    { name: 'Art', icon: Palette, color: 'bg-pink-100 text-pink-600' },
-    { name: 'PE', icon: Dumbbell, color: 'bg-red-100 text-red-600' },
-  ],
-  'Grade 1': [
-    { name: 'Language Arts', icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
-    { name: 'Math', icon: BookMarked, color: 'bg-green-100 text-green-600' },
-    { name: 'Science', icon: FlaskConical, color: 'bg-purple-100 text-purple-600' },
-    { name: 'Social Studies', icon: Globe, color: 'bg-orange-100 text-orange-600' },
-    { name: 'Music', icon: Music, color: 'bg-yellow-100 text-yellow-600' },
-    { name: 'PE', icon: Dumbbell, color: 'bg-red-100 text-red-600' },
-  ],
+const GRADES = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'];
+const SUBJECTS = ['Math', 'Language Arts', 'Arts', 'ADST'];
+const SUBJECT_PREFIX: Record<string, string> = {
+  Math: 'MATH',
+  'Language Arts': 'ELA',
+  Arts: 'ARTS',
+  ADST: 'ADST',
 };
 
-// Grades 2-7: same core subjects
-['Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7'].forEach((g) => {
-  SUBJECTS_BY_GRADE[g] = [
-    { name: 'Language Arts', icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
-    { name: 'Math', icon: BookMarked, color: 'bg-green-100 text-green-600' },
-    { name: 'Science', icon: FlaskConical, color: 'bg-purple-100 text-purple-600' },
-    { name: 'Social Studies', icon: Globe, color: 'bg-orange-100 text-orange-600' },
-    { name: 'Music', icon: Music, color: 'bg-yellow-100 text-yellow-600' },
-    { name: 'Art', icon: Palette, color: 'bg-pink-100 text-pink-600' },
-    { name: 'PE', icon: Dumbbell, color: 'bg-red-100 text-red-600' },
-  ];
-});
+type Outcome = {
+  id: string;
+  outcome_code: string;
+  content_knowledge: string | null;
+  elaboration: string | null;
+  sequence_order: number | null;
+};
 
-// Grades 8-12: departmentalized
-['Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].forEach((g) => {
-  SUBJECTS_BY_GRADE[g] = [
-    { name: 'English', icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
-    { name: 'Math', icon: BookMarked, color: 'bg-green-100 text-green-600' },
-    { name: 'Science', icon: FlaskConical, color: 'bg-purple-100 text-purple-600' },
-    { name: 'Social Studies', icon: Globe, color: 'bg-orange-100 text-orange-600' },
-    { name: 'French / Mandarin', icon: Globe, color: 'bg-teal-100 text-teal-600' },
-    { name: 'PE & Health', icon: Dumbbell, color: 'bg-red-100 text-red-600' },
-    { name: 'Arts', icon: Palette, color: 'bg-pink-100 text-pink-600' },
-  ];
-});
+type Session = {
+  id: string;
+  bc_outcome_ids: string[] | null;
+  status: string | null;
+  coastaltutor_lesson_id: string | null;
+  lesson_payload: unknown | null;
+  lesson_title: string | null;
+  started_at: string | null;
+};
 
-// ─── Component ─────────────────────────────────────────────────────────────
+type TodayGoal = {
+  id: string;
+  title: string;
+  outcomeCode: string;
+  mastery: number;
+  priority: number;
+  reusedSessionId?: string;
+};
+
+const FALLBACK_GOALS: TodayGoal[] = [
+  {
+    id: 'fallback-number-20',
+    title: 'Number concepts to 20',
+    outcomeCode: 'MATH-1-01-number-concepts-to-20',
+    mastery: 0.28,
+    priority: 1,
+  },
+  {
+    id: 'fallback-make-10',
+    title: 'Ways to make 10',
+    outcomeCode: 'MATH-1-02-make-10',
+    mastery: 0.42,
+    priority: 2,
+  },
+  {
+    id: 'fallback-add-sub-20',
+    title: 'Addition and subtraction to 20',
+    outcomeCode: 'MATH-1-03-addition-and-subtraction-to-20',
+    mastery: 0.36,
+    priority: 3,
+  },
+];
+
 export default function StudentDashboard() {
   const router = useRouter();
   const supabase = createClient();
-
   const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedGrade, setSelectedGrade] = useState<string | null>(null);
-  const [apMode, setApMode] = useState(false);
+  const [planLoading, setPlanLoading] = useState(false);
+  const [selectedGrade, setSelectedGrade] = useState('Grade 1');
+  const [selectedSubject, setSelectedSubject] = useState('Math');
+  const [todayGoals, setTodayGoals] = useState<TodayGoal[]>(FALLBACK_GOALS);
+  const [planSource, setPlanSource] = useState<'supabase' | 'fallback'>('fallback');
   const [activeNav, setActiveNav] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -121,13 +103,114 @@ export default function StudentDashboard() {
         router.replace('/login');
         return;
       }
+
+      const metadata = data.user.user_metadata ?? {};
       setUser(data.user);
-      // Restore saved grade from metadata if exists
-      const savedGrade = data.user.user_metadata?.grade;
-      if (savedGrade) setSelectedGrade(savedGrade);
+      setSelectedGrade(metadata.grade ?? 'Grade 1');
+      setSelectedSubject(metadata.subjects?.[0] ?? 'Math');
       setLoading(false);
     });
   }, [router, supabase.auth]);
+
+  useEffect(() => {
+    if (!user) return;
+    void loadTodayPlan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, selectedGrade, selectedSubject]);
+
+  const averageMastery = useMemo(() => {
+    const value =
+      todayGoals.reduce((total, goal) => total + goal.mastery, 0) / Math.max(1, todayGoals.length);
+    return Math.round(value * 100);
+  }, [todayGoals]);
+
+  const firstName = user?.user_metadata?.first_name ?? user?.user_metadata?.preferred_name ?? 'Student';
+
+  async function loadTodayPlan() {
+    if (!user) return;
+
+    setPlanLoading(true);
+
+    try {
+      const gradeNumber = Number(selectedGrade.replace('Grade ', ''));
+      const subjectCode = `${SUBJECT_PREFIX[selectedSubject] ?? 'MATH'}-${gradeNumber}`;
+      const { data: subject } = await supabase
+        .from('bc_subjects')
+        .select('id')
+        .eq('code', subjectCode)
+        .maybeSingle();
+
+      if (!subject?.id) {
+        setTodayGoals(FALLBACK_GOALS);
+        setPlanSource('fallback');
+        return;
+      }
+
+      const { data: outcomes } = await supabase
+        .from('bc_learning_outcomes')
+        .select('id,outcome_code,content_knowledge,elaboration,sequence_order')
+        .eq('subject_id', subject.id)
+        .order('sequence_order', { ascending: true })
+        .limit(30);
+
+      if (!outcomes?.length) {
+        setTodayGoals(FALLBACK_GOALS);
+        setPlanSource('fallback');
+        return;
+      }
+
+      const outcomeIds = outcomes.map((outcome) => outcome.id);
+      const [{ data: masteryRows }, { data: sessions }] = await Promise.all([
+        supabase
+          .from('student_mastery')
+          .select('outcome_id,mastery_level,next_review_at,attempts')
+          .eq('student_id', user.id)
+          .in('outcome_id', outcomeIds),
+        supabase
+          .from('learning_sessions')
+          .select('id,bc_outcome_ids,status,coastaltutor_lesson_id,lesson_payload,lesson_title,started_at')
+          .eq('student_id', user.id)
+          .order('started_at', { ascending: false })
+          .limit(50),
+      ]);
+
+      const masteryByOutcome = new Map(
+        (masteryRows ?? []).map((row) => [row.outcome_id as string, Number(row.mastery_level ?? 0)]),
+      );
+      const sessionByOutcome = new Map<string, Session>();
+
+      (sessions as Session[] | null)?.forEach((session) => {
+        session.bc_outcome_ids?.forEach((outcomeId) => {
+          if (!sessionByOutcome.has(outcomeId)) sessionByOutcome.set(outcomeId, session);
+        });
+      });
+
+      const planned = (outcomes as Outcome[])
+        .map((outcome) => {
+          const mastery = masteryByOutcome.get(outcome.id) ?? 0;
+          const session = sessionByOutcome.get(outcome.id);
+          return {
+            id: outcome.id,
+            title: outcome.content_knowledge ?? outcome.outcome_code,
+            outcomeCode: outcome.outcome_code,
+            mastery,
+            priority: outcome.sequence_order ?? 999,
+            reusedSessionId: session?.coastaltutor_lesson_id || session?.lesson_payload ? session.id : undefined,
+          };
+        })
+        .sort((a, b) => a.mastery - b.mastery || a.priority - b.priority)
+        .slice(0, 3)
+        .map((goal, index) => ({ ...goal, priority: index + 1 }));
+
+      setTodayGoals(planned.length ? planned : FALLBACK_GOALS);
+      setPlanSource(planned.length ? 'supabase' : 'fallback');
+    } catch {
+      setTodayGoals(FALLBACK_GOALS);
+      setPlanSource('fallback');
+    } finally {
+      setPlanLoading(false);
+    }
+  }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -136,39 +219,32 @@ export default function StudentDashboard() {
 
   const handleSelectGrade = async (grade: string) => {
     setSelectedGrade(grade);
-    setApMode(false);
-    // Persist grade choice to Supabase metadata
     await supabase.auth.updateUser({ data: { grade } });
   };
 
-  const handleStartLesson = (subject: string) => {
-    const params = new URLSearchParams({ grade: selectedGrade!, subject });
-    router.push(`/student/lesson?${params.toString()}`);
-  };
-
-  const handleStartApCourse = (course: string) => {
-    const params = new URLSearchParams({ grade: 'AP', subject: course });
+  const handleStartGoal = (goal: TodayGoal) => {
+    const params = new URLSearchParams({
+      grade: selectedGrade,
+      subject: selectedSubject,
+      outcomeId: goal.id,
+      outcomeCode: goal.outcomeCode,
+      title: goal.title,
+    });
+    if (goal.reusedSessionId) params.set('sessionId', goal.reusedSessionId);
     router.push(`/student/lesson?${params.toString()}`);
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#f8f9fa]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-[#003461] border-t-transparent rounded-full animate-spin" />
-          <p className="text-[#424750] text-sm">Loading your dashboard…</p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-[#f8f9fa]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#003461]" />
       </div>
     );
   }
 
-  const firstName = user?.user_metadata?.first_name ?? 'Student';
-  const subjects = selectedGrade ? (SUBJECTS_BY_GRADE[selectedGrade] ?? []) : [];
-
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'learning', label: 'My Learning', icon: BookOpen },
-    { id: 'ap', label: 'AP Prep', icon: GraduationCap },
     { id: 'mastery', label: 'Mastery', icon: BarChart3 },
     { id: 'schedule', label: 'Schedule', icon: Calendar },
     { id: 'community', label: 'Community', icon: Users },
@@ -176,247 +252,227 @@ export default function StudentDashboard() {
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa] font-sans">
-      {/* ─── Sidebar ─────────────────────────────────────────── */}
-      <aside className="w-64 shrink-0 bg-white border-r border-[#e7e8e9] flex flex-col sticky top-0 h-screen">
-        {/* Logo */}
-        <div className="px-6 py-5 border-b border-[#e7e8e9]">
+      <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col border-r border-[#e7e8e9] bg-white">
+        <div className="border-b border-[#e7e8e9] px-6 py-5">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-[#003461] rounded flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-sm">C</span>
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[#003461]">
+              <span className="text-sm font-bold text-white">C</span>
             </div>
-            <span className="text-lg font-bold text-[#003461] tracking-tight">
+            <span className="text-lg font-bold tracking-tight text-[#003461]">
               Coastal<span className="text-[#0057a8]">Tutor</span>
             </span>
           </div>
-          <p className="text-[10px] text-[#727781] mt-1 font-medium uppercase tracking-widest">
+          <p className="mt-1 text-[10px] font-medium uppercase tracking-widest text-[#727781]">
             Student Portal
           </p>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
           <div className="flex flex-col gap-0.5">
             {navItems.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => {
-                  setActiveNav(id);
-                  if (id === 'ap') setApMode(true);
-                  else setApMode(false);
-                }}
+                onClick={() => setActiveNav(id)}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium w-full text-left transition-all',
+                  'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all',
                   activeNav === id
                     ? 'bg-[#003461] text-white'
                     : 'text-[#424750] hover:bg-[#f0f4ff] hover:text-[#003461]',
                 )}
               >
-                <Icon className="w-4 h-4 shrink-0" />
+                <Icon className="h-4 w-4 shrink-0" />
                 {label}
               </button>
             ))}
           </div>
         </nav>
 
-        {/* Bottom actions */}
-        <div className="px-3 py-4 border-t border-[#e7e8e9] flex flex-col gap-2">
+        <div className="flex flex-col gap-2 border-t border-[#e7e8e9] px-3 py-4">
           <button
-            onClick={() => router.push('/coastaltutor')}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-[#003461] bg-blue-50 hover:bg-blue-100 transition-all w-full"
+            onClick={() => router.push('/generation-preview')}
+            className="flex w-full items-center gap-2 rounded-lg bg-blue-50 px-3 py-2.5 text-sm font-medium text-[#003461] transition-all hover:bg-blue-100"
           >
-            <Sparkles className="w-4 h-4" />
-            自由探索模式
+            <Sparkles className="h-4 w-4" />
+            Free explore
           </button>
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-[#727781] hover:bg-red-50 hover:text-red-500 transition-all w-full"
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-[#727781] transition-all hover:bg-red-50 hover:text-red-500"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="h-4 w-4" />
             Sign Out
           </button>
         </div>
       </aside>
 
-      {/* ─── Main Content ────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto">
-        {/* Top Header */}
-        <header className="bg-white border-b border-[#e7e8e9] px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e7e8e9] bg-white px-8 py-4">
           <div>
-            <h1 className="text-xl font-semibold text-[#191c1d]">
-              {apMode
-                ? 'AP Exam Prep'
-                : selectedGrade
-                  ? `${selectedGrade} — Choose a Subject`
-                  : 'Welcome back! Choose your grade.'}
-            </h1>
-            <p className="text-sm text-[#727781]">Hello, {firstName} 👋</p>
+            <h1 className="text-xl font-semibold text-[#191c1d]">Today&apos;s learning path</h1>
+            <p className="text-sm text-[#727781]">
+              Hello, {firstName}. {selectedGrade} · {selectedSubject}
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            {selectedGrade && !apMode && (
-              <button
-                onClick={() => {
-                  setSelectedGrade(null);
-                  setApMode(false);
-                }}
-                className="text-sm text-[#003461] hover:underline font-medium"
-              >
-                ← Change Grade
-              </button>
-            )}
-            {apMode && (
-              <button
-                onClick={() => setApMode(false)}
-                className="text-sm text-[#003461] hover:underline font-medium"
-              >
-                ← Back to Dashboard
-              </button>
-            )}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => void loadTodayPlan()}
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-[#e7e8e9] px-3 text-sm font-medium text-[#424750] hover:bg-[#f0f4ff]"
+            >
+              <RefreshCw className={cn('h-4 w-4', planLoading && 'animate-spin')} />
+              Recalculate
+            </button>
             <button
               onClick={() => setSettingsOpen(true)}
-              className="p-2 rounded-full hover:bg-[#f0f4ff] text-[#727781] transition-all"
+              className="rounded-full p-2 text-[#727781] transition-all hover:bg-[#f0f4ff]"
+              aria-label="Settings"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="h-4 w-4" />
             </button>
           </div>
         </header>
 
         <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
-        <div className="p-8">
-          {/* ── AP Mode ─────────────────────────────── */}
-          {apMode && (
-            <div className="animate-fadeIn">
-              <p className="text-[#424750] mb-6 max-w-2xl">
-                Choose an AP course to start a focused AI-powered prep session aligned with College
-                Board standards.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {AP_COURSES.map((course) => (
-                  <button
-                    key={course}
-                    onClick={() => handleStartApCourse(course)}
-                    className="group flex items-center justify-between gap-3 bg-white border border-[#e7e8e9] rounded-xl p-5 text-left hover:border-[#003461] hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#003461]/10 flex items-center justify-center shrink-0">
-                        <Zap className="w-5 h-5 text-[#003461]" />
-                      </div>
-                      <span className="font-semibold text-sm text-[#191c1d] leading-tight">
-                        {course}
-                      </span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-[#c2c6d1] group-hover:text-[#003461] shrink-0 transition-colors" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── Grade Selector ───────────────────────── */}
-          {!apMode && !selectedGrade && (
-            <div className="animate-fadeIn">
-              <p className="text-[#424750] mb-6 max-w-2xl">
-                Select your grade to see your BC curriculum subjects and start an AI-powered lesson.
-              </p>
-
-              {/* K-12 Grade grid */}
-              <div className="mb-8">
-                <h2 className="text-sm font-semibold text-[#727781] uppercase tracking-wider mb-3">
-                  K – Grade 12
-                </h2>
-                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                  {GRADES.map((grade) => (
-                    <button
-                      key={grade}
-                      onClick={() => handleSelectGrade(grade)}
-                      className="group flex flex-col items-center justify-center bg-white border border-[#e7e8e9] rounded-xl p-4 hover:border-[#003461] hover:shadow-md transition-all aspect-square"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-[#003461]/10 flex items-center justify-center mb-2 group-hover:bg-[#003461] transition-colors">
-                        <GraduationCap className="w-5 h-5 text-[#003461] group-hover:text-white transition-colors" />
-                      </div>
-                      <span className="text-xs font-semibold text-[#191c1d] text-center leading-tight">
-                        {grade}
-                      </span>
-                    </button>
-                  ))}
+        <div className="space-y-8 p-8">
+          <section className="grid gap-5 lg:grid-cols-[1fr_320px]">
+            <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-[#003461]">Adaptive planner</p>
+                  <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#191c1d]">
+                    3 targets for today
+                  </h2>
                 </div>
+                <span className="rounded-full bg-[#f0f4ff] px-3 py-1 text-xs font-semibold text-[#003461]">
+                  {planSource === 'supabase' ? 'Live mastery' : 'Demo fallback'}
+                </span>
               </div>
 
-              {/* AP Section */}
-              <div>
-                <h2 className="text-sm font-semibold text-[#727781] uppercase tracking-wider mb-3">
-                  Advanced Placement (AP)
-                </h2>
-                <button
-                  onClick={() => {
-                    setApMode(true);
-                    setActiveNav('ap');
-                  }}
-                  className="group flex items-center gap-4 bg-gradient-to-r from-[#003461] to-[#0057a8] text-white rounded-xl p-5 w-full max-w-sm hover:shadow-lg transition-all"
-                >
-                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                    <Zap className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-base">AP Exam Prep</p>
-                    <p className="text-sm text-white/70">{AP_COURSES.length} courses available</p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 ml-auto text-white/60 group-hover:text-white transition-colors" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── Subject Grid ─────────────────────────── */}
-          {!apMode && selectedGrade && (
-            <div className="animate-fadeIn">
-              <p className="text-[#424750] mb-6">
-                Your BC curriculum subjects for{' '}
-                <span className="font-semibold text-[#191c1d]">{selectedGrade}</span>. Tap a subject
-                to start your AI lesson.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-                {subjects.map(({ name, icon: Icon, color }) => (
+              <div className="grid gap-3">
+                {todayGoals.map((goal) => (
                   <button
-                    key={name}
-                    onClick={() => handleStartLesson(name)}
-                    className="group flex flex-col gap-4 bg-white border border-[#e7e8e9] rounded-xl p-6 text-left hover:border-[#003461] hover:shadow-md transition-all"
+                    key={goal.id}
+                    onClick={() => handleStartGoal(goal)}
+                    className="group flex items-center gap-4 rounded-lg border border-[#e7e8e9] bg-white p-4 text-left transition-all hover:border-[#003461] hover:shadow-sm"
                   >
-                    <div
-                      className={cn('w-12 h-12 rounded-xl flex items-center justify-center', color)}
-                    >
-                      <Icon className="w-6 h-6" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#003461]/10 text-sm font-bold text-[#003461]">
+                      {goal.priority}
                     </div>
-                    <div>
-                      <p className="font-semibold text-[#191c1d] text-sm">{name}</p>
-                      <p className="text-xs text-[#727781] mt-0.5">
-                        {selectedGrade} · BC Curriculum
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-[#191c1d]">{goal.title}</p>
+                      <p className="mt-1 text-xs text-[#727781]">
+                        {goal.outcomeCode} · mastery {Math.round(goal.mastery * 100)}%
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-[#003461] font-medium mt-auto group-hover:gap-2 transition-all">
-                      Start Lesson <ChevronRight className="w-3 h-3" />
-                    </div>
+                    {goal.reusedSessionId ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Reuse
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                        <Zap className="h-3.5 w-3.5" />
+                        Generate
+                      </span>
+                    )}
+                    <ChevronRight className="h-4 w-4 text-[#c2c6d1] transition-colors group-hover:text-[#003461]" />
                   </button>
                 ))}
               </div>
+            </div>
 
-              {/* Quick AP access from subject page */}
-              <div className="border-t border-[#e7e8e9] pt-6">
-                <button
-                  onClick={() => {
-                    setApMode(true);
-                    setActiveNav('ap');
-                  }}
-                  className="flex items-center gap-2 text-sm text-[#003461] font-medium hover:underline"
-                >
-                  <Zap className="w-4 h-4" />
-                  Switch to AP Prep instead
-                </button>
+            <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-[#003461]">Progress ring</p>
+                  <h2 className="mt-1 text-lg font-semibold text-[#191c1d]">Current mastery</h2>
+                </div>
+                <Target className="h-5 w-5 text-[#003461]" />
+              </div>
+              <div className="mt-8 flex justify-center">
+                <ProgressRing value={averageMastery} />
+              </div>
+              <p className="mt-6 text-sm leading-6 text-[#424750]">
+                Mastery is recalculated after each question using correctness, hint use, response
+                latency, and emotion signal snapshots.
+              </p>
+            </div>
+          </section>
+
+          <section className="grid gap-5 lg:grid-cols-2">
+            <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+              <h2 className="text-base font-semibold text-[#191c1d]">Grade</h2>
+              <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {GRADES.map((grade) => (
+                  <button
+                    key={grade}
+                    onClick={() => void handleSelectGrade(grade)}
+                    className={cn(
+                      'flex h-12 items-center justify-center rounded-lg border text-xs font-semibold',
+                      selectedGrade === grade
+                        ? 'border-[#003461] bg-[#f0f4ff] text-[#003461]'
+                        : 'border-[#e7e8e9] text-[#424750] hover:border-[#003461]',
+                    )}
+                  >
+                    <GraduationCap className="mr-1.5 h-4 w-4" />
+                    {grade.replace('Grade ', 'G')}
+                  </button>
+                ))}
               </div>
             </div>
-          )}
+
+            <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+              <h2 className="text-base font-semibold text-[#191c1d]">Subject</h2>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {SUBJECTS.map((subject) => (
+                  <button
+                    key={subject}
+                    onClick={() => setSelectedSubject(subject)}
+                    className={cn(
+                      'flex h-12 items-center justify-center rounded-lg border text-sm font-semibold',
+                      selectedSubject === subject
+                        ? 'border-[#003461] bg-[#f0f4ff] text-[#003461]'
+                        : 'border-[#e7e8e9] text-[#424750] hover:border-[#003461]',
+                    )}
+                  >
+                    <BookMarked className="mr-2 h-4 w-4" />
+                    {subject}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
         </div>
       </main>
+    </div>
+  );
+}
+
+function ProgressRing({ value }: { value: number }) {
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (value / 100) * circumference;
+
+  return (
+    <div className="relative h-36 w-36">
+      <svg className="h-36 w-36 -rotate-90" viewBox="0 0 128 128">
+        <circle cx="64" cy="64" r={radius} fill="none" stroke="#e7e8e9" strokeWidth="12" />
+        <circle
+          cx="64"
+          cy="64"
+          r={radius}
+          fill="none"
+          stroke="#003461"
+          strokeLinecap="round"
+          strokeWidth="12"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-3xl font-bold text-[#191c1d]">{value}%</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#727781]">ready</span>
+      </div>
     </div>
   );
 }
