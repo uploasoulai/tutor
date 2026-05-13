@@ -56,7 +56,10 @@ const AP_COURSES = [
   'AP Economics',
 ];
 
-const SUBJECTS_BY_GRADE: Record<string, { name: string; icon: React.ElementType; color: string }[]> = {
+const SUBJECTS_BY_GRADE: Record<
+  string,
+  { name: string; icon: React.ElementType; color: string }[]
+> = {
   Kindergarten: [
     { name: 'Reading & Writing', icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
     { name: 'Math', icon: BookMarked, color: 'bg-green-100 text-green-600' },
