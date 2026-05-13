@@ -5,6 +5,15 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
+import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT, subjectCodeFor } from '@/lib/curriculum/grade';
+import {
+  buildFallbackGoals,
+  planTodayGoals,
+  type CurriculumOutcome,
+  type LearningSessionSummary,
+  type MasteryRow,
+  type TodayGoal,
+} from '@/lib/curriculum/planner';
 import {
   BarChart3,
   BookOpen,
@@ -36,63 +45,6 @@ const GRADES = [
   'Grade 9',
 ];
 const SUBJECTS = ['Math', 'Language Arts', 'Arts', 'ADST'];
-const SUBJECT_PREFIX: Record<string, string> = {
-  Math: 'MATH',
-  'Language Arts': 'ELA',
-  Arts: 'ARTS',
-  ADST: 'ADST',
-};
-
-type Outcome = {
-  id: string;
-  outcome_code: string;
-  content_knowledge: string | null;
-  elaboration: string | null;
-  sequence_order: number | null;
-};
-
-type Session = {
-  id: string;
-  bc_outcome_ids: string[] | null;
-  status: string | null;
-  coastaltutor_lesson_id: string | null;
-  lesson_payload: unknown | null;
-  lesson_title: string | null;
-  started_at: string | null;
-};
-
-type TodayGoal = {
-  id: string;
-  title: string;
-  outcomeCode: string;
-  mastery: number;
-  priority: number;
-  reusedSessionId?: string;
-};
-
-const FALLBACK_GOALS: TodayGoal[] = [
-  {
-    id: 'fallback-number-20',
-    title: 'Number concepts to 20',
-    outcomeCode: 'MATH-1-01-number-concepts-to-20',
-    mastery: 0.28,
-    priority: 1,
-  },
-  {
-    id: 'fallback-make-10',
-    title: 'Ways to make 10',
-    outcomeCode: 'MATH-1-02-make-10',
-    mastery: 0.42,
-    priority: 2,
-  },
-  {
-    id: 'fallback-add-sub-20',
-    title: 'Addition and subtraction to 20',
-    outcomeCode: 'MATH-1-03-addition-and-subtraction-to-20',
-    mastery: 0.36,
-    priority: 3,
-  },
-];
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -100,9 +52,11 @@ export default function StudentDashboard() {
   const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
   const [loading, setLoading] = useState(true);
   const [planLoading, setPlanLoading] = useState(false);
-  const [selectedGrade, setSelectedGrade] = useState('Grade 1');
-  const [selectedSubject, setSelectedSubject] = useState('Math');
-  const [todayGoals, setTodayGoals] = useState<TodayGoal[]>(FALLBACK_GOALS);
+  const [selectedGrade, setSelectedGrade] = useState(DEFAULT_GRADE_LABEL);
+  const [selectedSubject, setSelectedSubject] = useState(DEFAULT_SUBJECT);
+  const [todayGoals, setTodayGoals] = useState<TodayGoal[]>(
+    buildFallbackGoals(DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT),
+  );
   const [planSource, setPlanSource] = useState<'supabase' | 'fallback'>('fallback');
   const [activeNav, setActiveNav] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -116,8 +70,8 @@ export default function StudentDashboard() {
 
       const metadata = data.user.user_metadata ?? {};
       setUser(data.user);
-      setSelectedGrade(metadata.grade ?? 'Grade 1');
-      setSelectedSubject(metadata.subjects?.[0] ?? 'Math');
+      setSelectedGrade(metadata.grade ?? DEFAULT_GRADE_LABEL);
+      setSelectedSubject(metadata.subjects?.[0] ?? DEFAULT_SUBJECT);
       setLoading(false);
     });
   }, [router, supabase.auth]);
@@ -143,8 +97,8 @@ export default function StudentDashboard() {
     setPlanLoading(true);
 
     try {
-      const gradeNumber = Number(selectedGrade.replace('Grade ', ''));
-      const subjectCode = `${SUBJECT_PREFIX[selectedSubject] ?? 'MATH'}-${gradeNumber}`;
+      const fallbackGoals = buildFallbackGoals(selectedGrade, selectedSubject);
+      const subjectCode = subjectCodeFor(selectedGrade, selectedSubject);
       const { data: subject } = await supabase
         .from('bc_subjects')
         .select('id')
@@ -152,7 +106,7 @@ export default function StudentDashboard() {
         .maybeSingle();
 
       if (!subject?.id) {
-        setTodayGoals(FALLBACK_GOALS);
+        setTodayGoals(fallbackGoals);
         setPlanSource('fallback');
         return;
       }
@@ -165,7 +119,7 @@ export default function StudentDashboard() {
         .limit(30);
 
       if (!outcomes?.length) {
-        setTodayGoals(FALLBACK_GOALS);
+        setTodayGoals(fallbackGoals);
         setPlanSource('fallback');
         return;
       }
@@ -187,42 +141,16 @@ export default function StudentDashboard() {
           .limit(50),
       ]);
 
-      const masteryByOutcome = new Map(
-        (masteryRows ?? []).map((row) => [
-          row.outcome_id as string,
-          Number(row.mastery_level ?? 0),
-        ]),
-      );
-      const sessionByOutcome = new Map<string, Session>();
-
-      (sessions as Session[] | null)?.forEach((session) => {
-        session.bc_outcome_ids?.forEach((outcomeId) => {
-          if (!sessionByOutcome.has(outcomeId)) sessionByOutcome.set(outcomeId, session);
-        });
+      const planned = planTodayGoals({
+        outcomes: outcomes as CurriculumOutcome[],
+        masteryRows: (masteryRows ?? []) as MasteryRow[],
+        sessions: (sessions ?? []) as LearningSessionSummary[],
       });
 
-      const planned = (outcomes as Outcome[])
-        .map((outcome) => {
-          const mastery = masteryByOutcome.get(outcome.id) ?? 0;
-          const session = sessionByOutcome.get(outcome.id);
-          return {
-            id: outcome.id,
-            title: outcome.content_knowledge ?? outcome.outcome_code,
-            outcomeCode: outcome.outcome_code,
-            mastery,
-            priority: outcome.sequence_order ?? 999,
-            reusedSessionId:
-              session?.coastaltutor_lesson_id || session?.lesson_payload ? session.id : undefined,
-          };
-        })
-        .sort((a, b) => a.mastery - b.mastery || a.priority - b.priority)
-        .slice(0, 3)
-        .map((goal, index) => ({ ...goal, priority: index + 1 }));
-
-      setTodayGoals(planned.length ? planned : FALLBACK_GOALS);
+      setTodayGoals(planned.length ? planned : fallbackGoals);
       setPlanSource(planned.length ? 'supabase' : 'fallback');
     } catch {
-      setTodayGoals(FALLBACK_GOALS);
+      setTodayGoals(buildFallbackGoals(selectedGrade, selectedSubject));
       setPlanSource('fallback');
     } finally {
       setPlanLoading(false);

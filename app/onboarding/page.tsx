@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
+import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import {
   ArrowLeft,
   ArrowRight,
@@ -50,8 +51,8 @@ export default function OnboardingPage() {
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('Student');
   const [profile, setProfile] = useState({
-    grade: 'Grade 1',
-    subjects: ['Math'],
+    grade: DEFAULT_GRADE_LABEL,
+    subjects: [DEFAULT_SUBJECT],
     goal: 'Build confidence',
     favoriteColor: 'Ocean blue',
     tutorStyle: 'Patient coach',

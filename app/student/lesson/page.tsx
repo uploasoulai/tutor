@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -21,9 +22,23 @@ type LessonSession = {
   coastaltutor_lesson_id: string | null;
   lesson_payload: {
     prompt?: string;
+    bc_context?: {
+      grade: string;
+      subject: string;
+      outcome_code: string;
+      knowledge_point: string;
+      matches?: BCCurriculumContextMatch[];
+    };
     slides?: { title: string; body: string }[];
     quiz?: { prompt: string; answer: string }[];
   } | null;
+};
+
+type BCCurriculumContextMatch = {
+  outcome_code: string;
+  content_knowledge: string | null;
+  elaboration: string | null;
+  similarity: number;
 };
 
 function LessonContent() {
@@ -31,8 +46,8 @@ function LessonContent() {
   const searchParams = useSearchParams();
   const supabase = createClient();
 
-  const grade = searchParams.get('grade') ?? 'Grade 1';
-  const subject = searchParams.get('subject') ?? 'Math';
+  const grade = searchParams.get('grade') ?? DEFAULT_GRADE_LABEL;
+  const subject = searchParams.get('subject') ?? DEFAULT_SUBJECT;
   const outcomeId = searchParams.get('outcomeId') ?? '';
   const outcomeCode = searchParams.get('outcomeCode') ?? '';
   const title = searchParams.get('title') ?? subject;
@@ -77,7 +92,7 @@ function LessonContent() {
         setSession({
           id: `local-${Date.now()}`,
           coastaltutor_lesson_id: null,
-          lesson_payload: buildLessonPayload(),
+          lesson_payload: await buildLessonPayload(),
         });
       }
       setLoading(false);
@@ -108,7 +123,7 @@ function LessonContent() {
       return;
     }
 
-    const lessonPayload = buildLessonPayload();
+    const lessonPayload = await buildLessonPayload();
     const lessonId = `local-${Date.now()}`;
     const validOutcomeId = UUID_RE.test(outcomeId) ? outcomeId : null;
     const { data: inserted } = await supabase
@@ -145,15 +160,53 @@ function LessonContent() {
     return data as LessonSession | null;
   }
 
-  function buildLessonPayload() {
+  async function fetchBCContext() {
+    try {
+      const response = await fetch('/api/bc-curriculum/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `${grade} ${subject}: ${title}`,
+          grade,
+          subject,
+          matchCount: 4,
+        }),
+      });
+
+      if (!response.ok) return [];
+
+      const payload = (await response.json()) as {
+        success: boolean;
+        matches?: BCCurriculumContextMatch[];
+      };
+
+      return payload.matches ?? [];
+    } catch {
+      return [];
+    }
+  }
+
+  async function buildLessonPayload() {
+    const matches = await fetchBCContext();
+    const bcContextLines = matches
+      .slice(0, 3)
+      .map(
+        (match, index) =>
+          `${index + 1}. ${match.content_knowledge ?? match.outcome_code}: ${
+            match.elaboration?.slice(0, 360) ?? 'No elaboration available.'
+          }`,
+      )
+      .join('\n');
+
     return {
       bc_context: {
         grade,
         subject,
         outcome_code: outcomeCode,
         knowledge_point: title,
+        matches,
       },
-      prompt: `Create a 2 minute ${grade} ${subject} lesson for ${title}. Include BC context, a warm tutor persona, short slides, voiceover cues, and a 3 question quiz.`,
+      prompt: `Create a 2 minute ${grade} ${subject} lesson for ${title}. Use Voyage query-retrieved BC curriculum context below. Include a warm tutor persona, short slides, voiceover cues, and a 3 question quiz.\n\nBC context:\n${bcContextLines || 'Use the selected BC learning outcome as the source of truth.'}`,
       slides: [
         {
           title,
@@ -415,6 +468,26 @@ function LessonContent() {
                 goals.
               </li>
             </ol>
+          </div>
+
+          <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-[#191c1d]">BC context</h2>
+            <div className="mt-4 space-y-3">
+              {(session?.lesson_payload?.bc_context?.matches ?? []).slice(0, 3).map((match) => (
+                <div key={match.outcome_code} className="rounded-md bg-[#f8f9fa] p-3">
+                  <p className="text-xs font-semibold text-[#003461]">{match.outcome_code}</p>
+                  <p className="mt-1 text-sm font-medium text-[#191c1d]">
+                    {match.content_knowledge}
+                  </p>
+                  <p className="mt-1 text-xs text-[#727781]">
+                    similarity {Math.round(match.similarity * 100)}%
+                  </p>
+                </div>
+              ))}
+              {!session?.lesson_payload?.bc_context?.matches?.length ? (
+                <p className="text-sm text-[#727781]">Using selected outcome fallback.</p>
+              ) : null}
+            </div>
           </div>
         </aside>
       </main>

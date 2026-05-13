@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import fs from 'fs';
 import JSZip from 'jszip';
 import path from 'path';
+import { createVoyageEmbeddings } from '../lib/curriculum/voyage';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -285,30 +286,6 @@ function buildChunks(fileName: string, paragraphs: string[]) {
   return chunks;
 }
 
-async function embedDocuments(inputs: string[]) {
-  const response = await fetch('https://api.voyageai.com/v1/embeddings', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${voyageApiKey}`,
-      ...(voyageProjectId ? { 'X-Voyage-Project-ID': voyageProjectId } : {}),
-    },
-    body: JSON.stringify({
-      model: voyageModel,
-      input: inputs,
-      input_type: 'document',
-      output_dimension: 512,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Voyage embedding failed: ${response.status} ${await response.text()}`);
-  }
-
-  const payload = (await response.json()) as { data: { embedding: number[] }[] };
-  return payload.data.map((item) => item.embedding);
-}
-
 async function upsertSubject(chunk: CurriculumChunk) {
   const { data, error } = await supabase
     .from('bc_subjects')
@@ -360,7 +337,13 @@ async function seed() {
 
     for (let index = 0; index < chunks.length; index += 64) {
       const batch = chunks.slice(index, index + 64);
-      const embeddings = await embedDocuments(batch.map((chunk) => chunk.chunkText));
+      const { embeddings } = await createVoyageEmbeddings({
+        input: batch.map((chunk) => chunk.chunkText),
+        inputType: 'document',
+        apiKey: voyageApiKey,
+        projectId: voyageProjectId,
+        model: voyageModel,
+      });
 
       const rows = batch.map((chunk, batchIndex) => ({
         subject_id: subjectId,
