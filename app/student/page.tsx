@@ -219,7 +219,7 @@ export default function StudentDashboard() {
         {/* Bottom actions */}
         <div className="px-3 py-4 border-t border-[#e7e8e9] flex flex-col gap-2">
           <button
-            onClick={() => router.push('/openmaic')}
+            onClick={() => router.push('/coastaltutor')}
             className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-[#003461] bg-blue-50 hover:bg-blue-100 transition-all w-full"
           >
             <Sparkles className="w-4 h-4" />

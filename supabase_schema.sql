@@ -97,7 +97,7 @@ CREATE TABLE learning_sessions (
     started_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
     ended_at TIMESTAMP WITH TIME ZONE,
     duration_seconds INTEGER,
-    openmaic_lesson_id TEXT,
+    coastaltutor_lesson_id TEXT,
     bc_outcome_ids UUID[],
     accuracy_rate FLOAT,
     emotion_trajectory JSONB,

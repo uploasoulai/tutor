@@ -362,7 +362,15 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center p-4 pt-16 md:p-8 md:pt-16 overflow-x-hidden">
+    <div className="min-h-[100dvh] w-full bg-[#f8f9fa] dark:bg-slate-950 flex flex-col items-center p-4 pt-16 md:p-8 md:pt-16 overflow-x-hidden relative">
+      {/* ═══ Custom CoastalTutor Decor ═══ */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-20"
+        style={{
+          backgroundImage: 'radial-gradient(#c2c6d1 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+        }}
+      />
       <input
         ref={fileInputRef}
         type="file"
@@ -463,14 +471,8 @@ function HomePage() {
 
       {/* ═══ Background Decor ═══ */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: '4s' }}
-        />
-        <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDuration: '6s' }}
-        />
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#003461]/5 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-[#0057a8]/5 rounded-full blur-[100px]" />
       </div>
 
       {/* ═══ Hero section: title + input (centered, wider) ═══ */}
@@ -520,7 +522,7 @@ function HomePage() {
           transition={{ delay: 0.35 }}
           className="w-full"
         >
-          <div className="w-full rounded-2xl border border-border/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-black/[0.03] dark:shadow-black/20 transition-shadow focus-within:shadow-2xl focus-within:shadow-violet-500/[0.06]">
+          <div className="w-full rounded-2xl border-2 border-[#e7e8e9] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all focus-within:border-[#003461] focus-within:ring-4 focus-within:ring-[#003461]/10">
             {/* ── Greeting + Profile + Agents ── */}
             <div className="relative z-20 flex items-start justify-between">
               <GreetingBar />

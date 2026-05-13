@@ -20,7 +20,7 @@ const inter = localFont({
 export const metadata: Metadata = {
   title: 'CoastalTutor',
   description:
-    'The open-source AI interactive classroom. Upload a PDF to instantly generate an immersive, multi-agent learning experience.',
+    'CoastalTutor - Your personal AI interactive classroom. Explore immersive, multi-agent learning experiences.',
 };
 
 export default function RootLayout({

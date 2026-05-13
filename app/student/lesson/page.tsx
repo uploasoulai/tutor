@@ -30,7 +30,7 @@ function LessonContent() {
     // Pass context to the generation engine
     const prompt = `I am a ${grade} student. Please create an interactive lesson on ${subject} aligned with the BC Ministry of Education curriculum.`;
     sessionStorage.setItem('coastaltutor_lesson_prompt', prompt);
-    router.push('/openmaic');
+    router.push('/coastaltutor');
   };
 
   return (
