@@ -40,4 +40,12 @@ describe('resolveModel auto:free', () => {
     expect(resolved.modelString).toBe('siliconflow:Qwen/Qwen2.5-7B-Instruct');
     expect(resolved.providerId).toBe('siliconflow');
   });
+
+  it('reports missing server-side free provider keys clearly', async () => {
+    const { resolveModel } = await import('@/lib/server/resolve-model');
+
+    await expect(resolveModel({ modelString: 'auto:free' })).rejects.toThrow(
+      'No server-configured free model provider is available',
+    );
+  });
 });

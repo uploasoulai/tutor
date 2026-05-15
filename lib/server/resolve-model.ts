@@ -6,7 +6,7 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { pickAutoFreeModel } from '@/lib/ai/auto-free-models';
+import { parseAutoFreeModels, pickAutoFreeModel } from '@/lib/ai/auto-free-models';
 import { getModel, parseModelString, type ModelWithInfo } from '@/lib/ai/providers';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import {
@@ -55,11 +55,34 @@ export async function resolveModel(params: {
 
   if (providerId === 'auto' || shouldAvoidGemini3) {
     const serverProviders = getServerProviders();
+    const configuredProviderIds = Object.keys(serverProviders);
+    if (configuredProviderIds.length === 0) {
+      throw new Error(
+        'No server-configured free model provider is available. Configure SILICONFLOW_API_KEY, GOOGLE_API_KEY, or GROQ_API_KEY in .env.local, then restart the dev server.',
+      );
+    }
+
     const configuredModels = Object.fromEntries(
       Object.entries(serverProviders).map(([id, entry]) => [id, entry.models]),
     );
+    const pool = parseAutoFreeModels(process.env.AUTO_FREE_MODELS);
+    const hasEligibleConfiguredModel = pool.some((choice) => {
+      if (!configuredProviderIds.includes(choice.providerId)) return false;
+
+      const providerModels = configuredModels[choice.providerId];
+      return !providerModels?.length || providerModels.includes(choice.modelId);
+    });
+
+    if (!hasEligibleConfiguredModel) {
+      throw new Error(
+        `No configured provider matches AUTO_FREE_MODELS. Configured providers: ${configuredProviderIds.join(
+          ', ',
+        )}. Update AUTO_FREE_MODELS or provider *_MODELS in .env.local.`,
+      );
+    }
+
     const choice = pickAutoFreeModel({
-      configuredProviderIds: Object.keys(serverProviders),
+      configuredProviderIds,
       configuredModels,
       cursor: autoFreeCursor++,
       envValue: process.env.AUTO_FREE_MODELS,
