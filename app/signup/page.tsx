@@ -7,6 +7,7 @@ import { Check, GraduationCap, Loader2, Mail, Presentation, Smartphone, Users } 
 import { LeftPanelBrandAcademicImageryHiddenOnMobile } from '@/components/auth-left-panel';
 import { formatAuthError } from '@/lib/auth/client-errors';
 import { PHONE_COUNTRIES, isLikelyE164Phone, normalizePhoneNumber } from '@/lib/auth/phone';
+import { buildAuthCallbackUrl, getRoleLandingPath } from '@/lib/auth/redirect';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -25,9 +26,13 @@ export default function RegisterPage() {
   const [countryDialCode, setCountryDialCode] = useState('+1');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneCode, setPhoneCode] = useState('');
+  const [pendingPhone, setPendingPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,12 +49,19 @@ export default function RegisterPage() {
 
     setLoading(true);
     setError('');
+    setMessage('');
 
     try {
+      const next = getRoleLandingPath(selectedRole);
       const { error: signUpError } = await supabase.auth.signUp({
         ...(method === 'email' ? { email } : { phone: normalizedPhone }),
         password,
         options: {
+          emailRedirectTo: buildAuthCallbackUrl({
+            origin: window.location.origin,
+            next,
+            role: selectedRole,
+          }),
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -60,13 +72,15 @@ export default function RegisterPage() {
 
       if (signUpError) throw signUpError;
 
-      if (selectedRole === 'student') {
-        router.push('/onboarding');
-      } else if (selectedRole === 'teacher') {
-        router.push('/teacher');
-      } else {
-        router.push('/parent');
+      if (method === 'email') {
+        setMessage(
+          'Account created. Check your email and click the verification link to continue.',
+        );
+        return;
       }
+
+      setPendingPhone(normalizedPhone);
+      setMessage('Verification code sent. Enter the SMS code to finish registration.');
     } catch (err: unknown) {
       setError(formatAuthError(err, 'An error occurred during signup.'));
     } finally {
@@ -74,22 +88,44 @@ export default function RegisterPage() {
     }
   };
 
+  const handleVerifyPhone = async () => {
+    if (!pendingPhone || !phoneCode.trim()) {
+      setError('Enter the SMS verification code.');
+      return;
+    }
+
+    setVerifyLoading(true);
+    setError('');
+    setMessage('');
+    try {
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        phone: pendingPhone,
+        token: phoneCode.trim(),
+        type: 'sms',
+      });
+      if (verifyError) throw verifyError;
+
+      router.push(getRoleLandingPath(selectedRole));
+    } catch (err: unknown) {
+      setError(formatAuthError(err, 'Phone verification failed.'));
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
   const handleGoogleSignup = async () => {
     setGoogleLoading(true);
     setError('');
     try {
-      const next =
-        selectedRole === 'student'
-          ? '/onboarding'
-          : selectedRole === 'teacher'
-            ? '/teacher'
-            : '/parent';
+      const next = getRoleLandingPath(selectedRole);
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+          redirectTo: buildAuthCallbackUrl({
+            origin: window.location.origin,
             next,
-          )}&role=${selectedRole}`,
+            role: selectedRole,
+          }),
         },
       });
       if (authError) throw authError;
@@ -220,9 +256,41 @@ export default function RegisterPage() {
                 <p className="text-xs text-[#424750]">Must be at least 8 characters long.</p>
               </div>
 
+              {pendingPhone && (
+                <div className="rounded-lg border border-[#c2c6d1] bg-[#f8f9fa] p-4">
+                  <label htmlFor="phoneCode" className="text-sm font-semibold text-[#191c1d]">
+                    SMS Verification Code
+                  </label>
+                  <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                    <input
+                      id="phoneCode"
+                      type="text"
+                      inputMode="numeric"
+                      value={phoneCode}
+                      onChange={(e) => setPhoneCode(e.target.value)}
+                      placeholder="123456"
+                      className="h-11 rounded-lg border border-[#c2c6d1] bg-white px-4 text-[#191c1d] placeholder:text-[#727781] focus:outline-none focus:ring-2 focus:ring-[#003461]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void handleVerifyPhone()}
+                      disabled={verifyLoading}
+                      className="inline-flex h-11 items-center justify-center rounded-lg bg-[#003461] px-4 text-sm font-semibold text-white hover:bg-[#002b50] disabled:opacity-70"
+                    >
+                      {verifyLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verify'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <div className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-lg border border-red-100">
                   {error}
+                </div>
+              )}
+              {message && (
+                <div className="text-green-700 text-sm font-medium bg-green-50 p-3 rounded-lg border border-green-100">
+                  {message}
                 </div>
               )}
 
