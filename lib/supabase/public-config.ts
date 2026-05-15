@@ -7,15 +7,16 @@ export function getSupabasePublicConfig() {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (supabaseUrl && supabaseKey) {
-    return { supabaseUrl, supabaseKey };
+    return { configured: true, supabaseUrl, supabaseKey };
   }
 
-  if (typeof window === 'undefined') {
-    return {
-      supabaseUrl: supabaseUrl ?? PRERENDER_SUPABASE_URL,
-      supabaseKey: supabaseKey ?? PRERENDER_SUPABASE_KEY,
-    };
-  }
+  return {
+    configured: false,
+    supabaseUrl: supabaseUrl ?? PRERENDER_SUPABASE_URL,
+    supabaseKey: supabaseKey ?? PRERENDER_SUPABASE_KEY,
+  };
+}
 
-  throw new Error('Supabase public URL and publishable key are required.');
+export function isSupabasePublicConfigured() {
+  return getSupabasePublicConfig().configured;
 }
