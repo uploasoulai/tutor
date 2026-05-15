@@ -31,7 +31,8 @@ export default function LoginPage() {
 
       // Read role from user metadata and route accordingly
       const role = data.user?.user_metadata?.role ?? 'student';
-      if (role === 'teacher') router.push('/teacher');
+      if (role === 'admin') router.push('/admin');
+      else if (role === 'teacher') router.push('/teacher');
       else if (role === 'parent') router.push('/parent');
       else router.push('/student');
     } catch (err: unknown) {

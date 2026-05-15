@@ -202,7 +202,7 @@ export default function TeacherDashboardPage() {
     router.replace('/login');
   };
 
-  const handleResolveAlert = async (alertId: string) => {
+  const handleResolveAlert = async (alertId: string, studentId?: string) => {
     setResolvingAlertId(alertId);
     try {
       const response = await fetch('/api/teacher/alerts', {
@@ -213,13 +213,19 @@ export default function TeacherDashboardPage() {
 
       if (response.ok) {
         const resolvedAlert = alerts.find((alert) => alert.id === alertId);
+        const resolvedStudentId = studentId ?? resolvedAlert?.studentId;
         setAlerts((current) => current.filter((alert) => alert.id !== alertId));
         setStudents((current) =>
           current.map((student) =>
-            student.studentId === resolvedAlert?.studentId
+            student.studentId === resolvedStudentId
               ? { ...student, unresolvedAlerts: Math.max(0, student.unresolvedAlerts - 1) }
               : student,
           ),
+        );
+        setSelectedStudent((current) =>
+          current && current.studentId === resolvedStudentId
+            ? buildResolvedStudentDetail(current, alertId)
+            : current,
         );
         setSummary((current) =>
           current
@@ -362,6 +368,8 @@ export default function TeacherDashboardPage() {
               selectedStudent={selectedStudent}
               selectedStudentLoading={selectedStudentLoading}
               onSelectStudent={setSelectedStudentId}
+              resolvingAlertId={resolvingAlertId}
+              onResolveAlert={handleResolveAlert}
             />
           ) : (
             <PriorityInterventions
@@ -455,14 +463,18 @@ function ClassRoster({
   selectedStudentId,
   selectedStudent,
   selectedStudentLoading,
+  resolvingAlertId,
   onSelectStudent,
+  onResolveAlert,
 }: {
   students: TeacherStudent[];
   loading: boolean;
   selectedStudentId: string | null;
   selectedStudent: TeacherStudentDetail | null;
   selectedStudentLoading: boolean;
+  resolvingAlertId: string | null;
   onSelectStudent: (studentId: string) => void;
+  onResolveAlert: (alertId: string, studentId?: string) => void;
 }) {
   return (
     <>
@@ -522,7 +534,12 @@ function ClassRoster({
               </button>
             ))}
         </div>
-        <StudentDetailPanel student={selectedStudent} loading={selectedStudentLoading} />
+        <StudentDetailPanel
+          student={selectedStudent}
+          loading={selectedStudentLoading}
+          resolvingAlertId={resolvingAlertId}
+          onResolveAlert={onResolveAlert}
+        />
       </div>
     </>
   );
@@ -531,9 +548,13 @@ function ClassRoster({
 function StudentDetailPanel({
   student,
   loading,
+  resolvingAlertId,
+  onResolveAlert,
 }: {
   student: TeacherStudentDetail | null;
   loading: boolean;
+  resolvingAlertId: string | null;
+  onResolveAlert: (alertId: string, studentId?: string) => void;
 }) {
   if (loading) {
     return (
@@ -571,6 +592,33 @@ function StudentDetailPanel({
       <div className="grid grid-cols-2 gap-3 mt-5">
         <MiniStat label="Mastery" value={`${Math.round(student.averageMastery * 100)}%`} />
         <MiniStat label="Lessons" value={String(student.completedSessions)} />
+      </div>
+
+      <h4 className="mt-6 text-sm font-semibold text-[#191c1d]">Open alerts</h4>
+      <div className="mt-2 flex flex-col gap-2">
+        {student.unresolvedAlertSummaries.length === 0 && (
+          <p className="text-sm text-[#727781]">No open alerts for this student.</p>
+        )}
+        {student.unresolvedAlertSummaries.map((alert) => (
+          <div
+            key={alert.id}
+            className="flex items-center justify-between gap-3 rounded-lg border border-[#e7e8e9] p-3"
+          >
+            <div>
+              <p className="text-sm font-medium text-[#191c1d]">
+                {formatAlertType(alert.alertType)}
+              </p>
+              <p className="text-xs text-[#727781]">{formatLastActive(alert.createdAt)}</p>
+            </div>
+            <button
+              onClick={() => onResolveAlert(alert.id, student.studentId)}
+              disabled={resolvingAlertId === alert.id}
+              className="rounded-md bg-[#003461] px-3 py-2 text-xs font-semibold text-white hover:bg-[#002b50] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {resolvingAlertId === alert.id ? 'Resolving...' : 'Resolve'}
+            </button>
+          </div>
+        ))}
       </div>
 
       <h4 className="mt-6 text-sm font-semibold text-[#191c1d]">Lowest mastery</h4>
@@ -616,6 +664,16 @@ function StudentDetailPanel({
   );
 }
 
+function buildResolvedStudentDetail(student: TeacherStudentDetail, alertId: string) {
+  return {
+    ...student,
+    unresolvedAlerts: Math.max(0, student.unresolvedAlerts - 1),
+    unresolvedAlertSummaries: student.unresolvedAlertSummaries.filter(
+      (alert) => alert.id !== alertId,
+    ),
+  };
+}
+
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-[#f8f9fa] p-3">
@@ -655,4 +713,11 @@ function formatLastActive(value: string | null) {
     hour: 'numeric',
     minute: '2-digit',
   }).format(new Date(value));
+}
+
+function formatAlertType(value: string) {
+  return value
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 }

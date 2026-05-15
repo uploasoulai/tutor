@@ -16,7 +16,8 @@ export default function RootPage() {
       }
       // User is logged in — route by role
       const role = data.user.user_metadata?.role ?? 'student';
-      if (role === 'teacher') router.replace('/teacher');
+      if (role === 'admin') router.replace('/admin');
+      else if (role === 'teacher') router.replace('/teacher');
       else if (role === 'parent') router.replace('/parent');
       else router.replace('/student');
     });

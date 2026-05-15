@@ -56,6 +56,7 @@ type StudentSession = {
   accuracyRate: number | null;
   xpEarned: number;
   canReuse: boolean;
+  openPath: string;
 };
 
 export default function StudentDashboard() {
@@ -316,7 +317,11 @@ export default function StudentDashboard() {
           {activeNav === 'mastery' ? (
             <MasteryOverview items={masteryItems} loading={masteryLoading} />
           ) : activeNav === 'learning' ? (
-            <LearningHistory sessions={sessions} loading={sessionsLoading} />
+            <LearningHistory
+              sessions={sessions}
+              loading={sessionsLoading}
+              onOpenSession={(path) => router.push(path)}
+            />
           ) : (
             <>
               <section className="grid gap-5 lg:grid-cols-[1fr_320px]">
@@ -510,7 +515,15 @@ function MasteryOverview({ items, loading }: { items: MasteryOverviewItem[]; loa
   );
 }
 
-function LearningHistory({ sessions, loading }: { sessions: StudentSession[]; loading: boolean }) {
+function LearningHistory({
+  sessions,
+  loading,
+  onOpenSession,
+}: {
+  sessions: StudentSession[];
+  loading: boolean;
+  onOpenSession: (path: string) => void;
+}) {
   return (
     <section>
       <div className="mb-4">
@@ -518,11 +531,12 @@ function LearningHistory({ sessions, loading }: { sessions: StudentSession[]; lo
         <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#191c1d]">My Learning</h2>
       </div>
       <div className="rounded-lg border border-[#e7e8e9] bg-white shadow-sm">
-        <div className="grid grid-cols-[minmax(0,1fr)_110px_120px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781]">
+        <div className="grid grid-cols-[minmax(0,1fr)_110px_120px_90px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781]">
           <span>Lesson</span>
           <span>Status</span>
           <span>Accuracy</span>
           <span>XP</span>
+          <span>Action</span>
         </div>
         {loading && <div className="p-6 text-sm text-[#727781]">Loading learning history...</div>}
         {!loading && sessions.length === 0 && (
@@ -535,7 +549,7 @@ function LearningHistory({ sessions, loading }: { sessions: StudentSession[]; lo
           sessions.map((session) => (
             <div
               key={session.id}
-              className="grid grid-cols-[minmax(0,1fr)_110px_120px_90px] items-center gap-4 border-t border-[#e7e8e9] px-5 py-4"
+              className="grid grid-cols-[minmax(0,1fr)_110px_120px_90px_90px] items-center gap-4 border-t border-[#e7e8e9] px-5 py-4"
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-[#191c1d]">
@@ -554,6 +568,12 @@ function LearningHistory({ sessions, loading }: { sessions: StudentSession[]; lo
                   : `${Math.round(session.accuracyRate * 100)}%`}
               </span>
               <span className="text-sm font-semibold text-[#191c1d]">{session.xpEarned}</span>
+              <button
+                onClick={() => onOpenSession(session.openPath)}
+                className="rounded-md bg-[#003461] px-3 py-2 text-xs font-semibold text-white hover:bg-[#002b50]"
+              >
+                Open
+              </button>
             </div>
           ))}
       </div>

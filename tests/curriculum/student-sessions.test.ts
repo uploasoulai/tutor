@@ -20,6 +20,7 @@ describe('mapStudentSession', () => {
       accuracyRate: 0.68,
       xpEarned: 24,
       canReuse: true,
+      openPath: '/student/lesson?sessionId=session-1',
     });
   });
 });

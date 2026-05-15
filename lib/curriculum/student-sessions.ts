@@ -9,6 +9,7 @@ export interface StudentSessionListItem {
   xpEarned: number;
   reuseKey: string | null;
   canReuse: boolean;
+  openPath: string;
 }
 
 export function mapStudentSession(row: Record<string, unknown>): StudentSessionListItem {
@@ -24,6 +25,7 @@ export function mapStudentSession(row: Record<string, unknown>): StudentSessionL
     xpEarned: Number(row.xp_earned ?? 0),
     reuseKey,
     canReuse: !!reuseKey && ['planned', 'generated', 'started', 'completed'].includes(status),
+    openPath: `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`,
   };
 }
 
