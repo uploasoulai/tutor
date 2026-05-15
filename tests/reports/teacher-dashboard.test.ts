@@ -95,4 +95,25 @@ describe('buildTeacherStudentSummaries', () => {
       },
     ]);
   });
+
+  it('keeps students with no activity visible for teacher onboarding', () => {
+    const students = buildTeacherStudentSummaries({
+      students: [{ id: 'student-c', grade_level: 2, profiles: null }],
+      masteryRows: [],
+      sessions: [],
+      unresolvedAlerts: [],
+    });
+
+    expect(students).toEqual([
+      {
+        studentId: 'student-c',
+        studentName: 'Student',
+        grade: 'Grade 2',
+        averageMastery: 0,
+        completedSessions: 0,
+        lastActiveAt: null,
+        unresolvedAlerts: 0,
+      },
+    ]);
+  });
 });

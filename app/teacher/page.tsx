@@ -43,6 +43,30 @@ type TeacherStudent = {
   unresolvedAlerts: number;
 };
 
+type TeacherStudentDetail = TeacherStudent & {
+  masteryRows: {
+    outcomeId: string;
+    outcomeCode: string;
+    contentKnowledge: string;
+    masteryLevel: number;
+    attempts: number;
+    correctAttempts: number;
+  }[];
+  recentSessions: {
+    id: string;
+    lessonTitle: string;
+    status: string;
+    startedAt: string | null;
+    accuracyRate: number | null;
+    xpEarned: number;
+  }[];
+  unresolvedAlertSummaries: {
+    id: string;
+    alertType: string;
+    createdAt: string | null;
+  }[];
+};
+
 export default function TeacherDashboardPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -57,6 +81,9 @@ export default function TeacherDashboardPage() {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [students, setStudents] = useState<TeacherStudent[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<TeacherStudentDetail | null>(null);
+  const [selectedStudentLoading, setSelectedStudentLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -95,6 +122,34 @@ export default function TeacherDashboardPage() {
       cancelled = true;
     };
   }, [user]);
+
+  useEffect(() => {
+    if (!students[0] || selectedStudentId) return;
+    setSelectedStudentId(students[0].studentId);
+  }, [selectedStudentId, students]);
+
+  useEffect(() => {
+    if (!selectedStudentId) return;
+
+    let cancelled = false;
+    setSelectedStudentLoading(true);
+    fetch(`/api/teacher/students/${selectedStudentId}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.success && data.student) {
+          setSelectedStudent(data.student);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setSelectedStudentLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedStudentId]);
 
   useEffect(() => {
     if (!user) return;
@@ -300,7 +355,14 @@ export default function TeacherDashboardPage() {
           </div>
 
           {activeNav === 'classes' ? (
-            <ClassRoster students={students} loading={studentsLoading} />
+            <ClassRoster
+              students={students}
+              loading={studentsLoading}
+              selectedStudentId={selectedStudentId}
+              selectedStudent={selectedStudent}
+              selectedStudentLoading={selectedStudentLoading}
+              onSelectStudent={setSelectedStudentId}
+            />
           ) : (
             <PriorityInterventions
               alerts={alerts}
@@ -387,7 +449,21 @@ function PriorityInterventions({
   );
 }
 
-function ClassRoster({ students, loading }: { students: TeacherStudent[]; loading: boolean }) {
+function ClassRoster({
+  students,
+  loading,
+  selectedStudentId,
+  selectedStudent,
+  selectedStudentLoading,
+  onSelectStudent,
+}: {
+  students: TeacherStudent[];
+  loading: boolean;
+  selectedStudentId: string | null;
+  selectedStudent: TeacherStudentDetail | null;
+  selectedStudentLoading: boolean;
+  onSelectStudent: (studentId: string) => void;
+}) {
   return (
     <>
       <div className="flex items-center justify-between mb-4">
@@ -396,52 +472,156 @@ function ClassRoster({ students, loading }: { students: TeacherStudent[]; loadin
           <p className="text-sm text-[#727781]">Grade 2 students sorted by attention priority.</p>
         </div>
       </div>
-      <div className="bg-white border border-[#e7e8e9] rounded-xl overflow-hidden mb-8">
-        <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr_0.9fr_0.9fr] gap-4 px-5 py-3 bg-[#f8f9fa] text-xs font-semibold uppercase tracking-wide text-[#727781]">
-          <span>Student</span>
-          <span>Mastery</span>
-          <span>Lessons</span>
-          <span>Alerts</span>
-          <span>Last Active</span>
-        </div>
-        {loading && <RosterRowSkeleton />}
-        {!loading && students.length === 0 && (
-          <div className="px-5 py-6 text-sm text-[#727781]">
-            No linked students yet. Once a Grade 2 student is linked to this teacher, their mastery
-            and lesson activity will appear here.
+      <div className="grid grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] gap-5 mb-8">
+        <div className="bg-white border border-[#e7e8e9] rounded-xl overflow-hidden">
+          <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr_0.9fr_0.9fr] gap-4 px-5 py-3 bg-[#f8f9fa] text-xs font-semibold uppercase tracking-wide text-[#727781]">
+            <span>Student</span>
+            <span>Mastery</span>
+            <span>Lessons</span>
+            <span>Alerts</span>
+            <span>Last Active</span>
           </div>
-        )}
-        {!loading &&
-          students.map((student) => (
-            <div
-              key={student.studentId}
-              className="grid grid-cols-[1.4fr_0.8fr_0.8fr_0.9fr_0.9fr] gap-4 px-5 py-4 border-t border-[#e7e8e9] items-center"
-            >
-              <div>
-                <p className="font-semibold text-[#191c1d]">{student.studentName}</p>
-                <p className="text-sm text-[#727781]">{student.grade} Math</p>
-              </div>
-              <MasteryMeter value={student.averageMastery} />
-              <span className="text-sm font-medium text-[#424750]">
-                {student.completedSessions}
-              </span>
-              <span
+          {loading && <RosterRowSkeleton />}
+          {!loading && students.length === 0 && (
+            <div className="px-5 py-6 text-sm text-[#727781]">
+              No linked students yet. Once a Grade 2 student is linked to this teacher, their
+              mastery and lesson activity will appear here.
+            </div>
+          )}
+          {!loading &&
+            students.map((student) => (
+              <button
+                key={student.studentId}
+                onClick={() => onSelectStudent(student.studentId)}
                 className={cn(
-                  'w-fit rounded-full px-2.5 py-1 text-xs font-semibold',
-                  student.unresolvedAlerts > 0
-                    ? 'bg-red-50 text-red-600'
-                    : 'bg-green-50 text-green-700',
+                  'grid grid-cols-[1.4fr_0.8fr_0.8fr_0.9fr_0.9fr] gap-4 px-5 py-4 border-t border-[#e7e8e9] items-center text-left w-full transition-colors',
+                  selectedStudentId === student.studentId ? 'bg-blue-50' : 'hover:bg-[#f8f9fa]',
                 )}
               >
-                {student.unresolvedAlerts > 0 ? `${student.unresolvedAlerts} open` : 'Clear'}
-              </span>
-              <span className="text-sm text-[#727781]">
-                {formatLastActive(student.lastActiveAt)}
-              </span>
-            </div>
-          ))}
+                <div>
+                  <p className="font-semibold text-[#191c1d]">{student.studentName}</p>
+                  <p className="text-sm text-[#727781]">{student.grade} Math</p>
+                </div>
+                <MasteryMeter value={student.averageMastery} />
+                <span className="text-sm font-medium text-[#424750]">
+                  {student.completedSessions}
+                </span>
+                <span
+                  className={cn(
+                    'w-fit rounded-full px-2.5 py-1 text-xs font-semibold',
+                    student.unresolvedAlerts > 0
+                      ? 'bg-red-50 text-red-600'
+                      : 'bg-green-50 text-green-700',
+                  )}
+                >
+                  {student.unresolvedAlerts > 0 ? `${student.unresolvedAlerts} open` : 'Clear'}
+                </span>
+                <span className="text-sm text-[#727781]">
+                  {formatLastActive(student.lastActiveAt)}
+                </span>
+              </button>
+            ))}
+        </div>
+        <StudentDetailPanel student={selectedStudent} loading={selectedStudentLoading} />
       </div>
     </>
+  );
+}
+
+function StudentDetailPanel({
+  student,
+  loading,
+}: {
+  student: TeacherStudentDetail | null;
+  loading: boolean;
+}) {
+  if (loading) {
+    return (
+      <div className="bg-white border border-[#e7e8e9] rounded-xl p-5 text-sm text-[#727781]">
+        Loading student detail...
+      </div>
+    );
+  }
+
+  if (!student) {
+    return (
+      <div className="bg-white border border-[#e7e8e9] rounded-xl p-5 text-sm text-[#727781]">
+        Select a student to review mastery, recent lessons, and open alerts.
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white border border-[#e7e8e9] rounded-xl p-5 h-fit">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-base font-semibold text-[#191c1d]">{student.studentName}</h3>
+          <p className="text-sm text-[#727781]">{student.grade} Math intervention view</p>
+        </div>
+        <span
+          className={cn(
+            'rounded-full px-2.5 py-1 text-xs font-semibold',
+            student.unresolvedAlerts > 0 ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700',
+          )}
+        >
+          {student.unresolvedAlerts > 0 ? `${student.unresolvedAlerts} alerts` : 'Clear'}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mt-5">
+        <MiniStat label="Mastery" value={`${Math.round(student.averageMastery * 100)}%`} />
+        <MiniStat label="Lessons" value={String(student.completedSessions)} />
+      </div>
+
+      <h4 className="mt-6 text-sm font-semibold text-[#191c1d]">Lowest mastery</h4>
+      <div className="mt-2 flex flex-col gap-2">
+        {student.masteryRows.length === 0 && (
+          <p className="text-sm text-[#727781]">No mastery records yet.</p>
+        )}
+        {student.masteryRows.slice(0, 4).map((row) => (
+          <div key={row.outcomeId} className="rounded-lg border border-[#e7e8e9] p-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-[#191c1d]">{row.outcomeCode}</p>
+              <span className="text-sm font-semibold text-[#003461]">
+                {Math.round(row.masteryLevel * 100)}%
+              </span>
+            </div>
+            <p className="mt-1 line-clamp-2 text-xs text-[#727781]">{row.contentKnowledge}</p>
+            <p className="mt-2 text-xs text-[#727781]">
+              {row.correctAttempts}/{row.attempts} correct attempts
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <h4 className="mt-6 text-sm font-semibold text-[#191c1d]">Recent lessons</h4>
+      <div className="mt-2 flex flex-col gap-2">
+        {student.recentSessions.length === 0 && (
+          <p className="text-sm text-[#727781]">No lesson sessions yet.</p>
+        )}
+        {student.recentSessions.map((session) => (
+          <div key={session.id} className="rounded-lg bg-[#f8f9fa] p-3">
+            <p className="text-sm font-medium text-[#191c1d]">{session.lessonTitle}</p>
+            <p className="text-xs text-[#727781]">
+              {session.status} - {formatLastActive(session.startedAt)} -{' '}
+              {session.accuracyRate == null
+                ? 'No accuracy yet'
+                : `${Math.round(session.accuracyRate * 100)}% accuracy`}{' '}
+              - {session.xpEarned} XP
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-[#f8f9fa] p-3">
+      <p className="text-xs text-[#727781]">{label}</p>
+      <p className="text-lg font-semibold text-[#191c1d]">{value}</p>
+    </div>
   );
 }
 

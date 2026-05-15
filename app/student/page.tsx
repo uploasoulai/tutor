@@ -39,6 +39,25 @@ const GRADES = [
 ];
 const SUBJECTS = ['Math', 'Language Arts', 'Arts', 'ADST'];
 
+type MasteryOverviewItem = {
+  outcomeId: string;
+  outcomeCode: string;
+  title: string;
+  mastery: number;
+  attempts: number;
+  nextReviewAt: string | null;
+};
+
+type StudentSession = {
+  id: string;
+  lessonTitle: string;
+  status: string;
+  startedAt: string | null;
+  accuracyRate: number | null;
+  xpEarned: number;
+  canReuse: boolean;
+};
+
 export default function StudentDashboard() {
   const router = useRouter();
   const supabase = createClient();
@@ -51,6 +70,10 @@ export default function StudentDashboard() {
     buildFallbackGoals(DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT),
   );
   const [planSource, setPlanSource] = useState<'supabase' | 'fallback'>('fallback');
+  const [masteryItems, setMasteryItems] = useState<MasteryOverviewItem[]>([]);
+  const [masteryLoading, setMasteryLoading] = useState(false);
+  const [sessions, setSessions] = useState<StudentSession[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
   const [activeNav, setActiveNav] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -72,6 +95,8 @@ export default function StudentDashboard() {
   useEffect(() => {
     if (!user) return;
     void loadTodayPlan();
+    void loadMasteryOverview();
+    void loadStudentSessions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, selectedGrade, selectedSubject]);
 
@@ -118,6 +143,49 @@ export default function StudentDashboard() {
       setPlanSource('fallback');
     } finally {
       setPlanLoading(false);
+    }
+  }
+
+  async function loadMasteryOverview() {
+    if (!user) return;
+
+    setMasteryLoading(true);
+    try {
+      const response = await fetch('/api/student/mastery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grade: selectedGrade,
+          subject: selectedSubject,
+        }),
+      });
+      const data = response.ok
+        ? ((await response.json()) as { overview?: { items?: MasteryOverviewItem[] } })
+        : null;
+
+      setMasteryItems(data?.overview?.items ?? []);
+    } catch {
+      setMasteryItems([]);
+    } finally {
+      setMasteryLoading(false);
+    }
+  }
+
+  async function loadStudentSessions() {
+    if (!user) return;
+
+    setSessionsLoading(true);
+    try {
+      const response = await fetch('/api/student/sessions');
+      const data = response.ok
+        ? ((await response.json()) as { sessions?: StudentSession[] })
+        : null;
+
+      setSessions(data?.sessions ?? []);
+    } catch {
+      setSessions([]);
+    } finally {
+      setSessionsLoading(false);
     }
   }
 
@@ -217,9 +285,11 @@ export default function StudentDashboard() {
       <main className="flex-1 overflow-y-auto">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e7e8e9] bg-white px-8 py-4">
           <div>
-            <h1 className="text-xl font-semibold text-[#191c1d]">Today&apos;s learning path</h1>
+            <h1 className="text-xl font-semibold text-[#191c1d]">
+              {activeNav === 'mastery' ? 'Mastery map' : 'Today&apos;s learning path'}
+            </h1>
             <p className="text-sm text-[#727781]">
-              Hello, {firstName}. {selectedGrade} · {selectedSubject}
+              Hello, {firstName}. {selectedGrade} - {selectedSubject}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -243,114 +313,124 @@ export default function StudentDashboard() {
         <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
         <div className="space-y-8 p-8">
-          <section className="grid gap-5 lg:grid-cols-[1fr_320px]">
-            <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
-              <div className="mb-5 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-[#003461]">Adaptive planner</p>
-                  <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#191c1d]">
-                    3 targets for today
-                  </h2>
-                </div>
-                <span className="rounded-full bg-[#f0f4ff] px-3 py-1 text-xs font-semibold text-[#003461]">
-                  {planSource === 'supabase' ? 'Live mastery' : 'Demo fallback'}
-                </span>
-              </div>
-
-              <div className="grid gap-3">
-                {todayGoals.map((goal) => (
-                  <button
-                    key={goal.id}
-                    onClick={() => handleStartGoal(goal)}
-                    className="group flex items-center gap-4 rounded-lg border border-[#e7e8e9] bg-white p-4 text-left transition-all hover:border-[#003461] hover:shadow-sm"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#003461]/10 text-sm font-bold text-[#003461]">
-                      {goal.priority}
+          {activeNav === 'mastery' ? (
+            <MasteryOverview items={masteryItems} loading={masteryLoading} />
+          ) : activeNav === 'learning' ? (
+            <LearningHistory sessions={sessions} loading={sessionsLoading} />
+          ) : (
+            <>
+              <section className="grid gap-5 lg:grid-cols-[1fr_320px]">
+                <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+                  <div className="mb-5 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-[#003461]">Adaptive planner</p>
+                      <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#191c1d]">
+                        3 targets for today
+                      </h2>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-[#191c1d]">{goal.title}</p>
-                      <p className="mt-1 text-xs text-[#727781]">
-                        {goal.outcomeCode} · mastery {Math.round(goal.mastery * 100)}%
-                      </p>
-                    </div>
-                    {goal.reusedSessionId ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        Reuse
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                        <Zap className="h-3.5 w-3.5" />
-                        Generate
-                      </span>
-                    )}
-                    <ChevronRight className="h-4 w-4 text-[#c2c6d1] transition-colors group-hover:text-[#003461]" />
-                  </button>
-                ))}
-              </div>
-            </div>
+                    <span className="rounded-full bg-[#f0f4ff] px-3 py-1 text-xs font-semibold text-[#003461]">
+                      {planSource === 'supabase' ? 'Live mastery' : 'Demo fallback'}
+                    </span>
+                  </div>
 
-            <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-[#003461]">Progress ring</p>
-                  <h2 className="mt-1 text-lg font-semibold text-[#191c1d]">Current mastery</h2>
+                  <div className="grid gap-3">
+                    {todayGoals.map((goal) => (
+                      <button
+                        key={goal.id}
+                        onClick={() => handleStartGoal(goal)}
+                        className="group flex items-center gap-4 rounded-lg border border-[#e7e8e9] bg-white p-4 text-left transition-all hover:border-[#003461] hover:shadow-sm"
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#003461]/10 text-sm font-bold text-[#003461]">
+                          {goal.priority}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-[#191c1d]">
+                            {goal.title}
+                          </p>
+                          <p className="mt-1 text-xs text-[#727781]">
+                            {goal.outcomeCode} - mastery {Math.round(goal.mastery * 100)}%
+                          </p>
+                        </div>
+                        {goal.reusedSessionId ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Reuse
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                            <Zap className="h-3.5 w-3.5" />
+                            Generate
+                          </span>
+                        )}
+                        <ChevronRight className="h-4 w-4 text-[#c2c6d1] transition-colors group-hover:text-[#003461]" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <Target className="h-5 w-5 text-[#003461]" />
-              </div>
-              <div className="mt-8 flex justify-center">
-                <ProgressRing value={averageMastery} />
-              </div>
-              <p className="mt-6 text-sm leading-6 text-[#424750]">
-                Mastery is recalculated after each question using correctness, hint use, response
-                latency, and emotion signal snapshots.
-              </p>
-            </div>
-          </section>
 
-          <section className="grid gap-5 lg:grid-cols-2">
-            <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
-              <h2 className="text-base font-semibold text-[#191c1d]">Grade</h2>
-              <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
-                {GRADES.map((grade) => (
-                  <button
-                    key={grade}
-                    onClick={() => void handleSelectGrade(grade)}
-                    className={cn(
-                      'flex h-12 items-center justify-center rounded-lg border text-xs font-semibold',
-                      selectedGrade === grade
-                        ? 'border-[#003461] bg-[#f0f4ff] text-[#003461]'
-                        : 'border-[#e7e8e9] text-[#424750] hover:border-[#003461]',
-                    )}
-                  >
-                    <GraduationCap className="mr-1.5 h-4 w-4" />
-                    {grade.replace('Grade ', 'G')}
-                  </button>
-                ))}
-              </div>
-            </div>
+                <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-[#003461]">Progress ring</p>
+                      <h2 className="mt-1 text-lg font-semibold text-[#191c1d]">Current mastery</h2>
+                    </div>
+                    <Target className="h-5 w-5 text-[#003461]" />
+                  </div>
+                  <div className="mt-8 flex justify-center">
+                    <ProgressRing value={averageMastery} />
+                  </div>
+                  <p className="mt-6 text-sm leading-6 text-[#424750]">
+                    Mastery is recalculated after each question using correctness, hint use,
+                    response latency, and emotion signal snapshots.
+                  </p>
+                </div>
+              </section>
 
-            <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
-              <h2 className="text-base font-semibold text-[#191c1d]">Subject</h2>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {SUBJECTS.map((subject) => (
-                  <button
-                    key={subject}
-                    onClick={() => setSelectedSubject(subject)}
-                    className={cn(
-                      'flex h-12 items-center justify-center rounded-lg border text-sm font-semibold',
-                      selectedSubject === subject
-                        ? 'border-[#003461] bg-[#f0f4ff] text-[#003461]'
-                        : 'border-[#e7e8e9] text-[#424750] hover:border-[#003461]',
-                    )}
-                  >
-                    <BookMarked className="mr-2 h-4 w-4" />
-                    {subject}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
+              <section className="grid gap-5 lg:grid-cols-2">
+                <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+                  <h2 className="text-base font-semibold text-[#191c1d]">Grade</h2>
+                  <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                    {GRADES.map((grade) => (
+                      <button
+                        key={grade}
+                        onClick={() => void handleSelectGrade(grade)}
+                        className={cn(
+                          'flex h-12 items-center justify-center rounded-lg border text-xs font-semibold',
+                          selectedGrade === grade
+                            ? 'border-[#003461] bg-[#f0f4ff] text-[#003461]'
+                            : 'border-[#e7e8e9] text-[#424750] hover:border-[#003461]',
+                        )}
+                      >
+                        <GraduationCap className="mr-1.5 h-4 w-4" />
+                        {grade.replace('Grade ', 'G')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+                  <h2 className="text-base font-semibold text-[#191c1d]">Subject</h2>
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    {SUBJECTS.map((subject) => (
+                      <button
+                        key={subject}
+                        onClick={() => setSelectedSubject(subject)}
+                        className={cn(
+                          'flex h-12 items-center justify-center rounded-lg border text-sm font-semibold',
+                          selectedSubject === subject
+                            ? 'border-[#003461] bg-[#f0f4ff] text-[#003461]'
+                            : 'border-[#e7e8e9] text-[#424750] hover:border-[#003461]',
+                        )}
+                      >
+                        <BookMarked className="mr-2 h-4 w-4" />
+                        {subject}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
         </div>
       </main>
     </div>
@@ -384,4 +464,108 @@ function ProgressRing({ value }: { value: number }) {
       </div>
     </div>
   );
+}
+
+function MasteryOverview({ items, loading }: { items: MasteryOverviewItem[]; loading: boolean }) {
+  return (
+    <section>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[#003461]">Grade 2 Math</p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#191c1d]">Mastery map</h2>
+        </div>
+      </div>
+      <div className="rounded-lg border border-[#e7e8e9] bg-white shadow-sm">
+        {loading && <div className="p-6 text-sm text-[#727781]">Loading mastery map...</div>}
+        {!loading && items.length === 0 && (
+          <div className="p-6 text-sm text-[#727781]">
+            No mastery records yet. Start a Grade 2 lesson to create the first snapshot.
+          </div>
+        )}
+        {!loading &&
+          items.map((item) => (
+            <div
+              key={item.outcomeId}
+              className="grid grid-cols-[minmax(0,1fr)_140px_90px] items-center gap-4 border-t border-[#e7e8e9] p-4 first:border-t-0"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[#191c1d]">{item.title}</p>
+                <p className="mt-1 text-xs text-[#727781]">
+                  {item.outcomeCode} - {item.attempts} attempts
+                </p>
+              </div>
+              <div className="h-2 rounded-full bg-[#e7e8e9]">
+                <div
+                  className="h-full rounded-full bg-[#003461]"
+                  style={{ width: `${Math.round(item.mastery * 100)}%` }}
+                />
+              </div>
+              <p className="text-right text-sm font-semibold text-[#003461]">
+                {Math.round(item.mastery * 100)}%
+              </p>
+            </div>
+          ))}
+      </div>
+    </section>
+  );
+}
+
+function LearningHistory({ sessions, loading }: { sessions: StudentSession[]; loading: boolean }) {
+  return (
+    <section>
+      <div className="mb-4">
+        <p className="text-sm font-semibold text-[#003461]">Reusable lessons</p>
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#191c1d]">My Learning</h2>
+      </div>
+      <div className="rounded-lg border border-[#e7e8e9] bg-white shadow-sm">
+        <div className="grid grid-cols-[minmax(0,1fr)_110px_120px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781]">
+          <span>Lesson</span>
+          <span>Status</span>
+          <span>Accuracy</span>
+          <span>XP</span>
+        </div>
+        {loading && <div className="p-6 text-sm text-[#727781]">Loading learning history...</div>}
+        {!loading && sessions.length === 0 && (
+          <div className="p-6 text-sm text-[#727781]">
+            No lesson sessions yet. Start today&apos;s first Grade 2 target to create a reusable
+            lesson.
+          </div>
+        )}
+        {!loading &&
+          sessions.map((session) => (
+            <div
+              key={session.id}
+              className="grid grid-cols-[minmax(0,1fr)_110px_120px_90px] items-center gap-4 border-t border-[#e7e8e9] px-5 py-4"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-[#191c1d]">
+                  {session.lessonTitle}
+                </p>
+                <p className="mt-1 text-xs text-[#727781]">
+                  {formatShortDate(session.startedAt)} {session.canReuse ? '- reusable' : ''}
+                </p>
+              </div>
+              <span className="w-fit rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-[#003461]">
+                {session.status}
+              </span>
+              <span className="text-sm text-[#424750]">
+                {session.accuracyRate == null
+                  ? 'Not scored'
+                  : `${Math.round(session.accuracyRate * 100)}%`}
+              </span>
+              <span className="text-sm font-semibold text-[#191c1d]">{session.xpEarned}</span>
+            </div>
+          ))}
+      </div>
+    </section>
+  );
+}
+
+function formatShortDate(value: string | null) {
+  if (!value) return 'Not started';
+
+  return new Intl.DateTimeFormat('en-CA', {
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(value));
 }

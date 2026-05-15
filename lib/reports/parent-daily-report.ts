@@ -75,6 +75,16 @@ export interface ParentDailyReportBatchResult {
   errors: string[];
 }
 
+export interface ParentReportHistoryItem {
+  id: string;
+  studentId: string;
+  reportType: string;
+  summaryText: string;
+  metrics: DailyReportMetrics | null;
+  deliveryStatus: string;
+  createdAt: string;
+}
+
 export function buildDailyReportMetrics({
   sessions,
   attempts,
@@ -338,6 +348,60 @@ export async function generateDailyReportsForAllParents({
     failed: errors.length,
     reports,
     errors,
+  };
+}
+
+export async function listParentReportHistory({
+  parentId,
+  limit = 7,
+}: {
+  parentId: string;
+  limit?: number;
+}): Promise<ParentReportHistoryItem[]> {
+  const supabase = createSupabaseAdminClient();
+  const { data: links, error: linksError } = await supabase
+    .from('parent_student_links')
+    .select('student_id')
+    .eq('parent_id', parentId);
+
+  if (linksError) {
+    throw new Error(linksError.message);
+  }
+
+  const studentIds = (links ?? [])
+    .map((link) => link.student_id as string | undefined)
+    .filter((studentId): studentId is string => !!studentId);
+
+  if (studentIds.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('parent_reports')
+    .select('id, student_id, report_type, summary_text, metrics, delivery_status, created_at')
+    .eq('parent_id', parentId)
+    .in('student_id', studentIds)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []).map(mapParentReportHistoryItem);
+}
+
+export function mapParentReportHistoryItem(
+  report: Record<string, unknown>,
+): ParentReportHistoryItem {
+  return {
+    id: String(report.id),
+    studentId: String(report.student_id),
+    reportType: String(report.report_type ?? 'daily'),
+    summaryText: String(report.summary_text ?? ''),
+    metrics: (report.metrics as DailyReportMetrics | null) ?? null,
+    deliveryStatus: String(report.delivery_status ?? 'generated'),
+    createdAt: String(report.created_at ?? new Date().toISOString()),
   };
 }
 

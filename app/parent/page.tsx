@@ -30,6 +30,15 @@ type DailyReport = {
   metrics: DailyReportMetrics;
 };
 
+type ReportHistoryItem = {
+  id: string;
+  reportType: string;
+  summaryText: string;
+  metrics: DailyReportMetrics | null;
+  deliveryStatus: string;
+  createdAt: string;
+};
+
 export default function ParentDashboardPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -39,6 +48,8 @@ export default function ParentDashboardPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [dailyReport, setDailyReport] = useState<DailyReport | null>(null);
   const [reportLoading, setReportLoading] = useState(true);
+  const [reportHistory, setReportHistory] = useState<ReportHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -69,6 +80,28 @@ export default function ParentDashboardPage() {
       .finally(() => {
         if (!cancelled) {
           setReportLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+    fetch('/api/parent/reports')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.success && Array.isArray(data.reports)) {
+          setReportHistory(data.reports);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setHistoryLoading(false);
         }
       });
 
@@ -122,7 +155,6 @@ export default function ParentDashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fa] font-sans">
-      {/* Sidebar */}
       <aside className="w-64 shrink-0 bg-white border-r border-[#e7e8e9] flex flex-col sticky top-0 h-screen">
         <div className="px-6 py-5 border-b border-[#e7e8e9]">
           <div className="flex items-center gap-2">
@@ -160,7 +192,7 @@ export default function ParentDashboardPage() {
             onClick={() => router.push('/coastaltutor')}
             className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-[#003461] bg-blue-50 hover:bg-blue-100 transition-all w-full"
           >
-            <Sparkles className="w-4 h-4" /> 自由探索模式
+            <Sparkles className="w-4 h-4" /> Explore Mode
           </button>
           <button
             onClick={handleSignOut}
@@ -171,12 +203,11 @@ export default function ParentDashboardPage() {
         </div>
       </aside>
 
-      {/* Main */}
       <main className="flex-1 overflow-y-auto">
         <header className="bg-white border-b border-[#e7e8e9] px-8 py-4 flex items-center justify-between sticky top-0 z-10">
           <div>
             <h1 className="text-xl font-semibold text-[#191c1d]">Parent Dashboard</h1>
-            <p className="text-sm text-[#727781]">Hello, {firstName} 👋</p>
+            <p className="text-sm text-[#727781]">Hello, {firstName}</p>
           </div>
           <button
             onClick={() => setSettingsOpen(true)}
@@ -189,55 +220,134 @@ export default function ParentDashboardPage() {
         <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
         <div className="p-8">
-          {/* Today's summary */}
-          <h2 className="text-lg font-semibold text-[#191c1d] mb-4">Today&apos;s Summary</h2>
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            {summaryCards.map((s) => (
-              <div
-                key={s.label}
-                className="bg-white border border-[#e7e8e9] rounded-xl p-5 flex items-center gap-4"
-              >
-                <div
-                  className={cn('w-12 h-12 rounded-xl flex items-center justify-center', s.color)}
-                >
-                  <s.icon className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-sm text-[#727781]">{s.label}</p>
-                  <p className="text-2xl font-bold text-[#191c1d]">{s.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* AI Insights */}
-          <h2 className="text-lg font-semibold text-[#191c1d] mb-4">AI Insights</h2>
-          <div className="bg-white border border-[#e7e8e9] rounded-xl p-6 mb-8">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-[#003461]/10 rounded-full flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-[#003461]" />
-              </div>
-              <div>
-                <p className="font-semibold text-[#191c1d]">
-                  {reportLoading
-                    ? "Preparing today's report..."
-                    : dailyReport
-                      ? "Today's AI daily report is ready"
-                      : 'No completed learning activity yet today'}
-                </p>
-                <p className="text-sm text-[#424750] mt-1 leading-relaxed">
-                  {dailyReport?.summaryText ??
-                    'Once your child finishes a Grade 2 lesson or quiz, CoastalTutor will generate a reusable daily summary here for parent review.'}
-                </p>
-              </div>
-            </div>
-          </div>
+          {activeNav === 'progress' ? (
+            <ReportHistory reports={reportHistory} loading={historyLoading} />
+          ) : (
+            <DashboardSummary
+              summaryCards={summaryCards}
+              dailyReport={dailyReport}
+              reportLoading={reportLoading}
+            />
+          )}
 
           <p className="text-sm text-[#727781] text-center">
-            More features coming soon — detailed reports, teacher chat, weekly summaries.
+            More features coming soon: detailed reports, teacher chat, weekly summaries.
           </p>
         </div>
       </main>
     </div>
   );
+}
+
+function DashboardSummary({
+  summaryCards,
+  dailyReport,
+  reportLoading,
+}: {
+  summaryCards: Array<{
+    label: string;
+    value: string;
+    icon: typeof Clock;
+    color: string;
+  }>;
+  dailyReport: DailyReport | null;
+  reportLoading: boolean;
+}) {
+  return (
+    <>
+      <h2 className="text-lg font-semibold text-[#191c1d] mb-4">Today&apos;s Summary</h2>
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        {summaryCards.map((s) => (
+          <div
+            key={s.label}
+            className="bg-white border border-[#e7e8e9] rounded-xl p-5 flex items-center gap-4"
+          >
+            <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center', s.color)}>
+              <s.icon className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm text-[#727781]">{s.label}</p>
+              <p className="text-2xl font-bold text-[#191c1d]">{s.value}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="text-lg font-semibold text-[#191c1d] mb-4">AI Insights</h2>
+      <div className="bg-white border border-[#e7e8e9] rounded-xl p-6 mb-8">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 bg-[#003461]/10 rounded-full flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5 text-[#003461]" />
+          </div>
+          <div>
+            <p className="font-semibold text-[#191c1d]">
+              {reportLoading
+                ? "Preparing today's report..."
+                : dailyReport
+                  ? "Today's AI daily report is ready"
+                  : 'No completed learning activity yet today'}
+            </p>
+            <p className="text-sm text-[#424750] mt-1 leading-relaxed">
+              {dailyReport?.summaryText ??
+                'Once your child finishes a Grade 2 lesson or quiz, CoastalTutor will generate a reusable daily summary here for parent review.'}
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ReportHistory({ reports, loading }: { reports: ReportHistoryItem[]; loading: boolean }) {
+  return (
+    <>
+      <h2 className="text-lg font-semibold text-[#191c1d] mb-4">Progress Reports</h2>
+      <div className="bg-white border border-[#e7e8e9] rounded-xl overflow-hidden mb-8">
+        <div className="grid grid-cols-[0.8fr_0.8fr_1fr_1fr] gap-4 px-5 py-3 bg-[#f8f9fa] text-xs font-semibold uppercase tracking-wide text-[#727781]">
+          <span>Date</span>
+          <span>Learning</span>
+          <span>Mastery</span>
+          <span>Status</span>
+        </div>
+        {loading && <div className="px-5 py-6 text-sm text-[#727781]">Loading reports...</div>}
+        {!loading && reports.length === 0 && (
+          <div className="px-5 py-6 text-sm text-[#727781]">
+            No parent reports yet. Daily reports will appear here after Grade 2 lessons are
+            completed.
+          </div>
+        )}
+        {!loading &&
+          reports.map((report) => (
+            <div
+              key={report.id}
+              className="grid grid-cols-[0.8fr_0.8fr_1fr_1fr] gap-4 px-5 py-4 border-t border-[#e7e8e9] items-start"
+            >
+              <div>
+                <p className="font-semibold text-[#191c1d]">{formatReportDate(report.createdAt)}</p>
+                <p className="text-xs text-[#727781]">{report.reportType}</p>
+              </div>
+              <p className="text-sm text-[#424750]">
+                {report.metrics?.learningMinutes ?? 0} mins, {report.metrics?.xpEarned ?? 0} XP
+              </p>
+              <p className="text-sm text-[#424750]">
+                {Math.round((report.metrics?.masteryAverage ?? 0) * 100)}% mastery
+              </p>
+              <div>
+                <span className="rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700">
+                  {report.deliveryStatus}
+                </span>
+                <p className="mt-2 line-clamp-2 text-xs text-[#727781]">{report.summaryText}</p>
+              </div>
+            </div>
+          ))}
+      </div>
+    </>
+  );
+}
+
+function formatReportDate(value: string) {
+  return new Intl.DateTimeFormat('en-CA', {
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(value));
 }

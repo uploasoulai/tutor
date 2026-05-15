@@ -41,6 +41,30 @@ export interface TeacherStudentSummary {
   unresolvedAlerts: number;
 }
 
+export interface TeacherStudentDetail extends TeacherStudentSummary {
+  masteryRows: Array<{
+    outcomeId: string;
+    outcomeCode: string;
+    contentKnowledge: string;
+    masteryLevel: number;
+    attempts: number;
+    correctAttempts: number;
+  }>;
+  recentSessions: Array<{
+    id: string;
+    lessonTitle: string;
+    status: string;
+    startedAt: string | null;
+    accuracyRate: number | null;
+    xpEarned: number;
+  }>;
+  unresolvedAlertSummaries: Array<{
+    id: string;
+    alertType: string;
+    createdAt: string | null;
+  }>;
+}
+
 export function buildTeacherDashboardSummary({
   studentIds,
   masteryRows,
@@ -234,6 +258,94 @@ export async function listTeacherStudentSummaries(
   });
 }
 
+export async function getTeacherStudentDetail({
+  teacherId,
+  studentId,
+}: {
+  teacherId: string;
+  studentId: string;
+}): Promise<TeacherStudentDetail | null> {
+  const supabase = createSupabaseAdminClient();
+  const { data: link, error: linkError } = await supabase
+    .from('teacher_student_links')
+    .select('student_id')
+    .eq('teacher_id', teacherId)
+    .eq('student_id', studentId)
+    .maybeSingle();
+
+  if (linkError) {
+    throw linkError;
+  }
+  if (!link) {
+    return null;
+  }
+
+  const [studentResult, masteryResult, sessionsResult, alertsResult] = await Promise.all([
+    supabase
+      .from('students')
+      .select('id, grade_level, profiles(full_name, preferred_name)')
+      .eq('id', studentId)
+      .maybeSingle(),
+    supabase
+      .from('student_mastery')
+      .select(
+        'outcome_id, mastery_level, attempts, correct_attempts, bc_learning_outcomes(outcome_code, content_knowledge)',
+      )
+      .eq('student_id', studentId)
+      .order('mastery_level', { ascending: true })
+      .limit(8),
+    supabase
+      .from('learning_sessions')
+      .select('id, lesson_title, status, started_at, accuracy_rate, xp_earned')
+      .eq('student_id', studentId)
+      .order('started_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('tutor_alerts')
+      .select('id, student_id, alert_type, created_at')
+      .eq('teacher_id', teacherId)
+      .eq('student_id', studentId)
+      .eq('is_resolved', false)
+      .order('created_at', { ascending: false }),
+  ]);
+
+  for (const result of [studentResult, masteryResult, sessionsResult, alertsResult]) {
+    if (result.error) {
+      throw result.error;
+    }
+  }
+
+  const summaries = buildTeacherStudentSummaries({
+    students: studentResult.data ? [studentResult.data as TeacherStudentProfileRow] : [],
+    masteryRows: (masteryResult.data ?? []).map((row) => ({
+      student_id: studentId,
+      mastery_level: row.mastery_level as number | null,
+    })),
+    sessions: (sessionsResult.data ?? []).map((session) => ({
+      student_id: studentId,
+      started_at: session.started_at as string | null,
+      status: session.status as string | null,
+    })),
+    unresolvedAlerts: (alertsResult.data ?? []) as TeacherDashboardAlertRow[],
+  });
+  const summary = summaries[0];
+
+  if (!summary) {
+    return null;
+  }
+
+  return {
+    ...summary,
+    masteryRows: (masteryResult.data ?? []).map(mapStudentMasteryDetail),
+    recentSessions: (sessionsResult.data ?? []).map(mapRecentSession),
+    unresolvedAlertSummaries: (alertsResult.data ?? []).map((alert) => ({
+      id: String(alert.id),
+      alertType: String(alert.alert_type ?? 'mastery_plateau'),
+      createdAt: (alert.created_at as string | null) ?? null,
+    })),
+  };
+}
+
 function average(values: number[], fallback: number) {
   if (values.length === 0) {
     return fallback;
@@ -266,6 +378,33 @@ function countByStudent(rows: Array<{ student_id?: string | null }>) {
   }
 
   return counts;
+}
+
+function mapStudentMasteryDetail(row: Record<string, unknown>) {
+  const outcome = Array.isArray(row.bc_learning_outcomes)
+    ? row.bc_learning_outcomes[0]
+    : row.bc_learning_outcomes;
+  const outcomeRecord = (outcome ?? {}) as Record<string, unknown>;
+
+  return {
+    outcomeId: String(row.outcome_id ?? ''),
+    outcomeCode: String(outcomeRecord.outcome_code ?? 'BC outcome'),
+    contentKnowledge: String(outcomeRecord.content_knowledge ?? 'Grade 2 math skill'),
+    masteryLevel: roundRatio(Number(row.mastery_level ?? 0)),
+    attempts: Number(row.attempts ?? 0),
+    correctAttempts: Number(row.correct_attempts ?? 0),
+  };
+}
+
+function mapRecentSession(row: Record<string, unknown>) {
+  return {
+    id: String(row.id),
+    lessonTitle: String(row.lesson_title ?? 'Grade 2 lesson'),
+    status: String(row.status ?? 'planned'),
+    startedAt: (row.started_at as string | null) ?? null,
+    accuracyRate: typeof row.accuracy_rate === 'number' ? roundRatio(row.accuracy_rate) : null,
+    xpEarned: Number(row.xp_earned ?? 0),
+  };
 }
 
 function getVancouverDayRange(date: Date) {

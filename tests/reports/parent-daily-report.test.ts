@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildDailyReportMetrics,
   buildDailyReportSummary,
+  mapParentReportHistoryItem,
 } from '@/lib/reports/parent-daily-report';
 
 describe('Grade 2 parent daily report', () => {
@@ -65,5 +66,33 @@ describe('Grade 2 parent daily report', () => {
     expect(summary).toContain('20 minutes');
     expect(summary).toContain('Accuracy was 100%');
     expect(summary).not.toContain('tutor review is recommended');
+  });
+
+  it('maps stored reports into parent history rows', () => {
+    const item = mapParentReportHistoryItem({
+      id: 'report-1',
+      student_id: 'student-1',
+      report_type: 'daily',
+      summary_text: 'A useful Grade 2 summary',
+      metrics: {
+        date: '2026-05-14',
+        sessionsCompleted: 1,
+        learningMinutes: 12,
+        averageAccuracy: 0.8,
+        xpEarned: 20,
+        questionsAnswered: 3,
+        correctAnswers: 2,
+        masteryAverage: 0.55,
+        needsTutorReview: false,
+        strengths: [],
+        focusAreas: [],
+      },
+      delivery_status: 'generated',
+      created_at: '2026-05-14T21:00:00.000Z',
+    });
+
+    expect(item.id).toBe('report-1');
+    expect(item.metrics?.learningMinutes).toBe(12);
+    expect(item.createdAt).toBe('2026-05-14T21:00:00.000Z');
   });
 });
