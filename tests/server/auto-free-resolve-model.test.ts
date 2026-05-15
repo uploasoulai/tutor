@@ -42,6 +42,10 @@ describe('resolveModel auto:free', () => {
   });
 
   it('reports missing server-side free provider keys clearly', async () => {
+    vi.stubEnv('SILICONFLOW_API_KEY', '');
+    vi.stubEnv('GOOGLE_API_KEY', '');
+    vi.stubEnv('GROQ_API_KEY', '');
+
     const { resolveModel } = await import('@/lib/server/resolve-model');
 
     await expect(resolveModel({ modelString: 'auto:free' })).rejects.toThrow(

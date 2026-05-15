@@ -17,6 +17,7 @@ const ENV_PREFIXES_TO_CLEAR = [
   'SILICONFLOW',
   'DOUBAO',
   'OPENROUTER',
+  'GROQ',
   'GROK',
   'TENCENT',
   'TENCENT_HUNYUAN',
@@ -201,6 +202,18 @@ providers:
         'deepseek/deepseek-v4-pro',
         'deepseek/deepseek-v4-flash',
       ]);
+    });
+
+    it('maps Groq and xAI Grok env prefixes to separate provider IDs', async () => {
+      vi.stubEnv('GROQ_API_KEY', 'gsk-groq');
+      vi.stubEnv('GROQ_MODELS', 'llama-3.1-8b-instant');
+      vi.stubEnv('GROK_API_KEY', 'xai-grok');
+      vi.stubEnv('GROK_MODELS', 'grok-4-1-fast-non-reasoning');
+      const { getServerProviders } = await import('@/lib/server/provider-config');
+      const providers = getServerProviders();
+
+      expect(providers.groq.models).toEqual(['llama-3.1-8b-instant']);
+      expect(providers.grok.models).toEqual(['grok-4-1-fast-non-reasoning']);
     });
 
     it('maps Tencent Hunyuan and Xiaomi MiMo env prefixes to provider IDs', async () => {

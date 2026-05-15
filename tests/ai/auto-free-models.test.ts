@@ -13,6 +13,9 @@ describe('auto free model rotation', () => {
     expect(DEFAULT_AUTO_FREE_MODELS.some((model) => model.modelId.startsWith('gemini-3'))).toBe(
       false,
     );
+    expect(DEFAULT_AUTO_FREE_MODELS.map((model) => model.modelString)).not.toContain(
+      'siliconflow:deepseek-ai/DeepSeek-R1-Distill-Qwen-7B',
+    );
   });
 
   it('prioritizes configured SiliconFlow models when available', () => {

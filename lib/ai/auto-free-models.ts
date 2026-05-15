@@ -8,7 +8,6 @@ export type AutoFreeModelChoice = {
 
 export const DEFAULT_AUTO_FREE_MODELS: AutoFreeModelChoice[] = [
   toChoice('siliconflow', 'Qwen/Qwen2.5-7B-Instruct'),
-  toChoice('siliconflow', 'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B'),
   toChoice('siliconflow', 'deepseek-ai/DeepSeek-V3'),
   toChoice('google', 'gemini-2.5-flash-lite'),
   toChoice('google', 'gemini-2.5-flash'),
