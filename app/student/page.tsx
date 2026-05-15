@@ -59,6 +59,14 @@ type StudentSession = {
   openPath: string;
 };
 
+const navItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: Home },
+  { id: 'learning', label: 'My Learning', icon: BookOpen },
+  { id: 'mastery', label: 'Mastery', icon: BarChart3 },
+  { id: 'schedule', label: 'Schedule', icon: Calendar },
+  { id: 'community', label: 'Community', icon: Users },
+];
+
 export default function StudentDashboard() {
   const router = useRouter();
   const supabase = createClient();
@@ -220,17 +228,9 @@ export default function StudentDashboard() {
     );
   }
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'learning', label: 'My Learning', icon: BookOpen },
-    { id: 'mastery', label: 'Mastery', icon: BarChart3 },
-    { id: 'schedule', label: 'Schedule', icon: Calendar },
-    { id: 'community', label: 'Community', icon: Users },
-  ];
-
   return (
-    <div className="flex min-h-screen bg-[#f8f9fa] font-sans">
-      <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col border-r border-[#e7e8e9] bg-white">
+    <div className="min-h-screen bg-[#f8f9fa] font-sans lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[#e7e8e9] bg-white lg:flex">
         <div className="border-b border-[#e7e8e9] px-6 py-5">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded bg-[#003461]">
@@ -283,11 +283,43 @@ export default function StudentDashboard() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e7e8e9] bg-white px-8 py-4">
+      <main className="min-w-0 flex-1 overflow-y-auto pb-24 lg:pb-0">
+        <div className="flex items-center justify-between border-b border-[#e7e8e9] bg-white px-4 py-3 lg:hidden">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-[#003461]">
+              <span className="text-sm font-bold text-white">C</span>
+            </div>
+            <div>
+              <p className="text-sm font-bold leading-none tracking-tight text-[#003461]">
+                Coastal<span className="text-[#0057a8]">Tutor</span>
+              </p>
+              <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-[#727781]">
+                Student Portal
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => router.push('/generation-preview')}
+              className="rounded-full p-2 text-[#003461] transition-all hover:bg-[#f0f4ff]"
+              aria-label="Free explore"
+            >
+              <Sparkles className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="rounded-full p-2 text-[#727781] transition-all hover:bg-[#f0f4ff]"
+              aria-label="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-[#e7e8e9] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div>
             <h1 className="text-xl font-semibold text-[#191c1d]">
-              {activeNav === 'mastery' ? 'Mastery map' : 'Today&apos;s learning path'}
+              {activeNav === 'mastery' ? 'Mastery map' : "Today's learning path"}
             </h1>
             <p className="text-sm text-[#727781]">
               Hello, {firstName}. {selectedGrade} - {selectedSubject}
@@ -299,11 +331,12 @@ export default function StudentDashboard() {
               className="inline-flex h-9 items-center gap-2 rounded-md border border-[#e7e8e9] px-3 text-sm font-medium text-[#424750] hover:bg-[#f0f4ff]"
             >
               <RefreshCw className={cn('h-4 w-4', planLoading && 'animate-spin')} />
-              Recalculate
+              <span className="hidden sm:inline">Recalculate</span>
+              <span className="sm:hidden">Plan</span>
             </button>
             <button
               onClick={() => setSettingsOpen(true)}
-              className="rounded-full p-2 text-[#727781] transition-all hover:bg-[#f0f4ff]"
+              className="hidden rounded-full p-2 text-[#727781] transition-all hover:bg-[#f0f4ff] sm:inline-flex"
               aria-label="Settings"
             >
               <Settings className="h-4 w-4" />
@@ -313,7 +346,7 @@ export default function StudentDashboard() {
 
         <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
-        <div className="space-y-8 p-8">
+        <div className="space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
           {activeNav === 'mastery' ? (
             <MasteryOverview items={masteryItems} loading={masteryLoading} />
           ) : activeNav === 'learning' ? (
@@ -326,7 +359,7 @@ export default function StudentDashboard() {
             <>
               <section className="grid gap-5 lg:grid-cols-[1fr_320px]">
                 <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
-                  <div className="mb-5 flex items-center justify-between">
+                  <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-[#003461]">Adaptive planner</p>
                       <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#191c1d]">
@@ -343,12 +376,20 @@ export default function StudentDashboard() {
                       <button
                         key={goal.id}
                         onClick={() => handleStartGoal(goal)}
-                        className="group flex items-center gap-4 rounded-lg border border-[#e7e8e9] bg-white p-4 text-left transition-all hover:border-[#003461] hover:shadow-sm"
+                        className="group flex flex-col gap-3 rounded-lg border border-[#e7e8e9] bg-white p-4 text-left transition-all hover:border-[#003461] hover:shadow-sm sm:flex-row sm:items-center sm:gap-4"
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#003461]/10 text-sm font-bold text-[#003461]">
-                          {goal.priority}
+                        <div className="flex w-full items-start gap-3 sm:w-auto sm:items-center">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#003461]/10 text-sm font-bold text-[#003461]">
+                            {goal.priority}
+                          </div>
+                          <div className="min-w-0 flex-1 sm:hidden">
+                            <p className="text-sm font-semibold text-[#191c1d]">{goal.title}</p>
+                            <p className="mt-1 text-xs text-[#727781]">
+                              {goal.outcomeCode} - mastery {Math.round(goal.mastery * 100)}%
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
+                        <div className="hidden min-w-0 flex-1 sm:block">
                           <p className="truncate text-sm font-semibold text-[#191c1d]">
                             {goal.title}
                           </p>
@@ -367,7 +408,7 @@ export default function StudentDashboard() {
                             Generate
                           </span>
                         )}
-                        <ChevronRight className="h-4 w-4 text-[#c2c6d1] transition-colors group-hover:text-[#003461]" />
+                        <ChevronRight className="hidden h-4 w-4 text-[#c2c6d1] transition-colors group-hover:text-[#003461] sm:block" />
                       </button>
                     ))}
                   </div>
@@ -438,7 +479,38 @@ export default function StudentDashboard() {
           )}
         </div>
       </main>
+      <StudentBottomNav activeNav={activeNav} onSelect={setActiveNav} />
     </div>
+  );
+}
+
+function StudentBottomNav({
+  activeNav,
+  onSelect,
+}: {
+  activeNav: string;
+  onSelect: (nav: string) => void;
+}) {
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-[#e7e8e9] bg-white/95 px-2 py-2 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur lg:hidden">
+      <div className="grid grid-cols-5 gap-1">
+        {navItems.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => onSelect(id)}
+            className={cn(
+              'flex h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 text-[10px] font-semibold transition-all',
+              activeNav === id
+                ? 'bg-[#003461] text-white'
+                : 'text-[#727781] hover:bg-[#f0f4ff] hover:text-[#003461]',
+            )}
+          >
+            <Icon className="h-4 w-4 shrink-0" />
+            <span className="w-full truncate text-center leading-tight">{label}</span>
+          </button>
+        ))}
+      </div>
+    </nav>
   );
 }
 
@@ -477,7 +549,9 @@ function MasteryOverview({ items, loading }: { items: MasteryOverviewItem[]; loa
       <div className="mb-4 flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold text-[#003461]">Grade 2 Math</p>
-          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#191c1d]">Mastery map</h2>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight text-[#191c1d] sm:text-2xl">
+            Mastery map
+          </h2>
         </div>
       </div>
       <div className="rounded-lg border border-[#e7e8e9] bg-white shadow-sm">
@@ -491,7 +565,7 @@ function MasteryOverview({ items, loading }: { items: MasteryOverviewItem[]; loa
           items.map((item) => (
             <div
               key={item.outcomeId}
-              className="grid grid-cols-[minmax(0,1fr)_140px_90px] items-center gap-4 border-t border-[#e7e8e9] p-4 first:border-t-0"
+              className="grid gap-3 border-t border-[#e7e8e9] p-4 first:border-t-0 sm:grid-cols-[minmax(0,1fr)_140px_70px] sm:items-center sm:gap-4"
             >
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-[#191c1d]">{item.title}</p>
@@ -505,7 +579,7 @@ function MasteryOverview({ items, loading }: { items: MasteryOverviewItem[]; loa
                   style={{ width: `${Math.round(item.mastery * 100)}%` }}
                 />
               </div>
-              <p className="text-right text-sm font-semibold text-[#003461]">
+              <p className="text-sm font-semibold text-[#003461] sm:text-right">
                 {Math.round(item.mastery * 100)}%
               </p>
             </div>
@@ -528,10 +602,12 @@ function LearningHistory({
     <section>
       <div className="mb-4">
         <p className="text-sm font-semibold text-[#003461]">Reusable lessons</p>
-        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#191c1d]">My Learning</h2>
+        <h2 className="mt-1 text-xl font-semibold tracking-tight text-[#191c1d] sm:text-2xl">
+          My Learning
+        </h2>
       </div>
       <div className="rounded-lg border border-[#e7e8e9] bg-white shadow-sm">
-        <div className="grid grid-cols-[minmax(0,1fr)_110px_120px_90px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781]">
+        <div className="hidden grid-cols-[minmax(0,1fr)_110px_120px_90px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781] md:grid">
           <span>Lesson</span>
           <span>Status</span>
           <span>Accuracy</span>
@@ -549,10 +625,10 @@ function LearningHistory({
           sessions.map((session) => (
             <div
               key={session.id}
-              className="grid grid-cols-[minmax(0,1fr)_110px_120px_90px_90px] items-center gap-4 border-t border-[#e7e8e9] px-5 py-4"
+              className="grid gap-3 border-t border-[#e7e8e9] p-4 first:border-t-0 md:grid-cols-[minmax(0,1fr)_110px_120px_90px_90px] md:items-center md:gap-4 md:px-5"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-[#191c1d]">
+                <p className="text-sm font-semibold text-[#191c1d] md:truncate">
                   {session.lessonTitle}
                 </p>
                 <p className="mt-1 text-xs text-[#727781]">
@@ -563,11 +639,15 @@ function LearningHistory({
                 {session.status}
               </span>
               <span className="text-sm text-[#424750]">
+                <span className="font-semibold text-[#727781] md:hidden">Accuracy: </span>
                 {session.accuracyRate == null
                   ? 'Not scored'
                   : `${Math.round(session.accuracyRate * 100)}%`}
               </span>
-              <span className="text-sm font-semibold text-[#191c1d]">{session.xpEarned}</span>
+              <span className="text-sm font-semibold text-[#191c1d]">
+                <span className="font-semibold text-[#727781] md:hidden">XP: </span>
+                {session.xpEarned}
+              </span>
               <button
                 onClick={() => onOpenSession(session.openPath)}
                 className="rounded-md bg-[#003461] px-3 py-2 text-xs font-semibold text-white hover:bg-[#002b50]"
