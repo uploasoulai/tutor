@@ -41,7 +41,7 @@ async function verifyToken(token: string, accessCode: string): Promise<boolean> 
   return mismatch === 0;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const accessCode = process.env.ACCESS_CODE;
   if (!accessCode) {
     return NextResponse.next();
@@ -54,13 +54,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check cookie — validate HMAC signature, not just existence
+  // Check cookie - validate HMAC signature, not just existence
   const cookie = request.cookies.get('coastaltutor_access');
   if (cookie?.value && (await verifyToken(cookie.value, accessCode))) {
     return NextResponse.next();
   }
 
-  // API requests without valid cookie → 401
+  // API requests without valid cookie -> 401
   if (pathname.startsWith('/api/')) {
     return NextResponse.json(
       { success: false, errorCode: 'INVALID_REQUEST', error: 'Access code required' },
@@ -68,7 +68,7 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // Page requests → let through, frontend shows modal
+  // Page requests -> let through, frontend shows modal
   return NextResponse.next();
 }
 
