@@ -47,6 +47,24 @@ type ParentReportRunResult = {
   message: string;
 };
 
+type RelationshipOverview = {
+  students: number;
+  parents: number;
+  teachers: number;
+  parentLinks: number;
+  teacherLinks: number;
+  studentsWithoutParent: number;
+  studentsWithoutTeacher: number;
+};
+
+type RelationshipDirectory = {
+  students: Array<{ id: string; name: string; grade: string }>;
+  parents: Array<{ id: string; name: string }>;
+  teachers: Array<{ id: string; name: string }>;
+  parentLinks: Array<{ parentId: string; studentId: string }>;
+  teacherLinks: Array<{ teacherId: string; studentId: string; subjects: string[] }>;
+};
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -59,6 +77,14 @@ export default function AdminDashboardPage() {
   const [parentReportLoading, setParentReportLoading] = useState(false);
   const [parentReportResult, setParentReportResult] = useState<ParentReportRunResult | null>(null);
   const [parentReportError, setParentReportError] = useState('');
+  const [relationshipOverview, setRelationshipOverview] = useState<RelationshipOverview | null>(
+    null,
+  );
+  const [relationshipLoading, setRelationshipLoading] = useState(true);
+  const [relationshipDirectory, setRelationshipDirectory] = useState<RelationshipDirectory | null>(
+    null,
+  );
+  const [directoryLoading, setDirectoryLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -88,6 +114,50 @@ export default function AdminDashboardPage() {
       .finally(() => {
         if (!cancelled) {
           setStatusLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loading]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    let cancelled = false;
+    fetch('/api/admin/relationships/directory')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.success && data.directory) {
+          setRelationshipDirectory(data.directory);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setDirectoryLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loading]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    let cancelled = false;
+    fetch('/api/admin/relationships/overview')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.success && data.overview) {
+          setRelationshipOverview(data.overview);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setRelationshipLoading(false);
         }
       });
 
@@ -236,6 +306,56 @@ export default function AdminDashboardPage() {
         {!statusLoading && status && (
           <div className="grid gap-5">
             <section className="rounded-lg border border-[#e7e8e9] bg-white p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-base font-semibold text-[#191c1d]">Relationship overview</h2>
+                  <p className="mt-1 text-sm text-[#727781]">
+                    Tracks whether students are linked to parent and teacher accounts.
+                  </p>
+                </div>
+              </div>
+              {relationshipLoading && (
+                <div className="mt-4 rounded-lg bg-[#f8f9fa] px-4 py-3 text-sm text-[#727781]">
+                  Loading relationships...
+                </div>
+              )}
+              {!relationshipLoading && relationshipOverview && (
+                <div className="mt-4 grid gap-3 md:grid-cols-4">
+                  <AdminMetric label="Students" value={relationshipOverview.students} />
+                  <AdminMetric label="Parents" value={relationshipOverview.parents} />
+                  <AdminMetric label="Teachers" value={relationshipOverview.teachers} />
+                  <AdminMetric
+                    label="Student-parent links"
+                    value={relationshipOverview.parentLinks}
+                  />
+                  <AdminMetric
+                    label="Student-teacher links"
+                    value={relationshipOverview.teacherLinks}
+                  />
+                  <AdminMetric
+                    label="Missing parent"
+                    value={relationshipOverview.studentsWithoutParent}
+                    danger={relationshipOverview.studentsWithoutParent > 0}
+                  />
+                  <AdminMetric
+                    label="Missing teacher"
+                    value={relationshipOverview.studentsWithoutTeacher}
+                    danger={relationshipOverview.studentsWithoutTeacher > 0}
+                  />
+                </div>
+              )}
+              {!relationshipLoading && !relationshipOverview && (
+                <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+                  Relationship overview is unavailable.
+                </div>
+              )}
+              <RelationshipDirectoryPanel
+                directory={relationshipDirectory}
+                loading={directoryLoading}
+              />
+            </section>
+
+            <section className="rounded-lg border border-[#e7e8e9] bg-white p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-base font-semibold text-[#191c1d]">
@@ -348,6 +468,101 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+function RelationshipDirectoryPanel({
+  directory,
+  loading,
+}: {
+  directory: RelationshipDirectory | null;
+  loading: boolean;
+}) {
+  if (loading) {
+    return (
+      <div className="mt-4 rounded-lg bg-[#f8f9fa] px-4 py-3 text-sm text-[#727781]">
+        Loading account directory...
+      </div>
+    );
+  }
+
+  if (!directory) {
+    return (
+      <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        Account directory is unavailable.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-5 grid gap-4 lg:grid-cols-3">
+      <DirectoryColumn
+        title="Students"
+        rows={directory.students.slice(0, 5).map((student) => ({
+          id: student.id,
+          primary: student.name,
+          secondary: student.grade,
+        }))}
+      />
+      <DirectoryColumn
+        title="Parents"
+        rows={directory.parents.slice(0, 5).map((parent) => ({
+          id: parent.id,
+          primary: parent.name,
+          secondary: `${directory.parentLinks.filter((link) => link.parentId === parent.id).length} linked`,
+        }))}
+      />
+      <DirectoryColumn
+        title="Teachers"
+        rows={directory.teachers.slice(0, 5).map((teacher) => ({
+          id: teacher.id,
+          primary: teacher.name,
+          secondary: `${directory.teacherLinks.filter((link) => link.teacherId === teacher.id).length} linked`,
+        }))}
+      />
+    </div>
+  );
+}
+
+function DirectoryColumn({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: Array<{ id: string; primary: string; secondary: string }>;
+}) {
+  return (
+    <div className="rounded-lg border border-[#e7e8e9] p-4">
+      <h3 className="text-sm font-semibold text-[#191c1d]">{title}</h3>
+      <div className="mt-3 grid gap-2">
+        {rows.length === 0 && <p className="text-sm text-[#727781]">No accounts yet.</p>}
+        {rows.map((row) => (
+          <div key={row.id} className="rounded-md bg-[#f8f9fa] px-3 py-2">
+            <p className="truncate text-sm font-medium text-[#191c1d]">{row.primary}</p>
+            <p className="mt-0.5 text-xs text-[#727781]">{row.secondary}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AdminMetric({
+  label,
+  value,
+  danger = false,
+}: {
+  label: string;
+  value: number;
+  danger?: boolean;
+}) {
+  return (
+    <div className="rounded-lg bg-[#f8f9fa] p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#727781]">{label}</p>
+      <p className={cn('mt-2 text-2xl font-bold', danger ? 'text-red-600' : 'text-[#191c1d]')}>
+        {value}
+      </p>
     </div>
   );
 }
