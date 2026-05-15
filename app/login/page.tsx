@@ -21,6 +21,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -72,6 +74,30 @@ export default function LoginPage() {
     } catch (err: unknown) {
       setError(formatAuthError(err, 'Google sign in failed.'));
       setGoogleLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!email) {
+      setMethod('email');
+      setError('Enter your email address first, then request a reset link.');
+      return;
+    }
+
+    setResetLoading(true);
+    setResetMessage('');
+    setError('');
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+      });
+      if (resetError) throw resetError;
+
+      setResetMessage('Password reset link sent. Check your email inbox.');
+    } catch (err: unknown) {
+      setError(formatAuthError(err, 'Password reset email failed.'));
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -129,9 +155,19 @@ export default function LoginPage() {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-sm font-semibold text-[#191c1d]">
-                Password
-              </label>
+              <div className="flex items-center justify-between gap-3">
+                <label htmlFor="password" className="text-sm font-semibold text-[#191c1d]">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => void handlePasswordReset()}
+                  disabled={resetLoading}
+                  className="text-sm font-semibold text-[#003461] hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {resetLoading ? 'Sending...' : 'Forgot password?'}
+                </button>
+              </div>
               <input
                 id="password"
                 type="password"
@@ -144,6 +180,11 @@ export default function LoginPage() {
             {error && (
               <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-100">
                 {error}
+              </div>
+            )}
+            {resetMessage && (
+              <div className="text-green-700 text-sm bg-green-50 p-3 rounded-lg border border-green-100">
+                {resetMessage}
               </div>
             )}
             <button

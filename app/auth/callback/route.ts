@@ -10,6 +10,8 @@ export async function GET(req: NextRequest) {
   const code = requestUrl.searchParams.get('code');
   const next = requestUrl.searchParams.get('next') ?? '/';
   const role = requestUrl.searchParams.get('role') as AccountRole | null;
+  const error =
+    requestUrl.searchParams.get('error_description') ?? requestUrl.searchParams.get('error');
 
   if (code) {
     const supabase = await createClient();
@@ -20,5 +22,10 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(new URL(next.startsWith('/') ? next : '/', requestUrl.origin));
+  const redirectUrl = new URL(next.startsWith('/') ? next : '/', requestUrl.origin);
+  if (error) {
+    redirectUrl.searchParams.set('error', error);
+  }
+
+  return NextResponse.redirect(redirectUrl);
 }
