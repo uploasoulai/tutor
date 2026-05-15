@@ -48,8 +48,12 @@ export async function resolveModel(params: {
 }): Promise<ResolvedModel> {
   let modelString = params.modelString || process.env.DEFAULT_MODEL || 'auto:free';
   let { providerId, modelId } = parseModelString(modelString);
+  const shouldAvoidGemini3 =
+    providerId === 'google' &&
+    modelId.startsWith('gemini-3') &&
+    process.env.ALLOW_GEMINI_3_FREE_TIER !== 'true';
 
-  if (providerId === 'auto') {
+  if (providerId === 'auto' || shouldAvoidGemini3) {
     const serverProviders = getServerProviders();
     const configuredModels = Object.fromEntries(
       Object.entries(serverProviders).map(([id, entry]) => [id, entry.models]),

@@ -98,12 +98,14 @@ function GenerationPreviewContent() {
     const settings = useSettingsStore.getState();
     const imageProviderConfig = settings.imageProvidersConfig?.[settings.imageProviderId];
     const videoProviderConfig = settings.videoProvidersConfig?.[settings.videoProviderId];
+    const forceAutoFree = session?.sessionId.startsWith('coastaltutor-') ?? false;
+
     return {
       'Content-Type': 'application/json',
-      'x-model': modelConfig.modelString,
-      'x-api-key': modelConfig.apiKey,
-      'x-base-url': modelConfig.baseUrl,
-      'x-provider-type': modelConfig.providerType || '',
+      'x-model': forceAutoFree ? 'auto:free' : modelConfig.modelString,
+      'x-api-key': forceAutoFree ? '' : modelConfig.apiKey,
+      'x-base-url': forceAutoFree ? '' : modelConfig.baseUrl,
+      'x-provider-type': forceAutoFree ? '' : modelConfig.providerType || '',
       // Image generation provider
       'x-image-provider': settings.imageProviderId || '',
       'x-image-model': settings.imageModelId || '',
@@ -121,6 +123,8 @@ function GenerationPreviewContent() {
   };
 
   const withThinkingConfig = <T extends Record<string, unknown>>(body: T) => {
+    if (session?.sessionId.startsWith('coastaltutor-')) return body;
+
     const { thinkingConfig } = getCurrentModelConfig();
     return thinkingConfig ? { ...body, thinkingConfig } : body;
   };

@@ -29,4 +29,15 @@ describe('resolveModel auto:free', () => {
     expect(resolved.modelId).toBe('Qwen/Qwen2.5-7B-Instruct');
     expect(resolved.apiKey).toBe('sf-test');
   });
+
+  it('reroutes explicit Gemini 3 requests to the free rotation unless allowed', async () => {
+    vi.stubEnv('SILICONFLOW_API_KEY', 'sf-test');
+    vi.stubEnv('GOOGLE_API_KEY', 'google-test');
+
+    const { resolveModel } = await import('@/lib/server/resolve-model');
+    const resolved = await resolveModel({ modelString: 'google:gemini-3.1-pro-preview' });
+
+    expect(resolved.modelString).toBe('siliconflow:Qwen/Qwen2.5-7B-Instruct');
+    expect(resolved.providerId).toBe('siliconflow');
+  });
 });
