@@ -7,6 +7,7 @@ import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import {
   ArrowLeft,
   CheckCircle2,
+  ExternalLink,
   Loader2,
   Mic,
   Play,
@@ -31,6 +32,16 @@ type LessonSession = {
     };
     slides?: { title: string; body: string }[];
     quiz?: { prompt: string; answer: string }[];
+    openmaic?: {
+      jobId: string;
+      status: 'queued' | 'running' | 'succeeded' | 'failed';
+      pollUrl: string;
+      pollIntervalMs: number;
+      requirement: string;
+      classroomUrl?: string;
+      classroomId?: string;
+      createdAt: string;
+    };
   } | null;
 };
 
@@ -244,6 +255,8 @@ function LessonContent() {
     router.push('/generation-preview');
   };
 
+  const openmaic = session?.lesson_payload?.openmaic;
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f8f9fa]">
@@ -393,6 +406,35 @@ function LessonContent() {
                 goals.
               </li>
             </ol>
+          </div>
+
+          <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
+            <h2 className="text-base font-semibold text-[#191c1d]">OpenMAIC engine</h2>
+            {openmaic ? (
+              <div className="mt-4 space-y-3">
+                <div className="rounded-md bg-[#f8f9fa] p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[#727781]">
+                    Job
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[#191c1d]">{openmaic.jobId}</p>
+                  <p className="mt-1 text-xs text-[#727781]">status: {openmaic.status}</p>
+                </div>
+                <a
+                  href={openmaic.classroomUrl ?? openmaic.pollUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-9 items-center gap-2 rounded-md border border-[#e7e8e9] px-3 text-sm font-semibold text-[#003461] hover:bg-[#f0f4ff]"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  {openmaic.classroomUrl ? 'Open classroom' : 'Check generation'}
+                </a>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-[#727781]">
+                Structured lesson is ready. OpenMAIC generation will attach when the server job is
+                queued.
+              </p>
+            )}
           </div>
 
           <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">

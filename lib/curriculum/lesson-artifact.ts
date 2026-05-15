@@ -32,6 +32,7 @@ export type LessonPayload = {
     retrieval: 'voyage-query-pgvector';
     estimatedDurationSeconds: number;
   };
+  openmaic?: OpenMAICLessonJob;
 };
 
 export type LessonArtifact = {
@@ -39,6 +40,17 @@ export type LessonArtifact = {
   lessonId: string;
   reused: boolean;
   payload: LessonPayload;
+};
+
+export type OpenMAICLessonJob = {
+  jobId: string;
+  status: 'queued' | 'running' | 'succeeded' | 'failed';
+  pollUrl: string;
+  pollIntervalMs: number;
+  requirement: string;
+  classroomUrl?: string;
+  classroomId?: string;
+  createdAt: string;
 };
 
 export function buildLessonReuseKey({
@@ -49,6 +61,48 @@ export function buildLessonReuseKey({
   title,
 }: Pick<LessonArtifactRequest, 'studentId' | 'grade' | 'subject' | 'outcomeCode' | 'title'>) {
   return `${studentId}:${grade}:${subject}:${outcomeCode || title}`;
+}
+
+export function buildOpenMAICRequirement(payload: LessonPayload) {
+  const context = payload.bc_context.matches
+    .slice(0, 3)
+    .map(
+      (match, index) =>
+        `${index + 1}. ${match.outcome_code} — ${match.content_knowledge ?? 'BC outcome'}\n${
+          match.elaboration || match.chunk_text || 'No elaboration available.'
+        }`,
+    )
+    .join('\n\n');
+  const quiz = payload.quiz
+    .map((item, index) => `${index + 1}. ${item.prompt} Expected answer: ${item.answer}`)
+    .join('\n');
+
+  return `Create a Grade 2-first OpenMAIC interactive classroom lesson.
+
+Audience:
+- Grade: ${payload.bc_context.grade}
+- Subject: ${payload.bc_context.subject}
+- Knowledge point: ${payload.bc_context.knowledge_point}
+- BC outcome: ${payload.bc_context.outcome_code || 'Use the strongest matched BC outcome'}
+
+Duration and structure:
+- Target length: about 2 minutes
+- Generate 3 concise scenes: warm intro, guided practice, quick quiz
+- Keep all wording age-appropriate for Grade 2
+- Use concrete examples, visual representations, and gentle tutor feedback
+- Include a short Rive-avatar-friendly teacher narration cue for each scene
+- Include the quiz checks below and make the learner answer actively
+
+BC curriculum context:
+${context || 'Use the selected BC outcome and Grade 2 Math expectations as source of truth.'}
+
+Required quiz checks:
+${quiz}
+
+Personalization:
+- Prefer a patient coach tone
+- If the student struggles, offer one scaffold instead of giving the final answer immediately
+- Update mastery from quiz performance after the lesson in CoastalTutor`;
 }
 
 export function buildLessonPayloadFromMatches({
@@ -129,6 +183,39 @@ export function buildLessonPayloadFromMatches({
       estimatedDurationSeconds: 120,
     },
   };
+}
+
+export function attachOpenMAICJob(
+  payload: LessonPayload,
+  openmaic: OpenMAICLessonJob,
+): LessonPayload {
+  return {
+    ...payload,
+    openmaic,
+  };
+}
+
+export async function updateLessonOpenMAICJob({
+  sessionId,
+  payload,
+  openmaic,
+}: {
+  sessionId: string;
+  payload: LessonPayload;
+  openmaic: OpenMAICLessonJob;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const nextPayload = attachOpenMAICJob(payload, openmaic);
+  const { error } = await supabase
+    .from('learning_sessions')
+    .update({
+      lesson_payload: nextPayload,
+      coastaltutor_lesson_id: openmaic.jobId,
+    })
+    .eq('id', sessionId);
+
+  if (error) throw error;
+  return nextPayload;
 }
 
 export async function getOrCreateLessonArtifact({
