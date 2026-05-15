@@ -34,6 +34,7 @@ export default function TeacherDashboardPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [alerts, setAlerts] = useState<TutorAlert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(false);
+  const [resolvingAlertId, setResolvingAlertId] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -76,6 +77,23 @@ export default function TeacherDashboardPage() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.replace('/login');
+  };
+
+  const handleResolveAlert = async (alertId: string) => {
+    setResolvingAlertId(alertId);
+    try {
+      const response = await fetch('/api/teacher/alerts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alertId, action: 'resolve' }),
+      });
+
+      if (response.ok) {
+        setAlerts((current) => current.filter((alert) => alert.id !== alertId));
+      }
+    } finally {
+      setResolvingAlertId(null);
+    }
   };
 
   if (loading) {
@@ -224,8 +242,12 @@ export default function TeacherDashboardPage() {
                   <button className="px-4 py-2 text-sm font-medium border border-[#c2c6d1] rounded-lg hover:bg-gray-50 transition-colors">
                     Message
                   </button>
-                  <button className="px-4 py-2 text-sm font-medium bg-[#003461] text-white rounded-lg hover:bg-[#002b50] transition-colors">
-                    Assign Tutor
+                  <button
+                    onClick={() => void handleResolveAlert(a.id)}
+                    disabled={resolvingAlertId === a.id}
+                    className="px-4 py-2 text-sm font-medium bg-[#003461] text-white rounded-lg hover:bg-[#002b50] disabled:cursor-not-allowed disabled:opacity-60 transition-colors"
+                  >
+                    {resolvingAlertId === a.id ? 'Resolving...' : 'Mark resolved'}
                   </button>
                 </div>
               </div>

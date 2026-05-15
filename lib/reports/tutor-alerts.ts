@@ -24,6 +24,10 @@ export interface TutorAlertSummary {
   createdAt: string;
 }
 
+export function isSupportedTutorAlertAction(action?: string) {
+  return !action || action === 'resolve';
+}
+
 export function decideTutorAlert({
   correctCount,
   attempts,
@@ -149,6 +153,36 @@ export async function listTeacherTutorAlerts(teacherId: string): Promise<TutorAl
   }
 
   return (alerts ?? []).map((alert) => mapTutorAlert(alert as TutorAlertRow));
+}
+
+export async function resolveTeacherTutorAlert({
+  teacherId,
+  alertId,
+}: {
+  teacherId: string;
+  alertId: string;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('tutor_alerts')
+    .update({
+      is_resolved: true,
+      resolved_at: new Date().toISOString(),
+    })
+    .eq('id', alertId)
+    .eq('teacher_id', teacherId)
+    .eq('is_resolved', false)
+    .select('id')
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    resolved: !!data,
+    alertId,
+  };
 }
 
 async function findPrimaryTeacherId(studentId: string) {
