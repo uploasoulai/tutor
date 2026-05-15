@@ -19,6 +19,17 @@ import {
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
 
+type DailyReportMetrics = {
+  learningMinutes: number;
+  masteryAverage: number;
+  xpEarned: number;
+};
+
+type DailyReport = {
+  summaryText: string;
+  metrics: DailyReportMetrics;
+};
+
 export default function ParentDashboardPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -26,6 +37,8 @@ export default function ParentDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activeNav, setActiveNav] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [dailyReport, setDailyReport] = useState<DailyReport | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -42,6 +55,29 @@ export default function ParentDashboardPage() {
     });
   }, [router, supabase.auth]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+    setReportLoading(true);
+    fetch('/api/parent/daily-report', { method: 'POST' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.success && data.report) {
+          setDailyReport(data.report);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setReportLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.replace('/login');
@@ -56,6 +92,26 @@ export default function ParentDashboardPage() {
   }
 
   const firstName = user?.user_metadata?.first_name ?? 'Parent';
+  const summaryCards = [
+    {
+      label: 'Learning Time',
+      value: `${dailyReport?.metrics.learningMinutes ?? 0} mins`,
+      icon: Clock,
+      color: 'text-blue-600 bg-blue-50',
+    },
+    {
+      label: 'Mastery Score',
+      value: `${Math.round((dailyReport?.metrics.masteryAverage ?? 0) * 100)}%`,
+      icon: TrendingUp,
+      color: 'text-green-600 bg-green-50',
+    },
+    {
+      label: 'XP Earned',
+      value: `${dailyReport?.metrics.xpEarned ?? 0} XP`,
+      icon: Star,
+      color: 'text-orange-500 bg-orange-50',
+    },
+  ];
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
@@ -137,26 +193,7 @@ export default function ParentDashboardPage() {
           {/* Today's summary */}
           <h2 className="text-lg font-semibold text-[#191c1d] mb-4">Today&apos;s Summary</h2>
           <div className="grid grid-cols-3 gap-4 mb-8">
-            {[
-              {
-                label: 'Learning Time',
-                value: '45 mins',
-                icon: Clock,
-                color: 'text-blue-600 bg-blue-50',
-              },
-              {
-                label: 'Mastery Score',
-                value: '78%',
-                icon: TrendingUp,
-                color: 'text-green-600 bg-green-50',
-              },
-              {
-                label: 'Streak',
-                value: '5 days',
-                icon: Star,
-                color: 'text-orange-500 bg-orange-50',
-              },
-            ].map((s) => (
+            {summaryCards.map((s) => (
               <div
                 key={s.label}
                 className="bg-white border border-[#e7e8e9] rounded-xl p-5 flex items-center gap-4"
@@ -182,11 +219,16 @@ export default function ParentDashboardPage() {
                 <Sparkles className="w-5 h-5 text-[#003461]" />
               </div>
               <div>
-                <p className="font-semibold text-[#191c1d]">Your child is making great progress!</p>
+                <p className="font-semibold text-[#191c1d]">
+                  {reportLoading
+                    ? "Preparing today's report..."
+                    : dailyReport
+                      ? "Today's AI daily report is ready"
+                      : 'No completed learning activity yet today'}
+                </p>
                 <p className="text-sm text-[#424750] mt-1 leading-relaxed">
-                  Math mastery has improved 12% this week. Reading consistency is strong with 5
-                  consecutive days of practice. Consider encouraging exploration of the Science
-                  curriculum which hasn&apos;t been visited recently.
+                  {dailyReport?.summaryText ??
+                    'Once your child finishes a Grade 2 lesson or quiz, CoastalTutor will generate a reusable daily summary here for parent review.'}
                 </p>
               </div>
             </div>
