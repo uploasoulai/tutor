@@ -39,6 +39,12 @@ type ReportHistoryItem = {
   createdAt: string;
 };
 
+type ParentLinkedStudent = {
+  studentId: string;
+  studentName: string;
+  grade: string;
+};
+
 export default function ParentDashboardPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -47,9 +53,12 @@ export default function ParentDashboardPage() {
   const [activeNav, setActiveNav] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [dailyReport, setDailyReport] = useState<DailyReport | null>(null);
-  const [reportLoading, setReportLoading] = useState(true);
+  const [reportLoading, setReportLoading] = useState(false);
   const [reportHistory, setReportHistory] = useState<ReportHistoryItem[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [linkedStudents, setLinkedStudents] = useState<ParentLinkedStudent[]>([]);
+  const [studentsLoading, setStudentsLoading] = useState(true);
+  const [selectedStudentId, setSelectedStudentId] = useState('');
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -77,7 +86,36 @@ export default function ParentDashboardPage() {
     if (!user) return;
 
     let cancelled = false;
-    fetch('/api/parent/daily-report', { method: 'POST' })
+    fetch('/api/parent/students')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.success && Array.isArray(data.students)) {
+          setLinkedStudents(data.students);
+          setSelectedStudentId((current) => current || data.students[0]?.studentId || '');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setStudentsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || !selectedStudentId) {
+      return;
+    }
+
+    let cancelled = false;
+    fetch('/api/parent/daily-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ studentId: selectedStudentId }),
+    })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (!cancelled && data?.success && data.report) {
@@ -93,13 +131,15 @@ export default function ParentDashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [selectedStudentId, user]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !selectedStudentId) {
+      return;
+    }
 
     let cancelled = false;
-    fetch('/api/parent/reports')
+    fetch(`/api/parent/reports?studentId=${encodeURIComponent(selectedStudentId)}`)
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (!cancelled && data?.success && Array.isArray(data.reports)) {
@@ -115,7 +155,7 @@ export default function ParentDashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [selectedStudentId, user]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -131,6 +171,7 @@ export default function ParentDashboardPage() {
   }
 
   const firstName = user?.user_metadata?.first_name ?? 'Parent';
+  const selectedStudent = linkedStudents.find((student) => student.studentId === selectedStudentId);
   const summaryCards = [
     {
       label: 'Learning Time',
@@ -214,14 +255,25 @@ export default function ParentDashboardPage() {
         <header className="bg-white border-b border-[#e7e8e9] px-8 py-4 flex items-center justify-between sticky top-0 z-10">
           <div>
             <h1 className="text-xl font-semibold text-[#191c1d]">Parent Dashboard</h1>
-            <p className="text-sm text-[#727781]">Hello, {firstName}</p>
+            <p className="text-sm text-[#727781]">
+              Hello, {firstName}
+              {selectedStudent ? ` · ${selectedStudent.studentName}` : ''}
+            </p>
           </div>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="p-2 rounded-full hover:bg-[#f0f4ff] text-[#727781]"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-3">
+            <StudentSelector
+              students={linkedStudents}
+              value={selectedStudentId}
+              loading={studentsLoading}
+              onChange={setSelectedStudentId}
+            />
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="p-2 rounded-full hover:bg-[#f0f4ff] text-[#727781]"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
         </header>
 
         <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
@@ -243,6 +295,47 @@ export default function ParentDashboardPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+function StudentSelector({
+  students,
+  value,
+  loading,
+  onChange,
+}: {
+  students: ParentLinkedStudent[];
+  value: string;
+  loading: boolean;
+  onChange: (value: string) => void;
+}) {
+  if (loading) {
+    return <div className="h-10 w-44 rounded-lg bg-[#f8f9fa]" />;
+  }
+
+  if (students.length === 0) {
+    return (
+      <span className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
+        No linked students
+      </span>
+    );
+  }
+
+  return (
+    <label className="flex items-center gap-2">
+      <span className="text-sm font-medium text-[#727781]">Student</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-10 rounded-lg border border-[#c2c6d1] bg-white px-3 text-sm font-semibold text-[#191c1d] outline-none focus:border-[#003461] focus:ring-2 focus:ring-[#003461]/20"
+      >
+        {students.map((student) => (
+          <option key={student.studentId} value={student.studentId}>
+            {student.studentName} ({student.grade})
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 

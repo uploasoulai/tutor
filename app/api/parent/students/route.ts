@@ -1,9 +1,9 @@
-import { listParentReportHistory } from '@/lib/reports/parent-daily-report';
+import { hasAccountRole } from '@/lib/auth/account-role';
+import { listParentLinkedStudents } from '@/lib/reports/parent-students';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createClient } from '@/lib/supabase/server';
-import { hasAccountRole } from '@/lib/auth/account-role';
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const supabase = await createClient();
     const {
@@ -17,16 +17,14 @@ export async function GET(req: Request) {
       return apiError('INVALID_REQUEST', 403, 'Parent account required');
     }
 
-    const { searchParams } = new URL(req.url);
-    const studentId = searchParams.get('studentId') ?? undefined;
-    const reports = await listParentReportHistory({ parentId: user.id, studentId });
+    const students = await listParentLinkedStudents(user.id);
 
-    return apiSuccess({ reports });
+    return apiSuccess({ students });
   } catch (error) {
     return apiError(
       'INTERNAL_ERROR',
       500,
-      error instanceof Error ? error.message : 'Failed to load parent reports',
+      error instanceof Error ? error.message : 'Failed to load linked students',
     );
   }
 }

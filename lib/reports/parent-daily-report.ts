@@ -353,9 +353,11 @@ export async function generateDailyReportsForAllParents({
 
 export async function listParentReportHistory({
   parentId,
+  studentId,
   limit = 7,
 }: {
   parentId: string;
+  studentId?: string;
   limit?: number;
 }): Promise<ParentReportHistoryItem[]> {
   const supabase = createSupabaseAdminClient();
@@ -375,12 +377,16 @@ export async function listParentReportHistory({
   if (studentIds.length === 0) {
     return [];
   }
+  if (studentId && !studentIds.includes(studentId)) {
+    return [];
+  }
 
+  const reportStudentIds = studentId ? [studentId] : studentIds;
   const { data, error } = await supabase
     .from('parent_reports')
     .select('id, student_id, report_type, summary_text, metrics, delivery_status, created_at')
     .eq('parent_id', parentId)
-    .in('student_id', studentIds)
+    .in('student_id', reportStudentIds)
     .order('created_at', { ascending: false })
     .limit(limit);
 
