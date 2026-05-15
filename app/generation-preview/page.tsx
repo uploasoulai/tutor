@@ -22,6 +22,7 @@ import {
 } from '@/lib/utils/image-storage';
 import { getCurrentModelConfig } from '@/lib/utils/model-config';
 import { db } from '@/lib/utils/database';
+import { shouldUseServerFreeModelFallback } from '@/lib/generation/model-routing';
 import { MAX_PDF_CONTENT_CHARS, MAX_VISION_IMAGES } from '@/lib/constants/generation';
 import { buildVideoManifestFromOutlines } from '@/lib/media/video-manifest';
 import { nanoid } from 'nanoid';
@@ -98,14 +99,17 @@ function GenerationPreviewContent() {
     const settings = useSettingsStore.getState();
     const imageProviderConfig = settings.imageProvidersConfig?.[settings.imageProviderId];
     const videoProviderConfig = settings.videoProvidersConfig?.[settings.videoProviderId];
-    const forceAutoFree = session?.sessionId.startsWith('coastaltutor-') ?? false;
+    const useServerFreeFallback = shouldUseServerFreeModelFallback({
+      sessionId: session?.sessionId,
+      clientApiKey: modelConfig.apiKey,
+    });
 
     return {
       'Content-Type': 'application/json',
-      'x-model': forceAutoFree ? 'auto:free' : modelConfig.modelString,
-      'x-api-key': forceAutoFree ? '' : modelConfig.apiKey,
-      'x-base-url': forceAutoFree ? '' : modelConfig.baseUrl,
-      'x-provider-type': forceAutoFree ? '' : modelConfig.providerType || '',
+      'x-model': useServerFreeFallback ? 'auto:free' : modelConfig.modelString,
+      'x-api-key': useServerFreeFallback ? '' : modelConfig.apiKey,
+      'x-base-url': useServerFreeFallback ? '' : modelConfig.baseUrl,
+      'x-provider-type': useServerFreeFallback ? '' : modelConfig.providerType || '',
       // Image generation provider
       'x-image-provider': settings.imageProviderId || '',
       'x-image-model': settings.imageModelId || '',
@@ -123,9 +127,17 @@ function GenerationPreviewContent() {
   };
 
   const withThinkingConfig = <T extends Record<string, unknown>>(body: T) => {
-    if (session?.sessionId.startsWith('coastaltutor-')) return body;
+    const modelConfig = getCurrentModelConfig();
+    if (
+      shouldUseServerFreeModelFallback({
+        sessionId: session?.sessionId,
+        clientApiKey: modelConfig.apiKey,
+      })
+    ) {
+      return body;
+    }
 
-    const { thinkingConfig } = getCurrentModelConfig();
+    const { thinkingConfig } = modelConfig;
     return thinkingConfig ? { ...body, thinkingConfig } : body;
   };
 

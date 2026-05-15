@@ -48,12 +48,22 @@ export async function resolveModel(params: {
 }): Promise<ResolvedModel> {
   let modelString = params.modelString || process.env.DEFAULT_MODEL || 'auto:free';
   let { providerId, modelId } = parseModelString(modelString);
+  const isAutoFreeRequest = providerId === 'auto';
+  const serverFreeModelsAllowed =
+    process.env.NODE_ENV !== 'production' || process.env.ALLOW_SERVER_FREE_MODELS === 'true';
+
+  if (isAutoFreeRequest && !serverFreeModelsAllowed) {
+    throw new Error(
+      'Server free model fallback is disabled. Configure your own model API key in settings.',
+    );
+  }
+
   const shouldAvoidGemini3 =
     providerId === 'google' &&
     modelId.startsWith('gemini-3') &&
     process.env.ALLOW_GEMINI_3_FREE_TIER !== 'true';
 
-  if (providerId === 'auto' || shouldAvoidGemini3) {
+  if (isAutoFreeRequest || shouldAvoidGemini3) {
     const serverProviders = getServerProviders();
     const configuredProviderIds = Object.keys(serverProviders);
     if (configuredProviderIds.length === 0) {
