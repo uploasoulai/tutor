@@ -10,6 +10,7 @@ import {
   TEACHER_PERSONAS,
   type TeacherPersonaSnapshot,
 } from '@/lib/curriculum/teacher-personas';
+import { getFallbackLessonWidget, type LessonWidget } from '@/lib/curriculum/lesson-widgets';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -47,6 +48,7 @@ type LessonSession = {
       voiceCue?: string;
       visualCue?: string;
       interaction?: string;
+      widget?: LessonWidget;
     }[];
     quiz?: {
       prompt: string;
@@ -261,6 +263,7 @@ function LessonContent() {
           voiceCue: 'Warm, curious, and slow enough for a Grade 2 learner.',
           visualCue: 'Show ten-frames, counters, or a number line that makes the idea visible.',
           interaction: 'Ask the learner to choose what they notice first.',
+          widget: getFallbackLessonWidget(0, title),
         },
         {
           title: 'Try it together',
@@ -268,6 +271,7 @@ function LessonContent() {
           voiceCue: 'Ask one question, pause, then model one strategy.',
           visualCue: 'Highlight one step on a number line or with counters.',
           interaction: 'Let the learner pick a strategy card.',
+          widget: getFallbackLessonWidget(1, title),
         },
         {
           title: 'Quick check',
@@ -275,6 +279,7 @@ function LessonContent() {
           voiceCue: 'Celebrate effort and name the next tiny step.',
           visualCue: 'Show three compact quiz cards with success and retry states.',
           interaction: 'Turn quiz answers into tap-friendly mini-game choices.',
+          widget: getFallbackLessonWidget(2, title),
         },
       ],
       quiz: [
@@ -539,7 +544,11 @@ function LessonContent() {
                     </p>
                   </div>
                 </div>
-                <LessonVisual title={currentSlide.title} cue={currentSlide.visualCue} />
+                <LessonWidgetPanel
+                  title={currentSlide.title}
+                  cue={currentSlide.visualCue}
+                  widget={currentSlide.widget ?? getFallbackLessonWidget(currentSlideIndex, title)}
+                />
               </div>
             ) : null}
 
@@ -790,20 +799,20 @@ function LessonContent() {
   );
 }
 
-function LessonVisual({ title, cue }: { title: string; cue?: string }) {
+function LessonWidgetPanel({
+  title,
+  cue,
+  widget,
+}: {
+  title: string;
+  cue?: string;
+  widget: LessonWidget;
+}) {
   return (
     <div className="rounded-lg border border-[#dbe5ef] bg-white p-4">
-      <div className="grid grid-cols-5 gap-2">
-        {Array.from({ length: 10 }).map((_, index) => (
-          <div
-            key={index}
-            className={[
-              'aspect-square rounded-md border',
-              index < 7 ? 'border-[#003461] bg-[#003461]' : 'border-[#c9d5df] bg-[#f8f9fa]',
-            ].join(' ')}
-          />
-        ))}
-      </div>
+      {widget.kind === 'ten-frame' ? <TenFrameWidget widget={widget} /> : null}
+      {widget.kind === 'number-line' ? <NumberLineWidget widget={widget} /> : null}
+      {widget.kind === 'choice-card' ? <ChoiceCardPreview widget={widget} /> : null}
       <div className="mt-4 rounded-md bg-[#f0f4ff] p-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-[#003461]">
           Visual prompt
@@ -811,6 +820,112 @@ function LessonVisual({ title, cue }: { title: string; cue?: string }) {
         <p className="mt-1 text-sm leading-5 text-[#424750]">
           {cue ?? `Make ${title} visible with counters, a number line, or a simple picture.`}
         </p>
+      </div>
+    </div>
+  );
+}
+
+function TenFrameWidget({ widget }: { widget: Extract<LessonWidget, { kind: 'ten-frame' }> }) {
+  const [count, setCount] = useState(Math.max(0, Math.min(widget.target - 2, widget.max)));
+  const isMatched = count === widget.target;
+
+  return (
+    <div>
+      <p className="mb-3 text-sm font-semibold text-[#191c1d]">{widget.prompt}</p>
+      <div className="grid grid-cols-5 gap-2">
+        {Array.from({ length: widget.max }).map((_, index) => {
+          const active = index < count;
+          return (
+            <button
+              key={index}
+              type="button"
+              onClick={() => setCount(index + 1)}
+              className={[
+                'aspect-square rounded-md border transition-all',
+                active ? 'border-[#003461] bg-[#003461]' : 'border-[#c9d5df] bg-[#f8f9fa]',
+              ].join(' ')}
+              aria-label={`Set counter ${index + 1}`}
+            />
+          );
+        })}
+      </div>
+      <div className="mt-3 flex items-center justify-between text-sm">
+        <span className="font-semibold text-[#424750]">
+          {count} of {widget.target}
+        </span>
+        <span className={isMatched ? 'font-semibold text-emerald-700' : 'text-[#727781]'}>
+          {isMatched ? 'Matched' : 'Keep tapping'}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function NumberLineWidget({ widget }: { widget: Extract<LessonWidget, { kind: 'number-line' }> }) {
+  const [value, setValue] = useState(widget.min);
+  const isClose = Math.abs(value - widget.target) <= widget.step;
+
+  return (
+    <div>
+      <p className="mb-3 text-sm font-semibold text-[#191c1d]">{widget.prompt}</p>
+      <div className="rounded-lg border border-[#e7e8e9] bg-[#f8f9fa] p-4">
+        <input
+          type="range"
+          min={widget.min}
+          max={widget.max}
+          step={widget.step}
+          value={value}
+          onChange={(event) => setValue(Number(event.target.value))}
+          className="w-full accent-[#003461]"
+          aria-label="Number line value"
+        />
+        <div className="mt-2 flex justify-between text-xs font-semibold text-[#727781]">
+          <span>{widget.min}</span>
+          <span>{widget.max}</span>
+        </div>
+        <div className="mt-4 rounded-md bg-white p-3 text-center">
+          <p className="text-2xl font-bold text-[#191c1d]">{value}</p>
+          <p
+            className={
+              isClose ? 'text-sm font-semibold text-emerald-700' : 'text-sm text-[#727781]'
+            }
+          >
+            {isClose ? 'Useful benchmark' : `Try to get near ${widget.target}`}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChoiceCardPreview({ widget }: { widget: Extract<LessonWidget, { kind: 'choice-card' }> }) {
+  const [selected, setSelected] = useState('');
+
+  return (
+    <div>
+      <p className="mb-3 text-sm font-semibold text-[#191c1d]">{widget.prompt}</p>
+      <div className="grid gap-2">
+        {widget.choices.map((choice) => {
+          const isSelected = selected === choice;
+          const isCorrect = choice === widget.correctChoice;
+          return (
+            <button
+              key={choice}
+              type="button"
+              onClick={() => setSelected(choice)}
+              className={[
+                'rounded-md border px-3 py-2 text-left text-sm font-semibold transition-all',
+                isSelected && isCorrect
+                  ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                  : isSelected
+                    ? 'border-amber-500 bg-amber-50 text-amber-700'
+                    : 'border-[#e7e8e9] text-[#424750] hover:bg-[#f8f9fa]',
+              ].join(' ')}
+            >
+              {choice}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

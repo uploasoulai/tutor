@@ -59,6 +59,14 @@ describe('Grade 2 lesson artifact builder', () => {
     expect(payload.prompt).toContain('Use personal strategies');
     expect(payload.slides).toHaveLength(3);
     expect(payload.slides[0].visualCue).toContain('ten-frames');
+    expect(payload.slides[0].widget).toMatchObject({
+      kind: 'ten-frame',
+      target: 7,
+    });
+    expect(payload.slides[1].widget).toMatchObject({
+      kind: 'number-line',
+      max: 100,
+    });
     expect(payload.slides[1].interaction).toContain('strategy');
     expect(payload.quiz.every((item) => item.outcomeCode === payload.bc_context.outcome_code)).toBe(
       true,

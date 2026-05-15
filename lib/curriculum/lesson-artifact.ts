@@ -11,6 +11,11 @@ import {
   type TeacherPersona,
   type TeacherPersonaSnapshot,
 } from '@/lib/curriculum/teacher-personas';
+import {
+  buildGrade2MathWidgets,
+  getFallbackLessonWidget,
+  type LessonWidget,
+} from '@/lib/curriculum/lesson-widgets';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -42,6 +47,7 @@ export type LessonPayload = {
     voiceCue: string;
     visualCue: string;
     interaction: string;
+    widget: LessonWidget;
   }[];
   quiz: {
     prompt: string;
@@ -161,6 +167,7 @@ export function buildLessonPayloadFromMatches({
   const selectedOutcomeCode = outcomeCode || primary?.outcome_code || '';
   const teacher = toTeacherPersonaSnapshot(teacherPersona ?? DEFAULT_TEACHER_PERSONA);
   const teacherPrompt = formatTeacherPersonaForLessonPrompt(teacher);
+  const widgets = buildGrade2MathWidgets(focusedTitle);
 
   return {
     version: 1,
@@ -181,6 +188,7 @@ export function buildLessonPayloadFromMatches({
         visualCue:
           'Show two neat rows of ten-frames or counting objects with a clear number label.',
         interaction: 'Ask the learner to tap the picture that matches the number story.',
+        widget: widgets[0],
       },
       {
         title: 'Try it together',
@@ -190,6 +198,7 @@ export function buildLessonPayloadFromMatches({
         voiceCue: 'Ask one question, pause, then model one strategy.',
         visualCue: 'Use a number line, base-ten blocks, or counters with one highlighted step.',
         interaction: 'Let the learner choose which strategy they want the tutor to model.',
+        widget: widgets[1],
       },
       {
         title: 'Quick check',
@@ -197,6 +206,7 @@ export function buildLessonPayloadFromMatches({
         voiceCue: 'Celebrate effort and name the next tiny step.',
         visualCue: 'Show three compact quiz cards with friendly success and retry states.',
         interaction: 'Turn each quiz item into a choice-card or reflection mini-game.',
+        widget: widgets[2] ?? getFallbackLessonWidget(2, focusedTitle),
       },
     ],
     quiz: [
