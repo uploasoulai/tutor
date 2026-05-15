@@ -16,13 +16,22 @@ export const PHONE_COUNTRIES = [
   { code: 'BR', label: 'Brazil', dialCode: '+55' },
 ] as const;
 
-export function normalizePhoneNumber(countryDialCode: string, rawPhone: string) {
+export type PhoneCountryCode = (typeof PHONE_COUNTRIES)[number]['code'];
+
+export function getPhoneCountryDialCode(countryCode: string) {
+  return PHONE_COUNTRIES.find((country) => country.code === countryCode)?.dialCode ?? '+1';
+}
+
+export function normalizePhoneNumber(countryCodeOrDialCode: string, rawPhone: string) {
   const trimmedPhone = rawPhone.trim();
   if (!trimmedPhone) return '';
   if (trimmedPhone.startsWith('+')) {
     return `+${trimmedPhone.slice(1).replace(/\D/g, '')}`;
   }
 
+  const countryDialCode = countryCodeOrDialCode.startsWith('+')
+    ? countryCodeOrDialCode
+    : getPhoneCountryDialCode(countryCodeOrDialCode);
   const dialCode = countryDialCode.startsWith('+') ? countryDialCode : `+${countryDialCode}`;
   const digits = trimmedPhone.replace(/\D/g, '').replace(/^0+/, '');
   return digits ? `${dialCode}${digits}` : '';

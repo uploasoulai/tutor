@@ -6,7 +6,12 @@ import { Check, GraduationCap, Loader2, Mail, Presentation, Smartphone, Users } 
 
 import { LeftPanelBrandAcademicImageryHiddenOnMobile } from '@/components/auth-left-panel';
 import { formatAuthError } from '@/lib/auth/client-errors';
-import { PHONE_COUNTRIES, isLikelyE164Phone, normalizePhoneNumber } from '@/lib/auth/phone';
+import {
+  PHONE_COUNTRIES,
+  type PhoneCountryCode,
+  isLikelyE164Phone,
+  normalizePhoneNumber,
+} from '@/lib/auth/phone';
 import { buildAuthCallbackUrl, getRoleLandingPath } from '@/lib/auth/redirect';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
@@ -23,7 +28,7 @@ export default function RegisterPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [countryDialCode, setCountryDialCode] = useState('+1');
+  const [phoneCountryCode, setPhoneCountryCode] = useState<PhoneCountryCode>('CA');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [phoneCode, setPhoneCode] = useState('');
@@ -36,7 +41,7 @@ export default function RegisterPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    const normalizedPhone = normalizePhoneNumber(countryDialCode, phone);
+    const normalizedPhone = normalizePhoneNumber(phoneCountryCode, phone);
     const missingIdentity = method === 'email' ? !email : !normalizedPhone;
     if (missingIdentity || !password || !firstName || !lastName) {
       setError('Please fill in all fields.');
@@ -108,6 +113,32 @@ export default function RegisterPage() {
       router.push(getRoleLandingPath(selectedRole));
     } catch (err: unknown) {
       setError(formatAuthError(err, 'Phone verification failed.'));
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
+  const handleResendPhoneCode = async () => {
+    const normalizedPhone = pendingPhone || normalizePhoneNumber(phoneCountryCode, phone);
+    if (!isLikelyE164Phone(normalizedPhone)) {
+      setError('Enter a valid phone number before resending the code.');
+      return;
+    }
+
+    setVerifyLoading(true);
+    setError('');
+    setMessage('');
+    try {
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'sms',
+        phone: normalizedPhone,
+      });
+      if (resendError) throw resendError;
+
+      setPendingPhone(normalizedPhone);
+      setMessage('Verification code resent. Check your SMS messages.');
+    } catch (err: unknown) {
+      setError(formatAuthError(err, 'Could not resend the verification code.'));
     } finally {
       setVerifyLoading(false);
     }
@@ -237,9 +268,9 @@ export default function RegisterPage() {
                 />
               ) : (
                 <PhoneField
-                  countryDialCode={countryDialCode}
+                  countryCode={phoneCountryCode}
                   phone={phone}
-                  onCountryChange={setCountryDialCode}
+                  onCountryChange={(value) => setPhoneCountryCode(value as PhoneCountryCode)}
                   onPhoneChange={setPhone}
                 />
               )}
@@ -280,6 +311,14 @@ export default function RegisterPage() {
                       {verifyLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verify'}
                     </button>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => void handleResendPhoneCode()}
+                    disabled={verifyLoading}
+                    className="mt-3 text-sm font-semibold text-[#003461] hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Resend code
+                  </button>
                 </div>
               )}
 
@@ -363,12 +402,12 @@ function AuthMethodButton({
 }
 
 function PhoneField({
-  countryDialCode,
+  countryCode,
   phone,
   onCountryChange,
   onPhoneChange,
 }: {
-  countryDialCode: string;
+  countryCode: string;
   phone: string;
   onCountryChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
@@ -380,12 +419,12 @@ function PhoneField({
       </label>
       <div className="grid grid-cols-[132px_1fr] gap-2">
         <select
-          value={countryDialCode}
+          value={countryCode}
           onChange={(e) => onCountryChange(e.target.value)}
           className="h-12 rounded-lg border border-[#c2c6d1] bg-[#f8f9fa] px-3 text-sm text-[#191c1d] focus:outline-none focus:ring-2 focus:ring-[#003461]"
         >
           {PHONE_COUNTRIES.map((country) => (
-            <option key={country.code} value={country.dialCode}>
+            <option key={country.code} value={country.code}>
               {country.code} {country.dialCode}
             </option>
           ))}

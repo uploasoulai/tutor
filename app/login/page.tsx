@@ -6,7 +6,12 @@ import { Loader2, Mail, Smartphone } from 'lucide-react';
 
 import { LeftPanelBrandAcademicImageryHiddenOnMobile } from '@/components/auth-left-panel';
 import { formatAuthError } from '@/lib/auth/client-errors';
-import { PHONE_COUNTRIES, isLikelyE164Phone, normalizePhoneNumber } from '@/lib/auth/phone';
+import {
+  PHONE_COUNTRIES,
+  type PhoneCountryCode,
+  isLikelyE164Phone,
+  normalizePhoneNumber,
+} from '@/lib/auth/phone';
 import { createClient } from '@/lib/supabase/client';
 
 type LoginMethod = 'email' | 'phone';
@@ -16,7 +21,7 @@ export default function LoginPage() {
   const supabase = createClient();
   const [method, setMethod] = useState<LoginMethod>('email');
   const [email, setEmail] = useState('');
-  const [countryDialCode, setCountryDialCode] = useState('+1');
+  const [phoneCountryCode, setPhoneCountryCode] = useState<PhoneCountryCode>('CA');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +32,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const normalizedPhone = normalizePhoneNumber(countryDialCode, phone);
+    const normalizedPhone = normalizePhoneNumber(phoneCountryCode, phone);
     if ((method === 'email' && !email) || (method === 'phone' && !normalizedPhone) || !password) {
       setError('Please fill in all fields.');
       return;
@@ -147,9 +152,9 @@ export default function LoginPage() {
               </div>
             ) : (
               <PhoneField
-                countryDialCode={countryDialCode}
+                countryCode={phoneCountryCode}
                 phone={phone}
-                onCountryChange={setCountryDialCode}
+                onCountryChange={(value) => setPhoneCountryCode(value as PhoneCountryCode)}
                 onPhoneChange={setPhone}
               />
             )}
@@ -253,12 +258,12 @@ function AuthMethodButton({
 }
 
 function PhoneField({
-  countryDialCode,
+  countryCode,
   phone,
   onCountryChange,
   onPhoneChange,
 }: {
-  countryDialCode: string;
+  countryCode: string;
   phone: string;
   onCountryChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
@@ -270,12 +275,12 @@ function PhoneField({
       </label>
       <div className="grid grid-cols-[132px_1fr] gap-2">
         <select
-          value={countryDialCode}
+          value={countryCode}
           onChange={(e) => onCountryChange(e.target.value)}
           className="h-12 rounded-lg border border-[#c2c6d1] bg-[#f8f9fa] px-3 text-sm text-[#191c1d] focus:outline-none focus:ring-2 focus:ring-[#003461]"
         >
           {PHONE_COUNTRIES.map((country) => (
-            <option key={country.code} value={country.dialCode}>
+            <option key={country.code} value={country.code}>
               {country.code} {country.dialCode}
             </option>
           ))}
