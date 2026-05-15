@@ -1,6 +1,6 @@
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { resolveAccountRole } from '@/lib/auth/account-role';
 
 export async function GET() {
   try {
@@ -13,23 +13,7 @@ export async function GET() {
       return apiError('INVALID_REQUEST', 401, 'Authentication required');
     }
 
-    const metadataRole = user.user_metadata?.role;
-    if (typeof metadataRole === 'string' && metadataRole) {
-      return apiSuccess({ role: metadataRole });
-    }
-
-    const admin = createSupabaseAdminClient();
-    const { data, error } = await admin
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (error) {
-      throw error;
-    }
-
-    return apiSuccess({ role: data?.role ?? 'student' });
+    return apiSuccess({ role: await resolveAccountRole(user) });
   } catch (error) {
     return apiError(
       'INTERNAL_ERROR',

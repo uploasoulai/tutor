@@ -1,6 +1,7 @@
 import { listParentReportHistory } from '@/lib/reports/parent-daily-report';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createClient } from '@/lib/supabase/server';
+import { hasAccountRole } from '@/lib/auth/account-role';
 
 export async function GET() {
   try {
@@ -12,7 +13,7 @@ export async function GET() {
     if (!user) {
       return apiError('INVALID_REQUEST', 401, 'Authentication required');
     }
-    if (user.user_metadata?.role && user.user_metadata.role !== 'parent') {
+    if (!(await hasAccountRole(user, 'parent'))) {
       return apiError('INVALID_REQUEST', 403, 'Parent account required');
     }
 

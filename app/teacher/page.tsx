@@ -86,12 +86,19 @@ export default function TeacherDashboardPage() {
   const [selectedStudentLoading, setSelectedStudentLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace('/login');
         return;
       }
-      if (data.user.user_metadata?.role !== 'teacher') {
+
+      const roleResponse = await fetch('/api/auth/role');
+      const roleData = roleResponse.ok
+        ? ((await roleResponse.json()) as { success?: boolean; role?: string })
+        : null;
+      const role = roleData?.role ?? data.user.user_metadata?.role;
+
+      if (role !== 'teacher') {
         router.replace('/student');
         return;
       }

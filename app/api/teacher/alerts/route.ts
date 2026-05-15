@@ -1,5 +1,6 @@
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createClient } from '@/lib/supabase/server';
+import { hasAccountRole } from '@/lib/auth/account-role';
 import {
   isSupportedTutorAlertAction,
   listTeacherTutorAlerts,
@@ -16,7 +17,7 @@ export async function GET() {
     if (!user) {
       return apiError('INVALID_REQUEST', 401, 'Authentication required');
     }
-    if (user.user_metadata?.role && user.user_metadata.role !== 'teacher') {
+    if (!(await hasAccountRole(user, 'teacher'))) {
       return apiError('INVALID_REQUEST', 403, 'Teacher account required');
     }
 
@@ -42,7 +43,7 @@ export async function PATCH(req: Request) {
     if (!user) {
       return apiError('INVALID_REQUEST', 401, 'Authentication required');
     }
-    if (user.user_metadata?.role && user.user_metadata.role !== 'teacher') {
+    if (!(await hasAccountRole(user, 'teacher'))) {
       return apiError('INVALID_REQUEST', 403, 'Teacher account required');
     }
 

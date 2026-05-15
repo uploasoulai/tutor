@@ -52,12 +52,19 @@ export default function ParentDashboardPage() {
   const [historyLoading, setHistoryLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace('/login');
         return;
       }
-      if (data.user.user_metadata?.role !== 'parent') {
+
+      const roleResponse = await fetch('/api/auth/role');
+      const roleData = roleResponse.ok
+        ? ((await roleResponse.json()) as { success?: boolean; role?: string })
+        : null;
+      const role = roleData?.role ?? data.user.user_metadata?.role;
+
+      if (role !== 'parent') {
         router.replace('/student');
         return;
       }

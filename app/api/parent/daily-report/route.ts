@@ -3,6 +3,7 @@ import { generateParentDailyReport } from '@/lib/reports/parent-daily-report';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { hasAccountRole } from '@/lib/auth/account-role';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return apiError('INVALID_REQUEST', 401, 'Authentication required');
     }
-    if (user.user_metadata?.role && user.user_metadata.role !== 'parent') {
+    if (!(await hasAccountRole(user, 'parent'))) {
       return apiError('INVALID_REQUEST', 403, 'Parent account required');
     }
 

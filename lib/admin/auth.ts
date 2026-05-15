@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { hasAccountRole } from '@/lib/auth/account-role';
 
 export class AdminAuthError extends Error {
   constructor(
@@ -17,29 +17,9 @@ export async function assertAdminUser(user: User | null): Promise<User> {
     throw new AdminAuthError('Authentication required', 401);
   }
 
-  if (user.user_metadata?.role === 'admin') {
-    return user;
-  }
-
-  const isProfileAdmin = await isAdminProfile(user.id);
-  if (!isProfileAdmin) {
+  if (!(await hasAccountRole(user, 'admin'))) {
     throw new AdminAuthError('Admin account required', 403);
   }
 
   return user;
-}
-
-export async function isAdminProfile(userId: string) {
-  const supabase = createSupabaseAdminClient();
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data?.role === 'admin';
 }
