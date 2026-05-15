@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Check, GraduationCap, Loader2, Mail, Presentation, Smartphone, Users } from 'lucide-react';
 
 import { LeftPanelBrandAcademicImageryHiddenOnMobile } from '@/components/auth-left-panel';
+import { GoogleMark } from '@/components/google-mark';
 import { formatAuthError } from '@/lib/auth/client-errors';
 import {
   PHONE_COUNTRIES,
@@ -167,13 +168,21 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex w-full min-h-screen bg-white">
+    <div className="flex w-full min-h-screen bg-[#eef6f7]">
       <div className="hidden lg:flex w-1/2 flex-col">
         <LeftPanelBrandAcademicImageryHiddenOnMobile />
       </div>
 
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 overflow-y-auto">
-        <div className="w-full max-w-[500px] flex flex-col gap-10">
+      <div
+        className="relative w-full lg:w-1/2 flex flex-col justify-center items-center overflow-y-auto overflow-x-hidden p-8"
+        style={{
+          backgroundColor: '#f8fbfb',
+          backgroundImage:
+            'linear-gradient(135deg, rgba(0,52,97,0.055) 0 1px, transparent 1px 18px), linear-gradient(90deg, rgba(52,168,83,0.06), transparent 38%), linear-gradient(180deg, rgba(66,133,244,0.06), transparent 44%)',
+        }}
+      >
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#4285F4_0_25%,#EA4335_25%_50%,#FBBC05_50%_75%,#34A853_75%_100%)] opacity-80" />
+        <div className="relative w-full max-w-[500px] flex flex-col gap-10">
           <div className="flex flex-col gap-2">
             <h1 className="text-[32px] font-semibold text-[#191c1d] tracking-tight">
               Create your account
@@ -344,15 +353,9 @@ export default function RegisterPage() {
                 type="button"
                 onClick={() => void handleGoogleSignup()}
                 disabled={googleLoading || loading}
-                className="w-full h-12 rounded-full border border-[#c2c6d1] bg-white text-[#191c1d] font-semibold hover:bg-[#f8f9fa] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                className="w-full h-12 rounded-full border border-[#dadce0] bg-white text-[#191c1d] font-semibold shadow-[0_1px_2px_rgba(60,64,67,0.08)] hover:bg-[#f8fbff] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
               >
-                {googleLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[#c2c6d1] text-xs font-bold">
-                    G
-                  </span>
-                )}
+                {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <GoogleMark />}
                 Continue with Google
               </button>
             </div>
