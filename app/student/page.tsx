@@ -5,15 +5,8 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
-import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT, subjectCodeFor } from '@/lib/curriculum/grade';
-import {
-  buildFallbackGoals,
-  planTodayGoals,
-  type CurriculumOutcome,
-  type LearningSessionSummary,
-  type MasteryRow,
-  type TodayGoal,
-} from '@/lib/curriculum/planner';
+import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
+import { buildFallbackGoals, type TodayGoal } from '@/lib/curriculum/planner';
 import {
   BarChart3,
   BookOpen,
@@ -98,57 +91,28 @@ export default function StudentDashboard() {
 
     try {
       const fallbackGoals = buildFallbackGoals(selectedGrade, selectedSubject);
-      const subjectCode = subjectCodeFor(selectedGrade, selectedSubject);
-      const { data: subject } = await supabase
-        .from('bc_subjects')
-        .select('id')
-        .eq('code', subjectCode)
-        .maybeSingle();
-
-      if (!subject?.id) {
-        setTodayGoals(fallbackGoals);
-        setPlanSource('fallback');
-        return;
-      }
-
-      const { data: outcomes } = await supabase
-        .from('bc_learning_outcomes')
-        .select('id,outcome_code,content_knowledge,elaboration,sequence_order')
-        .eq('subject_id', subject.id)
-        .order('sequence_order', { ascending: true })
-        .limit(30);
-
-      if (!outcomes?.length) {
-        setTodayGoals(fallbackGoals);
-        setPlanSource('fallback');
-        return;
-      }
-
-      const outcomeIds = outcomes.map((outcome) => outcome.id);
-      const [{ data: masteryRows }, { data: sessions }] = await Promise.all([
-        supabase
-          .from('student_mastery')
-          .select('outcome_id,mastery_level,next_review_at,attempts')
-          .eq('student_id', user.id)
-          .in('outcome_id', outcomeIds),
-        supabase
-          .from('learning_sessions')
-          .select(
-            'id,bc_outcome_ids,status,coastaltutor_lesson_id,lesson_payload,lesson_title,started_at',
-          )
-          .eq('student_id', user.id)
-          .order('started_at', { ascending: false })
-          .limit(50),
-      ]);
-
-      const planned = planTodayGoals({
-        outcomes: outcomes as CurriculumOutcome[],
-        masteryRows: (masteryRows ?? []) as MasteryRow[],
-        sessions: (sessions ?? []) as LearningSessionSummary[],
+      const response = await fetch('/api/student/today-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grade: selectedGrade,
+          subject: selectedSubject,
+        }),
       });
 
-      setTodayGoals(planned.length ? planned : fallbackGoals);
-      setPlanSource(planned.length ? 'supabase' : 'fallback');
+      if (!response.ok) {
+        setTodayGoals(fallbackGoals);
+        setPlanSource('fallback');
+        return;
+      }
+
+      const plan = (await response.json()) as {
+        goals?: TodayGoal[];
+        planSource?: 'supabase' | 'fallback';
+      };
+
+      setTodayGoals(plan.goals?.length ? plan.goals : fallbackGoals);
+      setPlanSource(plan.planSource ?? 'fallback');
     } catch {
       setTodayGoals(buildFallbackGoals(selectedGrade, selectedSubject));
       setPlanSource('fallback');
