@@ -27,8 +27,22 @@ export type LessonPayload = {
     knowledge_point: string;
     matches: BCCurriculumMatch[];
   };
-  slides: { title: string; body: string; voiceCue: string }[];
-  quiz: { prompt: string; answer: string; outcomeCode?: string }[];
+  slides: {
+    title: string;
+    body: string;
+    voiceCue: string;
+    visualCue: string;
+    interaction: string;
+  }[];
+  quiz: {
+    prompt: string;
+    answer: string;
+    outcomeCode?: string;
+    choices: string[];
+    correctChoice: string;
+    hint: string;
+    gameType: 'choice-card' | 'strategy-pick' | 'reflection';
+  }[];
   generator: {
     type: 'structured-local';
     retrieval: 'voyage-query-pgvector';
@@ -91,9 +105,9 @@ Duration and structure:
 - Target length: about 2 minutes
 - Generate 3 concise scenes: warm intro, guided practice, quick quiz
 - Keep all wording age-appropriate for Grade 2
-- Use concrete examples, visual representations, and gentle tutor feedback
+- Use concrete examples, visual representations, simple image prompts, and gentle tutor feedback
 - Include a short Rive-avatar-friendly teacher narration cue for each scene
-- Include the quiz checks below and make the learner answer actively
+- Include the quiz checks below as active mini-games, not text-only slides
 
 BC curriculum context:
 ${context || 'Use the selected BC outcome and Grade 2 Math expectations as source of truth.'}
@@ -148,6 +162,9 @@ export function buildLessonPayloadFromMatches({
         title: focusedTitle,
         body: `Connect ${focusedTitle} to a concrete Grade 2 example. Keep the explanation short and invite the student to say what they notice.`,
         voiceCue: 'Warm, curious, and slow enough for a Grade 2 learner.',
+        visualCue:
+          'Show two neat rows of ten-frames or counting objects with a clear number label.',
+        interaction: 'Ask the learner to tap the picture that matches the number story.',
       },
       {
         title: 'Try it together',
@@ -155,11 +172,15 @@ export function buildLessonPayloadFromMatches({
           primary?.elaboration?.slice(0, 220) ||
           'Use drawings, objects, number lines, or a short story to make the idea visible.',
         voiceCue: 'Ask one question, pause, then model one strategy.',
+        visualCue: 'Use a number line, base-ten blocks, or counters with one highlighted step.',
+        interaction: 'Let the learner choose which strategy they want the tutor to model.',
       },
       {
         title: 'Quick check',
         body: 'Ask three short questions. Update mastery and XP after each answer, then save a session snapshot.',
         voiceCue: 'Celebrate effort and name the next tiny step.',
+        visualCue: 'Show three compact quiz cards with friendly success and retry states.',
+        interaction: 'Turn each quiz item into a choice-card or reflection mini-game.',
       },
     ],
     quiz: [
@@ -167,16 +188,28 @@ export function buildLessonPayloadFromMatches({
         prompt: `What is one way to show ${focusedTitle}?`,
         answer: 'Use a drawing, objects, a number line, or a number sentence.',
         outcomeCode: selectedOutcomeCode,
+        choices: ['Draw it', 'Skip it', 'Guess silently'],
+        correctChoice: 'Draw it',
+        hint: 'Grade 2 math is easier when the idea is visible.',
+        gameType: 'choice-card',
       },
       {
         prompt: 'Which strategy would you try first?',
         answer: 'Choose a strategy and explain why it helps.',
         outcomeCode: selectedOutcomeCode,
+        choices: ['Use objects', 'Hide the numbers', 'Rush to the end'],
+        correctChoice: 'Use objects',
+        hint: 'A strategy should help you see or organize the math.',
+        gameType: 'strategy-pick',
       },
       {
         prompt: 'What should we review next?',
         answer: 'Name the part that felt hardest or slowest.',
         outcomeCode: selectedOutcomeCode,
+        choices: ['The tricky part', 'Nothing ever', 'Only the answer'],
+        correctChoice: 'The tricky part',
+        hint: 'Good learners name the next small step.',
+        gameType: 'reflection',
       },
     ],
     generator: {

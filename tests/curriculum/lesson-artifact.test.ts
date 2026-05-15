@@ -51,9 +51,16 @@ describe('Grade 2 lesson artifact builder', () => {
     expect(payload.prompt).toContain('Voyage query-retrieved BC curriculum context');
     expect(payload.prompt).toContain('Use personal strategies');
     expect(payload.slides).toHaveLength(3);
+    expect(payload.slides[0].visualCue).toContain('ten-frames');
+    expect(payload.slides[1].interaction).toContain('strategy');
     expect(payload.quiz.every((item) => item.outcomeCode === payload.bc_context.outcome_code)).toBe(
       true,
     );
+    expect(payload.quiz[0]).toMatchObject({
+      gameType: 'choice-card',
+      correctChoice: 'Draw it',
+    });
+    expect(payload.quiz[0].choices).toContain('Draw it');
     expect(payload.generator).toMatchObject({
       retrieval: 'voyage-query-pgvector',
       estimatedDurationSeconds: 120,
@@ -87,6 +94,7 @@ describe('Grade 2 lesson artifact builder', () => {
     expect(requirement).toContain('Grade: Grade 2');
     expect(requirement).toContain('MATH-2-04-addition-and-subtraction-to-100');
     expect(requirement).toContain('Required quiz checks');
+    expect(requirement).toContain('active mini-games');
   });
 
   it('attaches OpenMAIC job metadata without losing the structured lesson', () => {
