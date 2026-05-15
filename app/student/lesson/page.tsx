@@ -111,6 +111,19 @@ function LessonContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, supabase.auth]);
 
+  useEffect(() => {
+    const openmaic = session?.lesson_payload?.openmaic;
+    if (!session?.id || !UUID_RE.test(session.id) || !openmaic) return;
+    if (openmaic.status === 'succeeded' || openmaic.status === 'failed') return;
+
+    const timer = window.setInterval(() => {
+      void syncOpenMAICJob();
+    }, openmaic.pollIntervalMs || 5000);
+
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.id, session?.lesson_payload?.openmaic?.status]);
+
   async function prepareSession() {
     const response = await fetch('/api/student/lesson', {
       method: 'POST',
@@ -140,6 +153,37 @@ function LessonContent() {
       coastaltutor_lesson_id: artifact.lessonId,
       lesson_payload: artifact.payload,
     });
+  }
+
+  async function syncOpenMAICJob() {
+    if (!session?.id || !UUID_RE.test(session.id)) return;
+
+    try {
+      const response = await fetch('/api/student/lesson/sync-openmaic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: session.id }),
+      });
+
+      if (!response.ok) return;
+
+      const result = (await response.json()) as {
+        payload?: LessonSession['lesson_payload'];
+      };
+
+      if (result.payload) {
+        setSession((current) =>
+          current
+            ? {
+                ...current,
+                lesson_payload: result.payload ?? current.lesson_payload,
+              }
+            : current,
+        );
+      }
+    } catch {
+      // Polling is opportunistic; the poll URL remains available for manual checks.
+    }
   }
 
   async function buildLessonPayload() {
@@ -428,6 +472,14 @@ function LessonContent() {
                   <ExternalLink className="h-4 w-4" />
                   {openmaic.classroomUrl ? 'Open classroom' : 'Check generation'}
                 </a>
+                {openmaic.status !== 'succeeded' && openmaic.status !== 'failed' ? (
+                  <button
+                    onClick={() => void syncOpenMAICJob()}
+                    className="ml-2 inline-flex h-9 items-center gap-2 rounded-md border border-[#e7e8e9] px-3 text-sm font-semibold text-[#424750] hover:bg-[#f8f9fa]"
+                  >
+                    Sync
+                  </button>
+                ) : null}
               </div>
             ) : (
               <p className="mt-4 text-sm text-[#727781]">

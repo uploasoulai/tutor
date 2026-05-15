@@ -4,6 +4,7 @@ import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import {
   buildOpenMAICRequirement,
   getOrCreateLessonArtifact,
+  syncLessonOpenMAICJob,
   updateLessonOpenMAICJob,
 } from '@/lib/curriculum/lesson-artifact';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
@@ -77,6 +78,19 @@ export async function POST(req: NextRequest) {
       };
 
       after(() => runClassroomGenerationJob(jobId, generationInput, baseUrl));
+    } else {
+      const synced = await syncLessonOpenMAICJob({
+        studentId: user.id,
+        sessionId: artifact.sessionId,
+      });
+      artifact = {
+        ...artifact,
+        payload: synced.payload,
+        lessonId:
+          synced.payload.openmaic?.classroomId ??
+          synced.payload.openmaic?.jobId ??
+          artifact.lessonId,
+      };
     }
 
     return apiSuccess(artifact);

@@ -4,6 +4,7 @@ import {
   buildOpenMAICRequirement,
   buildLessonPayloadFromMatches,
   buildLessonReuseKey,
+  mergeOpenMAICJobStatus,
 } from '@/lib/curriculum/lesson-artifact';
 
 describe('Grade 2 lesson artifact builder', () => {
@@ -109,5 +110,93 @@ describe('Grade 2 lesson artifact builder', () => {
       jobId: 'job-123',
       status: 'queued',
     });
+  });
+
+  it('merges succeeded OpenMAIC job result back into lesson payload', () => {
+    const payload = attachOpenMAICJob(
+      buildLessonPayloadFromMatches({
+        grade: 'Grade 2',
+        subject: 'Math',
+        title: 'Number concepts to 100',
+        matches: [],
+      }),
+      {
+        jobId: 'job-123',
+        status: 'running',
+        pollUrl: 'https://app.example.com/api/generate-classroom/job-123',
+        pollIntervalMs: 5000,
+        requirement: 'Create a lesson',
+        createdAt: '2026-05-14T00:00:00.000Z',
+      },
+    );
+
+    const nextPayload = mergeOpenMAICJobStatus(payload, {
+      id: 'job-123',
+      status: 'succeeded',
+      step: 'completed',
+      progress: 100,
+      message: 'done',
+      createdAt: '2026-05-14T00:00:00.000Z',
+      updatedAt: '2026-05-14T00:01:00.000Z',
+      inputSummary: {
+        requirementPreview: 'Create a lesson',
+        hasPdf: false,
+        pdfTextLength: 0,
+        pdfImageCount: 0,
+      },
+      scenesGenerated: 3,
+      result: {
+        classroomId: 'classroom-1',
+        url: 'https://app.example.com/classroom/classroom-1',
+        scenesCount: 3,
+      },
+    });
+
+    expect(nextPayload.openmaic).toMatchObject({
+      status: 'succeeded',
+      classroomId: 'classroom-1',
+      classroomUrl: 'https://app.example.com/classroom/classroom-1',
+    });
+    expect(nextPayload.slides).toHaveLength(3);
+  });
+
+  it('merges failed OpenMAIC job status without removing lesson content', () => {
+    const payload = attachOpenMAICJob(
+      buildLessonPayloadFromMatches({
+        grade: 'Grade 2',
+        subject: 'Math',
+        title: 'Number concepts to 100',
+        matches: [],
+      }),
+      {
+        jobId: 'job-123',
+        status: 'running',
+        pollUrl: 'https://app.example.com/api/generate-classroom/job-123',
+        pollIntervalMs: 5000,
+        requirement: 'Create a lesson',
+        createdAt: '2026-05-14T00:00:00.000Z',
+      },
+    );
+
+    const nextPayload = mergeOpenMAICJobStatus(payload, {
+      id: 'job-123',
+      status: 'failed',
+      step: 'failed',
+      progress: 20,
+      message: 'failed',
+      createdAt: '2026-05-14T00:00:00.000Z',
+      updatedAt: '2026-05-14T00:01:00.000Z',
+      inputSummary: {
+        requirementPreview: 'Create a lesson',
+        hasPdf: false,
+        pdfTextLength: 0,
+        pdfImageCount: 0,
+      },
+      scenesGenerated: 0,
+      error: 'model unavailable',
+    });
+
+    expect(nextPayload.openmaic?.status).toBe('failed');
+    expect(nextPayload.quiz).toHaveLength(3);
   });
 });

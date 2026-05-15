@@ -1,6 +1,8 @@
 import { nanoid } from 'nanoid';
 import type { BCCurriculumMatch } from '@/lib/curriculum/search';
 import { searchBCCurriculum } from '@/lib/curriculum/search';
+import type { ClassroomGenerationJob } from '@/lib/server/classroom-job-store';
+import { readClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -195,6 +197,23 @@ export function attachOpenMAICJob(
   };
 }
 
+export function mergeOpenMAICJobStatus(
+  payload: LessonPayload,
+  job: ClassroomGenerationJob | null,
+): LessonPayload {
+  if (!payload.openmaic || !job || payload.openmaic.jobId !== job.id) return payload;
+
+  return {
+    ...payload,
+    openmaic: {
+      ...payload.openmaic,
+      status: job.status,
+      classroomId: job.result?.classroomId ?? payload.openmaic.classroomId,
+      classroomUrl: job.result?.url ?? payload.openmaic.classroomUrl,
+    },
+  };
+}
+
 export async function updateLessonOpenMAICJob({
   sessionId,
   payload,
@@ -216,6 +235,58 @@ export async function updateLessonOpenMAICJob({
 
   if (error) throw error;
   return nextPayload;
+}
+
+export async function syncLessonOpenMAICJob({
+  studentId,
+  sessionId,
+}: {
+  studentId: string;
+  sessionId: string;
+}) {
+  const supabase = createSupabaseAdminClient();
+  const { data: session, error: readError } = await supabase
+    .from('learning_sessions')
+    .select('id,coastaltutor_lesson_id,lesson_payload')
+    .eq('id', sessionId)
+    .eq('student_id', studentId)
+    .maybeSingle();
+
+  if (readError) throw readError;
+  if (!session?.lesson_payload) {
+    throw new Error('Learning session not found');
+  }
+
+  const payload = session.lesson_payload as LessonPayload;
+  if (!payload.openmaic?.jobId) {
+    return {
+      sessionId,
+      synced: false,
+      payload,
+    };
+  }
+
+  const job = await readClassroomGenerationJob(payload.openmaic.jobId);
+  const nextPayload = mergeOpenMAICJobStatus(payload, job);
+
+  if (nextPayload !== payload) {
+    const { error: updateError } = await supabase
+      .from('learning_sessions')
+      .update({
+        lesson_payload: nextPayload,
+        coastaltutor_lesson_id: nextPayload.openmaic?.classroomId ?? session.coastaltutor_lesson_id,
+      })
+      .eq('id', sessionId)
+      .eq('student_id', studentId);
+
+    if (updateError) throw updateError;
+  }
+
+  return {
+    sessionId,
+    synced: nextPayload !== payload,
+    payload: nextPayload,
+  };
 }
 
 export async function getOrCreateLessonArtifact({
