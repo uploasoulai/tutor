@@ -10,7 +10,12 @@ import {
   TEACHER_PERSONAS,
   type TeacherPersonaSnapshot,
 } from '@/lib/curriculum/teacher-personas';
-import { getFallbackLessonWidget, type LessonWidget } from '@/lib/curriculum/lesson-widgets';
+import {
+  calculateWidgetXp,
+  evaluateWidgetResult,
+  getFallbackLessonWidget,
+  type LessonWidget,
+} from '@/lib/curriculum/lesson-widgets';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -94,6 +99,7 @@ function LessonContent() {
   const [session, setSession] = useState<LessonSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [answered, setAnswered] = useState<boolean[]>([]);
+  const [widgetAnswered, setWidgetAnswered] = useState<Record<number, boolean>>({});
   const [selectedChoices, setSelectedChoices] = useState<Record<number, string>>({});
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [teacherId, setTeacherId] = useState(TEACHER_PERSONAS[0].id);
@@ -321,10 +327,59 @@ function LessonContent() {
     const earned = correct ? 12 : 4;
     setXp((current) => current + earned);
 
-    if (session?.id && UUID_RE.test(session.id)) {
-      const correctCount = nextAnswered.filter(Boolean).length;
-      const attempts = nextAnswered.filter((item) => item !== undefined).length;
+    await persistLearningAttempt({
+      correct,
+      attemptNumber: getTotalAttemptCount(nextAnswered, widgetAnswered),
+      correctCount: getTotalCorrectCount(nextAnswered, widgetAnswered),
+      responseLatencyMs: 12000 + index * 1500,
+      hintLevelUsed: correct ? 0 : 1,
+      localEarned: earned,
+    });
+  }
 
+  async function handleWidgetSignal(
+    slideIndex: number,
+    widget: LessonWidget,
+    value: number | string,
+  ) {
+    if (!user || widgetAnswered[slideIndex] !== undefined) return;
+
+    const correct = evaluateWidgetResult(widget, value);
+    const nextWidgetAnswered = {
+      ...widgetAnswered,
+      [slideIndex]: correct,
+    };
+    setWidgetAnswered(nextWidgetAnswered);
+
+    const earned = calculateWidgetXp(correct);
+    setXp((current) => current + earned);
+
+    await persistLearningAttempt({
+      correct,
+      attemptNumber: getTotalAttemptCount(answered, nextWidgetAnswered),
+      correctCount: getTotalCorrectCount(answered, nextWidgetAnswered),
+      responseLatencyMs: 8000 + slideIndex * 1200,
+      hintLevelUsed: correct ? 0 : 1,
+      localEarned: earned,
+    });
+  }
+
+  async function persistLearningAttempt({
+    correct,
+    attemptNumber,
+    correctCount,
+    responseLatencyMs,
+    hintLevelUsed,
+    localEarned,
+  }: {
+    correct: boolean;
+    attemptNumber: number;
+    correctCount: number;
+    responseLatencyMs: number;
+    hintLevelUsed: number;
+    localEarned: number;
+  }) {
+    if (session?.id && UUID_RE.test(session.id)) {
       try {
         const response = await fetch('/api/student/lesson/attempt', {
           method: 'POST',
@@ -333,17 +388,17 @@ function LessonContent() {
             sessionId: session.id,
             outcomeId: UUID_RE.test(outcomeId) ? outcomeId : undefined,
             isCorrect: correct,
-            attemptNumber: attempts,
+            attemptNumber,
             correctCount,
-            responseLatencyMs: 12000 + index * 1500,
-            hintLevelUsed: correct ? 0 : 1,
+            responseLatencyMs,
+            hintLevelUsed,
           }),
         });
 
         if (response.ok) {
           const result = (await response.json()) as { xpEarned?: number };
-          if (typeof result.xpEarned === 'number' && result.xpEarned !== earned) {
-            setXp((current) => current - earned + result.xpEarned!);
+          if (typeof result.xpEarned === 'number' && result.xpEarned !== localEarned) {
+            setXp((current) => current - localEarned + result.xpEarned!);
           }
         }
       } catch {
@@ -377,8 +432,8 @@ function LessonContent() {
   async function finishLesson() {
     if (!user || completed) return;
 
-    const attempts = answered.filter((item) => item !== undefined).length || 1;
-    const correct = answered.filter(Boolean).length;
+    const attempts = getTotalAttemptCount(answered, widgetAnswered) || 1;
+    const correct = getTotalCorrectCount(answered, widgetAnswered);
 
     if (session?.id && UUID_RE.test(session.id)) {
       try {
@@ -443,8 +498,8 @@ function LessonContent() {
   const slides = session?.lesson_payload?.slides ?? [];
   const currentSlide = slides[currentSlideIndex];
   const teacher = getTeacherPersonaById(teacherId);
-  const attemptedCount = answered.filter((item) => item !== undefined).length;
-  const correctCount = answered.filter(Boolean).length;
+  const attemptedCount = getTotalAttemptCount(answered, widgetAnswered);
+  const correctCount = getTotalCorrectCount(answered, widgetAnswered);
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
   const masteryEstimate =
     attemptedCount > 0
@@ -548,6 +603,14 @@ function LessonContent() {
                   title={currentSlide.title}
                   cue={currentSlide.visualCue}
                   widget={currentSlide.widget ?? getFallbackLessonWidget(currentSlideIndex, title)}
+                  completed={widgetAnswered[currentSlideIndex]}
+                  onSignal={(value) =>
+                    void handleWidgetSignal(
+                      currentSlideIndex,
+                      currentSlide.widget ?? getFallbackLessonWidget(currentSlideIndex, title),
+                      value,
+                    )
+                  }
                 />
               </div>
             ) : null}
@@ -803,16 +866,26 @@ function LessonWidgetPanel({
   title,
   cue,
   widget,
+  completed,
+  onSignal,
 }: {
   title: string;
   cue?: string;
   widget: LessonWidget;
+  completed?: boolean;
+  onSignal: (value: number | string) => void;
 }) {
   return (
     <div className="rounded-lg border border-[#dbe5ef] bg-white p-4">
-      {widget.kind === 'ten-frame' ? <TenFrameWidget widget={widget} /> : null}
-      {widget.kind === 'number-line' ? <NumberLineWidget widget={widget} /> : null}
-      {widget.kind === 'choice-card' ? <ChoiceCardPreview widget={widget} /> : null}
+      {widget.kind === 'ten-frame' ? (
+        <TenFrameWidget completed={completed} onSignal={onSignal} widget={widget} />
+      ) : null}
+      {widget.kind === 'number-line' ? (
+        <NumberLineWidget completed={completed} onSignal={onSignal} widget={widget} />
+      ) : null}
+      {widget.kind === 'choice-card' ? (
+        <ChoiceCardPreview completed={completed} onSignal={onSignal} widget={widget} />
+      ) : null}
       <div className="mt-4 rounded-md bg-[#f0f4ff] p-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-[#003461]">
           Visual prompt
@@ -825,9 +898,18 @@ function LessonWidgetPanel({
   );
 }
 
-function TenFrameWidget({ widget }: { widget: Extract<LessonWidget, { kind: 'ten-frame' }> }) {
+function TenFrameWidget({
+  completed,
+  onSignal,
+  widget,
+}: {
+  completed?: boolean;
+  onSignal: (value: number) => void;
+  widget: Extract<LessonWidget, { kind: 'ten-frame' }>;
+}) {
   const [count, setCount] = useState(Math.max(0, Math.min(widget.target - 2, widget.max)));
   const isMatched = count === widget.target;
+  const status = completed === undefined ? null : completed ? 'Saved' : 'Try again later';
 
   return (
     <div>
@@ -839,7 +921,12 @@ function TenFrameWidget({ widget }: { widget: Extract<LessonWidget, { kind: 'ten
             <button
               key={index}
               type="button"
-              onClick={() => setCount(index + 1)}
+              onClick={() => {
+                if (completed !== undefined) return;
+                const nextCount = index + 1;
+                setCount(nextCount);
+                if (evaluateWidgetResult(widget, nextCount)) onSignal(nextCount);
+              }}
               className={[
                 'aspect-square rounded-md border transition-all',
                 active ? 'border-[#003461] bg-[#003461]' : 'border-[#c9d5df] bg-[#f8f9fa]',
@@ -854,16 +941,25 @@ function TenFrameWidget({ widget }: { widget: Extract<LessonWidget, { kind: 'ten
           {count} of {widget.target}
         </span>
         <span className={isMatched ? 'font-semibold text-emerald-700' : 'text-[#727781]'}>
-          {isMatched ? 'Matched' : 'Keep tapping'}
+          {status ?? (isMatched ? 'Matched' : 'Keep tapping')}
         </span>
       </div>
     </div>
   );
 }
 
-function NumberLineWidget({ widget }: { widget: Extract<LessonWidget, { kind: 'number-line' }> }) {
+function NumberLineWidget({
+  completed,
+  onSignal,
+  widget,
+}: {
+  completed?: boolean;
+  onSignal: (value: number) => void;
+  widget: Extract<LessonWidget, { kind: 'number-line' }>;
+}) {
   const [value, setValue] = useState(widget.min);
   const isClose = Math.abs(value - widget.target) <= widget.step;
+  const status = completed === undefined ? null : completed ? 'Saved' : 'Try again later';
 
   return (
     <div>
@@ -875,7 +971,12 @@ function NumberLineWidget({ widget }: { widget: Extract<LessonWidget, { kind: 'n
           max={widget.max}
           step={widget.step}
           value={value}
-          onChange={(event) => setValue(Number(event.target.value))}
+          disabled={completed !== undefined}
+          onChange={(event) => {
+            const nextValue = Number(event.target.value);
+            setValue(nextValue);
+            if (evaluateWidgetResult(widget, nextValue)) onSignal(nextValue);
+          }}
           className="w-full accent-[#003461]"
           aria-label="Number line value"
         />
@@ -890,7 +991,7 @@ function NumberLineWidget({ widget }: { widget: Extract<LessonWidget, { kind: 'n
               isClose ? 'text-sm font-semibold text-emerald-700' : 'text-sm text-[#727781]'
             }
           >
-            {isClose ? 'Useful benchmark' : `Try to get near ${widget.target}`}
+            {status ?? (isClose ? 'Useful benchmark' : `Try to get near ${widget.target}`)}
           </p>
         </div>
       </div>
@@ -898,7 +999,15 @@ function NumberLineWidget({ widget }: { widget: Extract<LessonWidget, { kind: 'n
   );
 }
 
-function ChoiceCardPreview({ widget }: { widget: Extract<LessonWidget, { kind: 'choice-card' }> }) {
+function ChoiceCardPreview({
+  completed,
+  onSignal,
+  widget,
+}: {
+  completed?: boolean;
+  onSignal: (value: string) => void;
+  widget: Extract<LessonWidget, { kind: 'choice-card' }>;
+}) {
   const [selected, setSelected] = useState('');
 
   return (
@@ -912,7 +1021,11 @@ function ChoiceCardPreview({ widget }: { widget: Extract<LessonWidget, { kind: '
             <button
               key={choice}
               type="button"
-              onClick={() => setSelected(choice)}
+              onClick={() => {
+                if (completed !== undefined) return;
+                setSelected(choice);
+                onSignal(choice);
+              }}
               className={[
                 'rounded-md border px-3 py-2 text-left text-sm font-semibold transition-all',
                 isSelected && isCorrect
@@ -940,6 +1053,14 @@ function MetricTile({ label, value }: { label: string; value: string }) {
       </p>
     </div>
   );
+}
+
+function getTotalAttemptCount(answered: boolean[], widgetAnswered: Record<number, boolean>) {
+  return answered.filter((item) => item !== undefined).length + Object.keys(widgetAnswered).length;
+}
+
+function getTotalCorrectCount(answered: boolean[], widgetAnswered: Record<number, boolean>) {
+  return answered.filter(Boolean).length + Object.values(widgetAnswered).filter(Boolean).length;
 }
 
 export default function LessonPage() {

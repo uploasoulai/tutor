@@ -49,3 +49,19 @@ export function getFallbackLessonWidget(index: number, topic: string): LessonWid
   const widgets = buildGrade2MathWidgets(topic);
   return widgets[index] ?? widgets[widgets.length - 1];
 }
+
+export function evaluateWidgetResult(widget: LessonWidget, value: number | string) {
+  if (widget.kind === 'ten-frame') {
+    return Number(value) === widget.target;
+  }
+
+  if (widget.kind === 'number-line') {
+    return Math.abs(Number(value) - widget.target) <= widget.step;
+  }
+
+  return String(value) === widget.correctChoice;
+}
+
+export function calculateWidgetXp(isCorrect: boolean) {
+  return isCorrect ? 6 : 2;
+}
