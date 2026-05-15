@@ -9,6 +9,7 @@ import {
   DatabaseZap,
   Loader2,
   LogOut,
+  Link2,
   Send,
   Settings,
   ShieldCheck,
@@ -85,6 +86,14 @@ export default function AdminDashboardPage() {
     null,
   );
   const [directoryLoading, setDirectoryLoading] = useState(true);
+  const [parentLinkStudentId, setParentLinkStudentId] = useState('');
+  const [parentLinkParentId, setParentLinkParentId] = useState('');
+  const [teacherLinkStudentId, setTeacherLinkStudentId] = useState('');
+  const [teacherLinkTeacherId, setTeacherLinkTeacherId] = useState('');
+  const [teacherLinkSubject, setTeacherLinkSubject] = useState('Math');
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkMessage, setLinkMessage] = useState('');
+  const [linkError, setLinkError] = useState('');
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -121,6 +130,22 @@ export default function AdminDashboardPage() {
       cancelled = true;
     };
   }, [loading]);
+
+  const loadRelationshipData = async () => {
+    const [overviewResponse, directoryResponse] = await Promise.all([
+      fetch('/api/admin/relationships/overview'),
+      fetch('/api/admin/relationships/directory'),
+    ]);
+    const overviewData = overviewResponse.ok ? await overviewResponse.json() : null;
+    const directoryData = directoryResponse.ok ? await directoryResponse.json() : null;
+
+    if (overviewData?.success && overviewData.overview) {
+      setRelationshipOverview(overviewData.overview);
+    }
+    if (directoryData?.success && directoryData.directory) {
+      setRelationshipDirectory(directoryData.directory);
+    }
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -216,6 +241,59 @@ export default function AdminDashboardPage() {
       setParentReportError('Parent report run failed. Review server logs for details.');
     } finally {
       setParentReportLoading(false);
+    }
+  };
+
+  const handleCreateParentLink = async () => {
+    if (!parentLinkStudentId || !parentLinkParentId) {
+      setLinkError('Choose both a student and a parent.');
+      return;
+    }
+
+    await createRelationshipLink({
+      kind: 'parent',
+      studentId: parentLinkStudentId,
+      parentId: parentLinkParentId,
+    });
+  };
+
+  const handleCreateTeacherLink = async () => {
+    if (!teacherLinkStudentId || !teacherLinkTeacherId) {
+      setLinkError('Choose both a student and a teacher.');
+      return;
+    }
+
+    await createRelationshipLink({
+      kind: 'teacher',
+      studentId: teacherLinkStudentId,
+      teacherId: teacherLinkTeacherId,
+      subjects: [teacherLinkSubject],
+    });
+  };
+
+  const createRelationshipLink = async (payload: Record<string, unknown>) => {
+    setLinkLoading(true);
+    setLinkError('');
+    setLinkMessage('');
+    try {
+      const response = await fetch('/api/admin/relationships/links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = response.ok ? ((await response.json()) as { success?: boolean }) : null;
+
+      if (!data?.success) {
+        setLinkError('Relationship link failed. Check the selected accounts.');
+        return;
+      }
+
+      setLinkMessage('Relationship link saved.');
+      await loadRelationshipData();
+    } catch {
+      setLinkError('Relationship link failed. Check the selected accounts.');
+    } finally {
+      setLinkLoading(false);
     }
   };
 
@@ -353,6 +431,24 @@ export default function AdminDashboardPage() {
                 directory={relationshipDirectory}
                 loading={directoryLoading}
               />
+              <RelationshipLinkForms
+                directory={relationshipDirectory}
+                parentLinkStudentId={parentLinkStudentId}
+                parentLinkParentId={parentLinkParentId}
+                teacherLinkStudentId={teacherLinkStudentId}
+                teacherLinkTeacherId={teacherLinkTeacherId}
+                teacherLinkSubject={teacherLinkSubject}
+                loading={linkLoading}
+                message={linkMessage}
+                error={linkError}
+                onParentStudentChange={setParentLinkStudentId}
+                onParentParentChange={setParentLinkParentId}
+                onTeacherStudentChange={setTeacherLinkStudentId}
+                onTeacherTeacherChange={setTeacherLinkTeacherId}
+                onTeacherSubjectChange={setTeacherLinkSubject}
+                onCreateParentLink={handleCreateParentLink}
+                onCreateTeacherLink={handleCreateTeacherLink}
+              />
             </section>
 
             <section className="rounded-lg border border-[#e7e8e9] bg-white p-6">
@@ -469,6 +565,160 @@ export default function AdminDashboardPage() {
         )}
       </main>
     </div>
+  );
+}
+
+function RelationshipLinkForms({
+  directory,
+  parentLinkStudentId,
+  parentLinkParentId,
+  teacherLinkStudentId,
+  teacherLinkTeacherId,
+  teacherLinkSubject,
+  loading,
+  message,
+  error,
+  onParentStudentChange,
+  onParentParentChange,
+  onTeacherStudentChange,
+  onTeacherTeacherChange,
+  onTeacherSubjectChange,
+  onCreateParentLink,
+  onCreateTeacherLink,
+}: {
+  directory: RelationshipDirectory | null;
+  parentLinkStudentId: string;
+  parentLinkParentId: string;
+  teacherLinkStudentId: string;
+  teacherLinkTeacherId: string;
+  teacherLinkSubject: string;
+  loading: boolean;
+  message: string;
+  error: string;
+  onParentStudentChange: (value: string) => void;
+  onParentParentChange: (value: string) => void;
+  onTeacherStudentChange: (value: string) => void;
+  onTeacherTeacherChange: (value: string) => void;
+  onTeacherSubjectChange: (value: string) => void;
+  onCreateParentLink: () => void;
+  onCreateTeacherLink: () => void;
+}) {
+  if (!directory) return null;
+
+  return (
+    <div className="mt-5 rounded-lg border border-[#e7e8e9] p-4">
+      <div className="flex items-center gap-2">
+        <Link2 className="h-4 w-4 text-[#003461]" />
+        <h3 className="text-sm font-semibold text-[#191c1d]">Create relationship links</h3>
+      </div>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-lg bg-[#f8f9fa] p-4">
+          <h4 className="text-sm font-semibold text-[#191c1d]">Parent to student</h4>
+          <div className="mt-3 grid gap-3">
+            <RelationshipSelect
+              label="Student"
+              value={parentLinkStudentId}
+              options={directory.students.map((student) => ({
+                value: student.id,
+                label: `${student.name} (${student.grade})`,
+              }))}
+              onChange={onParentStudentChange}
+            />
+            <RelationshipSelect
+              label="Parent"
+              value={parentLinkParentId}
+              options={directory.parents.map((parent) => ({
+                value: parent.id,
+                label: parent.name,
+              }))}
+              onChange={onParentParentChange}
+            />
+            <button
+              onClick={onCreateParentLink}
+              disabled={loading}
+              className="inline-flex h-9 items-center justify-center rounded-md bg-[#003461] px-3 text-sm font-semibold text-white hover:bg-[#002b50] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Save parent link
+            </button>
+          </div>
+        </div>
+        <div className="rounded-lg bg-[#f8f9fa] p-4">
+          <h4 className="text-sm font-semibold text-[#191c1d]">Teacher to student</h4>
+          <div className="mt-3 grid gap-3">
+            <RelationshipSelect
+              label="Student"
+              value={teacherLinkStudentId}
+              options={directory.students.map((student) => ({
+                value: student.id,
+                label: `${student.name} (${student.grade})`,
+              }))}
+              onChange={onTeacherStudentChange}
+            />
+            <RelationshipSelect
+              label="Teacher"
+              value={teacherLinkTeacherId}
+              options={directory.teachers.map((teacher) => ({
+                value: teacher.id,
+                label: teacher.name,
+              }))}
+              onChange={onTeacherTeacherChange}
+            />
+            <RelationshipSelect
+              label="Subject"
+              value={teacherLinkSubject}
+              options={[
+                { value: 'Math', label: 'Math' },
+                { value: 'Language Arts', label: 'Language Arts' },
+                { value: 'Arts', label: 'Arts' },
+                { value: 'ADST', label: 'ADST' },
+              ]}
+              onChange={onTeacherSubjectChange}
+            />
+            <button
+              onClick={onCreateTeacherLink}
+              disabled={loading}
+              className="inline-flex h-9 items-center justify-center rounded-md bg-[#003461] px-3 text-sm font-semibold text-white hover:bg-[#002b50] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Save teacher link
+            </button>
+          </div>
+        </div>
+      </div>
+      {message && (
+        <div className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-700">{message}</div>
+      )}
+      {error && <div className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+    </div>
+  );
+}
+
+function RelationshipSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: Array<{ value: string; label: string }>;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid gap-1.5">
+      <span className="text-xs font-semibold uppercase tracking-wide text-[#727781]">{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-10 rounded-md border border-[#c2c6d1] bg-white px-3 text-sm text-[#191c1d] outline-none focus:border-[#003461] focus:ring-2 focus:ring-[#003461]/20"
+      >
+        <option value="">Choose {label.toLowerCase()}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
