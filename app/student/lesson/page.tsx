@@ -272,7 +272,6 @@ function LessonContent() {
 
     const attempts = answered.filter((item) => item !== undefined).length || 1;
     const correct = answered.filter(Boolean).length;
-    const accuracy = correct / attempts;
 
     if (session?.id && UUID_RE.test(session.id)) {
       try {

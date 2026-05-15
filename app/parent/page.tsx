@@ -38,7 +38,7 @@ export default function ParentDashboardPage() {
   const [activeNav, setActiveNav] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [dailyReport, setDailyReport] = useState<DailyReport | null>(null);
-  const [reportLoading, setReportLoading] = useState(false);
+  const [reportLoading, setReportLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -59,7 +59,6 @@ export default function ParentDashboardPage() {
     if (!user) return;
 
     let cancelled = false;
-    setReportLoading(true);
     fetch('/api/parent/daily-report', { method: 'POST' })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
