@@ -23,7 +23,10 @@ import {
   formatTeacherPersonaForPrompt,
 } from '@/lib/generation/generation-pipeline';
 import type { AgentInfo } from '@/lib/generation/generation-pipeline';
-import { DEFAULT_LANGUAGE_DIRECTIVE } from '@/lib/generation/outline-generator';
+import {
+  buildFallbackSceneOutlines,
+  DEFAULT_LANGUAGE_DIRECTIVE,
+} from '@/lib/generation/outline-generator';
 import { MAX_PDF_CONTENT_CHARS, MAX_VISION_IMAGES } from '@/lib/constants/generation';
 import { nanoid } from 'nanoid';
 import type {
@@ -384,15 +387,18 @@ export async function POST(req: NextRequest) {
             });
             controller.enqueue(encoder.encode(`data: ${doneEvent}\n\n`));
           } else {
-            // All retries exhausted, no outlines produced
-            log.error(
-              `Outline generation failed after ${MAX_STREAM_RETRIES + 1} attempts: ${lastError}`,
+            const fallbackOutlines = uniquifyMediaElementIds(
+              buildFallbackSceneOutlines(requirements),
             );
-            const errorEvent = JSON.stringify({
-              type: 'error',
-              error: lastError || 'Failed to generate outlines',
+            log.warn(
+              `Outline generation failed after ${MAX_STREAM_RETRIES + 1} attempts; using fallback outlines: ${lastError}`,
+            );
+            const fallbackEvent = JSON.stringify({
+              type: 'done',
+              outlines: fallbackOutlines,
+              languageDirective: languageDirective || DEFAULT_LANGUAGE_DIRECTIVE,
             });
-            controller.enqueue(encoder.encode(`data: ${errorEvent}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${fallbackEvent}\n\n`));
           }
         } catch (error) {
           const errorEvent = JSON.stringify({

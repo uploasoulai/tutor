@@ -28,6 +28,63 @@ const log = createLogger('Generation');
 export const DEFAULT_LANGUAGE_DIRECTIVE =
   'Teach in the language that matches the user requirement.';
 
+export function buildFallbackSceneOutlines(requirements: UserRequirements): SceneOutline[] {
+  const topic = extractFallbackTopic(requirements.requirement);
+
+  return [
+    {
+      id: nanoid(),
+      type: 'slide',
+      title: topic,
+      description:
+        'Introduce the learning goal with one concrete Grade 2 example and a short teacher narration.',
+      keyPoints: [
+        'Name the skill in student-friendly language',
+        'Show one concrete representation',
+        'Ask the learner what they notice',
+      ],
+      teachingObjective: `Understand the core idea of ${topic}.`,
+      estimatedDuration: 35,
+      order: 1,
+    },
+    {
+      id: nanoid(),
+      type: 'slide',
+      title: 'Try It Together',
+      description:
+        'Guide the learner through one worked example using drawings, objects, or a number line.',
+      keyPoints: [
+        'Model one strategy step by step',
+        'Pause for the learner to predict the next step',
+        'Give a scaffold before revealing the answer',
+      ],
+      teachingObjective: `Practice ${topic} with support.`,
+      estimatedDuration: 55,
+      order: 2,
+    },
+    {
+      id: nanoid(),
+      type: 'quiz',
+      title: 'Quick Check',
+      description:
+        'Ask a short three-question check so mastery, XP, and the next recommendation can update.',
+      keyPoints: [
+        'One confidence-building question',
+        'One strategy-choice question',
+        'One next-review question',
+      ],
+      teachingObjective: `Check whether the learner can apply ${topic}.`,
+      estimatedDuration: 30,
+      order: 3,
+      quizConfig: {
+        questionCount: 3,
+        difficulty: 'easy',
+        questionTypes: ['single', 'text'],
+      },
+    },
+  ];
+}
+
 /**
  * Generate scene outlines from user requirements
  * Now uses simplified UserRequirements with just requirement text and language
@@ -192,4 +249,18 @@ export function applyOutlineFallbacks(
     return { ...outline, type: 'slide' };
   }
   return outline;
+}
+
+function extractFallbackTopic(requirement: string) {
+  const knowledgePointMatch = requirement.match(/Knowledge point:\s*([^\n]+)/i);
+  if (knowledgePointMatch?.[1]) {
+    return knowledgePointMatch[1].trim();
+  }
+
+  const lessonMatch = requirement.match(/lesson (?:for|on)\s+([^.\n]+)/i);
+  if (lessonMatch?.[1]) {
+    return lessonMatch[1].trim();
+  }
+
+  return 'Grade 2 Math Practice';
 }

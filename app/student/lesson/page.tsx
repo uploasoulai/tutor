@@ -71,6 +71,7 @@ function LessonContent() {
   const [answered, setAnswered] = useState<boolean[]>([]);
   const [xp, setXp] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [syncingOpenMAIC, setSyncingOpenMAIC] = useState(false);
 
   const quiz = useMemo(
     () =>
@@ -160,6 +161,7 @@ function LessonContent() {
     if (!session?.id || !UUID_RE.test(session.id)) return;
 
     try {
+      setSyncingOpenMAIC(true);
       const response = await fetch('/api/student/lesson/sync-openmaic', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -184,6 +186,8 @@ function LessonContent() {
       }
     } catch {
       // Polling is opportunistic; the poll URL remains available for manual checks.
+    } finally {
+      setSyncingOpenMAIC(false);
     }
   }
 
@@ -293,6 +297,17 @@ function LessonContent() {
   }
 
   const handleOpenGenerator = () => {
+    const classroomUrl = session?.lesson_payload?.openmaic?.classroomUrl;
+    if (classroomUrl) {
+      window.open(classroomUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    if (session?.lesson_payload?.openmaic?.jobId) {
+      void syncOpenMAICJob();
+      return;
+    }
+
     const prompt =
       session?.lesson_payload?.openmaic?.requirement ??
       session?.lesson_payload?.prompt ??
@@ -304,7 +319,7 @@ function LessonContent() {
         userNickname: user?.user_metadata?.first_name ?? firstName,
         userBio: `${grade} ${subject} learner. Current focus: ${title}.`,
         webSearch: false,
-        interactiveMode: true,
+        interactiveMode: false,
       },
       pdfText: '',
       pdfImages: [],
@@ -365,7 +380,13 @@ function LessonContent() {
                 className="inline-flex h-10 items-center gap-2 rounded-md bg-[#003461] px-4 text-sm font-semibold text-white hover:bg-[#002b50]"
               >
                 <Sparkles className="h-4 w-4" />
-                Open generator
+                {openmaic?.classroomUrl
+                  ? 'Open classroom'
+                  : openmaic?.jobId
+                    ? syncingOpenMAIC
+                      ? 'Checking...'
+                      : 'Check generation'
+                    : 'Open generator'}
               </button>
             </div>
 
