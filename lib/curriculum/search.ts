@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
 import { DEFAULT_GRADE_LEVEL, DEFAULT_SUBJECT, parseGradeLevel } from '@/lib/curriculum/grade';
 import { createVoyageEmbeddings } from '@/lib/curriculum/voyage';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export type BCCurriculumMatch = {
   id: string;
@@ -22,26 +22,6 @@ export type SearchBCCurriculumOptions = {
   matchCount?: number;
 };
 
-function getSupabaseAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey =
-    process.env.SUPABASE_SECRET_KEY ??
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Supabase URL and server key are not configured');
-  }
-
-  return createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-}
-
 export async function searchBCCurriculum({
   query,
   grade = DEFAULT_GRADE_LEVEL,
@@ -54,7 +34,7 @@ export async function searchBCCurriculum({
     inputType: 'query',
   });
 
-  const supabase = getSupabaseAdminClient();
+  const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase.rpc('match_bc_learning_outcomes', {
     query_embedding: `[${embeddings[0].join(',')}]`,
     match_count: matchCount,

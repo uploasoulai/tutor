@@ -87,7 +87,7 @@ function LessonContent() {
       }
       setUser(data.user);
       try {
-        await prepareSession(data.user.id);
+        await prepareSession();
       } catch {
         setSession({
           id: `local-${Date.now()}`,
@@ -100,113 +100,47 @@ function LessonContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, supabase.auth]);
 
-  async function prepareSession(studentId: string) {
-    const reusable = incomingSessionId ? await fetchSession(incomingSessionId) : null;
-    if (reusable) {
-      setSession(reusable);
-      return;
+  async function prepareSession() {
+    const response = await fetch('/api/student/lesson', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grade,
+        subject,
+        title,
+        outcomeId,
+        outcomeCode,
+        sessionId: incomingSessionId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Lesson artifact API failed');
     }
 
-    const reuseKey = `${studentId}:${grade}:${subject}:${outcomeCode || title}`;
-    const { data: existing } = await supabase
-      .from('learning_sessions')
-      .select('id,coastaltutor_lesson_id,lesson_payload')
-      .eq('student_id', studentId)
-      .eq('reuse_key', reuseKey)
-      .not('lesson_payload', 'is', null)
-      .order('started_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const artifact = (await response.json()) as {
+      sessionId: string;
+      lessonId: string;
+      payload: LessonSession['lesson_payload'];
+    };
 
-    if (existing) {
-      setSession(existing as LessonSession);
-      return;
-    }
-
-    const lessonPayload = await buildLessonPayload();
-    const lessonId = `local-${Date.now()}`;
-    const validOutcomeId = UUID_RE.test(outcomeId) ? outcomeId : null;
-    const { data: inserted } = await supabase
-      .from('learning_sessions')
-      .insert({
-        student_id: studentId,
-        session_type: 'lesson',
-        coastaltutor_lesson_id: lessonId,
-        bc_outcome_ids: validOutcomeId ? [validOutcomeId] : [],
-        lesson_title: title,
-        lesson_payload: lessonPayload,
-        reuse_key: reuseKey,
-        status: 'generated',
-      })
-      .select('id,coastaltutor_lesson_id,lesson_payload')
-      .single();
-
-    setSession(
-      (inserted as LessonSession | null) ?? {
-        id: lessonId,
-        coastaltutor_lesson_id: lessonId,
-        lesson_payload: lessonPayload,
-      },
-    );
-  }
-
-  async function fetchSession(sessionId: string) {
-    const { data } = await supabase
-      .from('learning_sessions')
-      .select('id,coastaltutor_lesson_id,lesson_payload')
-      .eq('id', sessionId)
-      .maybeSingle();
-
-    return data as LessonSession | null;
-  }
-
-  async function fetchBCContext() {
-    try {
-      const response = await fetch('/api/bc-curriculum/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: `${grade} ${subject}: ${title}`,
-          grade,
-          subject,
-          matchCount: 4,
-        }),
-      });
-
-      if (!response.ok) return [];
-
-      const payload = (await response.json()) as {
-        success: boolean;
-        matches?: BCCurriculumContextMatch[];
-      };
-
-      return payload.matches ?? [];
-    } catch {
-      return [];
-    }
+    setSession({
+      id: artifact.sessionId,
+      coastaltutor_lesson_id: artifact.lessonId,
+      lesson_payload: artifact.payload,
+    });
   }
 
   async function buildLessonPayload() {
-    const matches = await fetchBCContext();
-    const bcContextLines = matches
-      .slice(0, 3)
-      .map(
-        (match, index) =>
-          `${index + 1}. ${match.content_knowledge ?? match.outcome_code}: ${
-            match.elaboration?.slice(0, 360) ?? 'No elaboration available.'
-          }`,
-      )
-      .join('\n');
-
     return {
       bc_context: {
         grade,
         subject,
         outcome_code: outcomeCode,
         knowledge_point: title,
-        matches,
+        matches: [],
       },
-      prompt: `Create a 2 minute ${grade} ${subject} lesson for ${title}. Use Voyage query-retrieved BC curriculum context below. Include a warm tutor persona, short slides, voiceover cues, and a 3 question quiz.\n\nBC context:\n${bcContextLines || 'Use the selected BC learning outcome as the source of truth.'}`,
+      prompt: `Create a 2 minute ${grade} ${subject} lesson for ${title}. Include BC context, a warm tutor persona, short slides, voiceover cues, and a 3 question quiz.`,
       slides: [
         {
           title,
