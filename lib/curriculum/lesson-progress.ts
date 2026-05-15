@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { createTutorAlertForLesson } from '@/lib/reports/tutor-alerts';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -179,6 +180,20 @@ export async function completeLessonSession({
       });
 
       if (xpError) throw xpError;
+    }
+
+    if (accuracyRate < 0.5 || (durationSeconds < 45 && safeAttempts <= 1)) {
+      try {
+        await createTutorAlertForLesson({
+          studentId,
+          correctCount,
+          attempts: safeAttempts,
+          accuracyRate,
+          durationSeconds,
+        });
+      } catch (error) {
+        console.warn('Tutor alert creation failed', error);
+      }
     }
   }
 

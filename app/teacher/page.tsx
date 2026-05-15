@@ -17,6 +17,14 @@ import {
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
 
+type TutorAlert = {
+  id: string;
+  studentName: string;
+  grade: string;
+  issue: string;
+  severity: 'low' | 'medium' | 'high';
+};
+
 export default function TeacherDashboardPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -24,6 +32,8 @@ export default function TeacherDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activeNav, setActiveNav] = useState('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [alerts, setAlerts] = useState<TutorAlert[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -39,6 +49,29 @@ export default function TeacherDashboardPage() {
       setLoading(false);
     });
   }, [router, supabase.auth]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+    setAlertsLoading(true);
+    fetch('/api/teacher/alerts')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.success && Array.isArray(data.alerts)) {
+          setAlerts(data.alerts);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setAlertsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -64,21 +97,11 @@ export default function TeacherDashboardPage() {
     { id: 'messages', label: 'Messages', icon: MessageSquare },
   ];
 
-  // Mock data for demo
-  const alerts = [
-    { student: 'Maya Lin', issue: 'Struggling with fractions', grade: 'Grade 4', severity: 'high' },
-    {
-      student: 'David Chen',
-      issue: 'Below target in reading',
-      grade: 'Grade 3',
-      severity: 'medium',
-    },
-    {
-      student: 'Sofia Park',
-      issue: "Hasn't logged in this week",
-      grade: 'Grade 2',
-      severity: 'low',
-    },
+  const stats = [
+    { label: 'Total Students', value: '-', color: 'text-[#003461]' },
+    { label: 'Avg. Mastery', value: '-', color: 'text-green-600' },
+    { label: 'Active Today', value: '-', color: 'text-blue-600' },
+    { label: 'Needs Attention', value: String(alerts.length), color: 'text-red-500' },
   ];
 
   return (
@@ -152,12 +175,7 @@ export default function TeacherDashboardPage() {
         <div className="p-8">
           {/* Stats row */}
           <div className="grid grid-cols-4 gap-4 mb-8">
-            {[
-              { label: 'Total Students', value: '24', color: 'text-[#003461]' },
-              { label: 'Avg. Mastery', value: '72%', color: 'text-green-600' },
-              { label: 'Active Today', value: '18', color: 'text-blue-600' },
-              { label: 'Needs Attention', value: '3', color: 'text-red-500' },
-            ].map((s) => (
+            {stats.map((s) => (
               <div key={s.label} className="bg-white border border-[#e7e8e9] rounded-xl p-5">
                 <p className="text-sm text-[#727781]">{s.label}</p>
                 <p className={cn('text-3xl font-bold mt-1', s.color)}>{s.value}</p>
@@ -168,9 +186,19 @@ export default function TeacherDashboardPage() {
           {/* Priority Interventions */}
           <h2 className="text-lg font-semibold text-[#191c1d] mb-4">Priority Interventions</h2>
           <div className="flex flex-col gap-3 mb-8">
+            {alertsLoading && (
+              <div className="bg-white border border-[#e7e8e9] rounded-xl p-5 text-sm text-[#727781]">
+                Loading priority interventions...
+              </div>
+            )}
+            {!alertsLoading && alerts.length === 0 && (
+              <div className="bg-white border border-[#e7e8e9] rounded-xl p-5 text-sm text-[#727781]">
+                No unresolved tutor alerts right now.
+              </div>
+            )}
             {alerts.map((a) => (
               <div
-                key={a.student}
+                key={a.id}
                 className="bg-white border border-[#e7e8e9] rounded-xl p-5 flex items-center justify-between"
               >
                 <div className="flex items-center gap-4">
@@ -186,7 +214,7 @@ export default function TeacherDashboardPage() {
                   />
                   <div>
                     <p className="font-semibold text-[#191c1d]">
-                      {a.student}{' '}
+                      {a.studentName}{' '}
                       <span className="text-sm text-[#727781] font-normal">· {a.grade}</span>
                     </p>
                     <p className="text-sm text-[#424750]">{a.issue}</p>
