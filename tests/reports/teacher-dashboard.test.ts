@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildTeacherDashboardSummary } from '@/lib/reports/teacher-dashboard';
+import {
+  buildTeacherDashboardSummary,
+  buildTeacherStudentSummaries,
+} from '@/lib/reports/teacher-dashboard';
 
 describe('buildTeacherDashboardSummary', () => {
   it('summarizes linked students, mastery, activity, and unresolved alerts', () => {
@@ -41,5 +44,55 @@ describe('buildTeacherDashboardSummary', () => {
       activeToday: 0,
       needsAttention: 0,
     });
+  });
+});
+
+describe('buildTeacherStudentSummaries', () => {
+  it('prioritizes students with unresolved alerts and low mastery', () => {
+    const students = buildTeacherStudentSummaries({
+      students: [
+        {
+          id: 'student-a',
+          grade_level: 2,
+          profiles: { preferred_name: 'Ming', full_name: 'Xiao Ming' },
+        },
+        {
+          id: 'student-b',
+          grade_level: 2,
+          profiles: { full_name: 'Ada Chen' },
+        },
+      ],
+      masteryRows: [
+        { student_id: 'student-a', mastery_level: 0.75 },
+        { student_id: 'student-b', mastery_level: 0.25 },
+      ],
+      sessions: [
+        { student_id: 'student-a', status: 'completed', started_at: '2026-05-14T17:00:00.000Z' },
+        { student_id: 'student-a', status: 'started', started_at: '2026-05-14T18:00:00.000Z' },
+        { student_id: 'student-b', status: 'completed', started_at: '2026-05-13T17:00:00.000Z' },
+      ],
+      unresolvedAlerts: [{ id: 'alert-1', student_id: 'student-b' }],
+    });
+
+    expect(students).toEqual([
+      {
+        studentId: 'student-b',
+        studentName: 'Ada Chen',
+        grade: 'Grade 2',
+        averageMastery: 0.25,
+        completedSessions: 1,
+        lastActiveAt: '2026-05-13T17:00:00.000Z',
+        unresolvedAlerts: 1,
+      },
+      {
+        studentId: 'student-a',
+        studentName: 'Ming',
+        grade: 'Grade 2',
+        averageMastery: 0.75,
+        completedSessions: 1,
+        lastActiveAt: '2026-05-14T18:00:00.000Z',
+        unresolvedAlerts: 0,
+      },
+    ]);
   });
 });

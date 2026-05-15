@@ -19,6 +19,7 @@ import { SettingsDialog } from '@/components/settings';
 
 type TutorAlert = {
   id: string;
+  studentId: string;
   studentName: string;
   grade: string;
   issue: string;
@@ -30,6 +31,16 @@ type TeacherSummary = {
   averageMastery: number;
   activeToday: number;
   needsAttention: number;
+};
+
+type TeacherStudent = {
+  studentId: string;
+  studentName: string;
+  grade: string;
+  averageMastery: number;
+  completedSessions: number;
+  lastActiveAt: string | null;
+  unresolvedAlerts: number;
 };
 
 export default function TeacherDashboardPage() {
@@ -44,6 +55,8 @@ export default function TeacherDashboardPage() {
   const [resolvingAlertId, setResolvingAlertId] = useState<string | null>(null);
   const [summary, setSummary] = useState<TeacherSummary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [students, setStudents] = useState<TeacherStudent[]>([]);
+  const [studentsLoading, setStudentsLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -75,6 +88,29 @@ export default function TeacherDashboardPage() {
       .finally(() => {
         if (!cancelled) {
           setAlertsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+    setStudentsLoading(true);
+    fetch('/api/teacher/students')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.success && Array.isArray(data.students)) {
+          setStudents(data.students);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setStudentsLoading(false);
         }
       });
 
@@ -121,7 +157,15 @@ export default function TeacherDashboardPage() {
       });
 
       if (response.ok) {
+        const resolvedAlert = alerts.find((alert) => alert.id === alertId);
         setAlerts((current) => current.filter((alert) => alert.id !== alertId));
+        setStudents((current) =>
+          current.map((student) =>
+            student.studentId === resolvedAlert?.studentId
+              ? { ...student, unresolvedAlerts: Math.max(0, student.unresolvedAlerts - 1) }
+              : student,
+          ),
+        );
         setSummary((current) =>
           current
             ? { ...current, needsAttention: Math.max(0, current.needsAttention - 1) }
@@ -255,57 +299,16 @@ export default function TeacherDashboardPage() {
             ))}
           </div>
 
-          <h2 className="text-lg font-semibold text-[#191c1d] mb-4">Priority Interventions</h2>
-          <div className="flex flex-col gap-3 mb-8">
-            {alertsLoading && (
-              <div className="bg-white border border-[#e7e8e9] rounded-xl p-5 text-sm text-[#727781]">
-                Loading priority interventions...
-              </div>
-            )}
-            {!alertsLoading && alerts.length === 0 && (
-              <div className="bg-white border border-[#e7e8e9] rounded-xl p-5 text-sm text-[#727781]">
-                No unresolved tutor alerts right now.
-              </div>
-            )}
-            {alerts.map((a) => (
-              <div
-                key={a.id}
-                className="bg-white border border-[#e7e8e9] rounded-xl p-5 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={cn(
-                      'w-2 h-8 rounded-full',
-                      a.severity === 'high'
-                        ? 'bg-red-500'
-                        : a.severity === 'medium'
-                          ? 'bg-yellow-500'
-                          : 'bg-gray-300',
-                    )}
-                  />
-                  <div>
-                    <p className="font-semibold text-[#191c1d]">
-                      {a.studentName}{' '}
-                      <span className="text-sm text-[#727781] font-normal">- {a.grade}</span>
-                    </p>
-                    <p className="text-sm text-[#424750]">{a.issue}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button className="px-4 py-2 text-sm font-medium border border-[#c2c6d1] rounded-lg hover:bg-gray-50 transition-colors">
-                    Message
-                  </button>
-                  <button
-                    onClick={() => void handleResolveAlert(a.id)}
-                    disabled={resolvingAlertId === a.id}
-                    className="px-4 py-2 text-sm font-medium bg-[#003461] text-white rounded-lg hover:bg-[#002b50] disabled:cursor-not-allowed disabled:opacity-60 transition-colors"
-                  >
-                    {resolvingAlertId === a.id ? 'Resolving...' : 'Mark resolved'}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          {activeNav === 'classes' ? (
+            <ClassRoster students={students} loading={studentsLoading} />
+          ) : (
+            <PriorityInterventions
+              alerts={alerts}
+              loading={alertsLoading}
+              resolvingAlertId={resolvingAlertId}
+              onResolveAlert={handleResolveAlert}
+            />
+          )}
 
           <p className="text-sm text-[#727781] text-center">
             More features coming soon: class analytics, curriculum alignment, bulk interventions.
@@ -314,4 +317,162 @@ export default function TeacherDashboardPage() {
       </main>
     </div>
   );
+}
+
+function PriorityInterventions({
+  alerts,
+  loading,
+  resolvingAlertId,
+  onResolveAlert,
+}: {
+  alerts: TutorAlert[];
+  loading: boolean;
+  resolvingAlertId: string | null;
+  onResolveAlert: (alertId: string) => void;
+}) {
+  return (
+    <>
+      <h2 className="text-lg font-semibold text-[#191c1d] mb-4">Priority Interventions</h2>
+      <div className="flex flex-col gap-3 mb-8">
+        {loading && (
+          <div className="bg-white border border-[#e7e8e9] rounded-xl p-5 text-sm text-[#727781]">
+            Loading priority interventions...
+          </div>
+        )}
+        {!loading && alerts.length === 0 && (
+          <div className="bg-white border border-[#e7e8e9] rounded-xl p-5 text-sm text-[#727781]">
+            No unresolved tutor alerts right now.
+          </div>
+        )}
+        {alerts.map((alert) => (
+          <div
+            key={alert.id}
+            className="bg-white border border-[#e7e8e9] rounded-xl p-5 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-4">
+              <div
+                className={cn(
+                  'w-2 h-8 rounded-full',
+                  alert.severity === 'high'
+                    ? 'bg-red-500'
+                    : alert.severity === 'medium'
+                      ? 'bg-yellow-500'
+                      : 'bg-gray-300',
+                )}
+              />
+              <div>
+                <p className="font-semibold text-[#191c1d]">
+                  {alert.studentName}{' '}
+                  <span className="text-sm text-[#727781] font-normal">- {alert.grade}</span>
+                </p>
+                <p className="text-sm text-[#424750]">{alert.issue}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button className="px-4 py-2 text-sm font-medium border border-[#c2c6d1] rounded-lg hover:bg-gray-50 transition-colors">
+                Message
+              </button>
+              <button
+                onClick={() => onResolveAlert(alert.id)}
+                disabled={resolvingAlertId === alert.id}
+                className="px-4 py-2 text-sm font-medium bg-[#003461] text-white rounded-lg hover:bg-[#002b50] disabled:cursor-not-allowed disabled:opacity-60 transition-colors"
+              >
+                {resolvingAlertId === alert.id ? 'Resolving...' : 'Mark resolved'}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function ClassRoster({ students, loading }: { students: TeacherStudent[]; loading: boolean }) {
+  return (
+    <>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-semibold text-[#191c1d]">My Classes</h2>
+          <p className="text-sm text-[#727781]">Grade 2 students sorted by attention priority.</p>
+        </div>
+      </div>
+      <div className="bg-white border border-[#e7e8e9] rounded-xl overflow-hidden mb-8">
+        <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr_0.9fr_0.9fr] gap-4 px-5 py-3 bg-[#f8f9fa] text-xs font-semibold uppercase tracking-wide text-[#727781]">
+          <span>Student</span>
+          <span>Mastery</span>
+          <span>Lessons</span>
+          <span>Alerts</span>
+          <span>Last Active</span>
+        </div>
+        {loading && <RosterRowSkeleton />}
+        {!loading && students.length === 0 && (
+          <div className="px-5 py-6 text-sm text-[#727781]">
+            No linked students yet. Once a Grade 2 student is linked to this teacher, their mastery
+            and lesson activity will appear here.
+          </div>
+        )}
+        {!loading &&
+          students.map((student) => (
+            <div
+              key={student.studentId}
+              className="grid grid-cols-[1.4fr_0.8fr_0.8fr_0.9fr_0.9fr] gap-4 px-5 py-4 border-t border-[#e7e8e9] items-center"
+            >
+              <div>
+                <p className="font-semibold text-[#191c1d]">{student.studentName}</p>
+                <p className="text-sm text-[#727781]">{student.grade} Math</p>
+              </div>
+              <MasteryMeter value={student.averageMastery} />
+              <span className="text-sm font-medium text-[#424750]">
+                {student.completedSessions}
+              </span>
+              <span
+                className={cn(
+                  'w-fit rounded-full px-2.5 py-1 text-xs font-semibold',
+                  student.unresolvedAlerts > 0
+                    ? 'bg-red-50 text-red-600'
+                    : 'bg-green-50 text-green-700',
+                )}
+              >
+                {student.unresolvedAlerts > 0 ? `${student.unresolvedAlerts} open` : 'Clear'}
+              </span>
+              <span className="text-sm text-[#727781]">
+                {formatLastActive(student.lastActiveAt)}
+              </span>
+            </div>
+          ))}
+      </div>
+    </>
+  );
+}
+
+function RosterRowSkeleton() {
+  return (
+    <div className="px-5 py-6 text-sm text-[#727781] border-t border-[#e7e8e9]">
+      Loading linked students...
+    </div>
+  );
+}
+
+function MasteryMeter({ value }: { value: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-2 w-20 rounded-full bg-[#e7e8e9] overflow-hidden">
+        <div className="h-full bg-green-600" style={{ width: `${Math.round(value * 100)}%` }} />
+      </div>
+      <span className="text-sm font-medium text-[#424750]">{Math.round(value * 100)}%</span>
+    </div>
+  );
+}
+
+function formatLastActive(value: string | null) {
+  if (!value) {
+    return 'No sessions';
+  }
+
+  return new Intl.DateTimeFormat('en-CA', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(value));
 }
