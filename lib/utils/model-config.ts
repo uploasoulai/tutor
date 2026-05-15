@@ -1,4 +1,5 @@
 import { useSettingsStore } from '@/lib/store/settings';
+import { pickAutoFreeModel } from '@/lib/ai/auto-free-models';
 import {
   getThinkingConfigKey,
   normalizeThinkingConfig,
@@ -15,16 +16,23 @@ export function getCurrentModelConfig() {
 
   // Implement auto free model load-balancing
   if (providerId === 'auto') {
-    const freeModels = [
-      { p: 'siliconflow', m: 'Qwen/Qwen2.5-7B-Instruct' },
-      { p: 'siliconflow', m: 'deepseek-ai/DeepSeek-V3' },
-      { p: 'google', m: 'gemini-3.1-pro-preview' }, // user mentioned gemini 3 flash, or other free
-      { p: 'groq', m: 'llama-3.3-70b-versatile' },
-    ];
-    // pick one randomly
-    const choice = freeModels[Math.floor(Math.random() * freeModels.length)];
-    providerId = choice.p as 'siliconflow' | 'google' | 'groq';
-    modelId = choice.m;
+    const configuredProviderIds = Object.entries(storeState.providersConfig)
+      .filter(([, config]) => config.isServerConfigured || !!config.apiKey)
+      .map(([id]) => id);
+    const configuredModels = Object.fromEntries(
+      Object.entries(storeState.providersConfig).map(([id, config]) => [
+        id,
+        config.serverModels?.length ? config.serverModels : undefined,
+      ]),
+    );
+    const choice = pickAutoFreeModel({
+      configuredProviderIds,
+      configuredModels,
+      cursor: Math.floor(Date.now() / 300000),
+    });
+
+    providerId = choice.providerId;
+    modelId = choice.modelId;
   }
 
   const modelString = `${providerId}:${modelId}`;

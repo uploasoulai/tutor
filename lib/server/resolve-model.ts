@@ -6,9 +6,15 @@
  */
 
 import type { NextRequest } from 'next/server';
+import { pickAutoFreeModel } from '@/lib/ai/auto-free-models';
 import { getModel, parseModelString, type ModelWithInfo } from '@/lib/ai/providers';
 import type { ThinkingConfig } from '@/lib/types/provider';
-import { resolveApiKey, resolveBaseUrl, resolveProxy } from '@/lib/server/provider-config';
+import {
+  getServerProviders,
+  resolveApiKey,
+  resolveBaseUrl,
+  resolveProxy,
+} from '@/lib/server/provider-config';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 
 export interface ResolvedModel extends ModelWithInfo {
@@ -26,6 +32,8 @@ export interface ResolvedModel extends ModelWithInfo {
   thinkingConfig?: ThinkingConfig;
 }
 
+let autoFreeCursor = 0;
+
 /**
  * Resolve a language model from explicit parameters.
  *
@@ -42,16 +50,20 @@ export async function resolveModel(params: {
   let { providerId, modelId } = parseModelString(modelString);
 
   if (providerId === 'auto') {
-    const freeModels = [
-      { p: 'siliconflow', m: 'Qwen/Qwen2.5-7B-Instruct' },
-      { p: 'siliconflow', m: 'deepseek-ai/DeepSeek-V3' },
-      { p: 'google', m: 'gemini-1.5-flash' },
-      { p: 'groq', m: 'llama-3.3-70b-versatile' },
-    ];
-    const choice = freeModels[Math.floor(Math.random() * freeModels.length)];
-    providerId = choice.p as 'siliconflow' | 'google' | 'groq';
-    modelId = choice.m;
-    modelString = `${providerId}:${modelId}`;
+    const serverProviders = getServerProviders();
+    const configuredModels = Object.fromEntries(
+      Object.entries(serverProviders).map(([id, entry]) => [id, entry.models]),
+    );
+    const choice = pickAutoFreeModel({
+      configuredProviderIds: Object.keys(serverProviders),
+      configuredModels,
+      cursor: autoFreeCursor++,
+      envValue: process.env.AUTO_FREE_MODELS,
+    });
+
+    providerId = choice.providerId;
+    modelId = choice.modelId;
+    modelString = choice.modelString;
   }
 
   // SSRF validation applies only to client-supplied base URLs.
