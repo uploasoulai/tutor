@@ -13,6 +13,7 @@ import {
   Send,
   Settings,
   ShieldCheck,
+  Trash2,
   XCircle,
 } from 'lucide-react';
 
@@ -92,6 +93,7 @@ export default function AdminDashboardPage() {
   const [teacherLinkTeacherId, setTeacherLinkTeacherId] = useState('');
   const [teacherLinkSubject, setTeacherLinkSubject] = useState('Math');
   const [linkLoading, setLinkLoading] = useState(false);
+  const [unlinkLoadingKey, setUnlinkLoadingKey] = useState('');
   const [linkMessage, setLinkMessage] = useState('');
   const [linkError, setLinkError] = useState('');
 
@@ -300,6 +302,39 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const deleteRelationshipLink = async (payload: {
+    kind: 'parent' | 'teacher';
+    studentId: string;
+    parentId?: string;
+    teacherId?: string;
+  }) => {
+    const accountId = payload.parentId ?? payload.teacherId ?? '';
+    const loadingKey = `${payload.kind}:${accountId}:${payload.studentId}`;
+    setUnlinkLoadingKey(loadingKey);
+    setLinkError('');
+    setLinkMessage('');
+    try {
+      const response = await fetch('/api/admin/relationships/links', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = response.ok ? ((await response.json()) as { success?: boolean }) : null;
+
+      if (!data?.success) {
+        setLinkError('Relationship unlink failed. Refresh the directory and try again.');
+        return;
+      }
+
+      setLinkMessage('Relationship link removed.');
+      await loadRelationshipData();
+    } catch {
+      setLinkError('Relationship unlink failed. Refresh the directory and try again.');
+    } finally {
+      setUnlinkLoadingKey('');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f8f9fa]">
@@ -433,6 +468,11 @@ export default function AdminDashboardPage() {
               <RelationshipDirectoryPanel
                 directory={relationshipDirectory}
                 loading={directoryLoading}
+              />
+              <RelationshipExistingLinks
+                directory={relationshipDirectory}
+                unlinkLoadingKey={unlinkLoadingKey}
+                onDeleteLink={deleteRelationshipLink}
               />
               <RelationshipLinkForms
                 directory={relationshipDirectory}
@@ -774,6 +814,122 @@ function RelationshipDirectoryPanel({
           secondary: `${directory.teacherLinks.filter((link) => link.teacherId === teacher.id).length} linked`,
         }))}
       />
+    </div>
+  );
+}
+
+function RelationshipExistingLinks({
+  directory,
+  unlinkLoadingKey,
+  onDeleteLink,
+}: {
+  directory: RelationshipDirectory | null;
+  unlinkLoadingKey: string;
+  onDeleteLink: (payload: {
+    kind: 'parent' | 'teacher';
+    studentId: string;
+    parentId?: string;
+    teacherId?: string;
+  }) => void;
+}) {
+  if (!directory) return null;
+
+  const studentsById = new Map(directory.students.map((student) => [student.id, student]));
+  const parentsById = new Map(directory.parents.map((parent) => [parent.id, parent]));
+  const teachersById = new Map(directory.teachers.map((teacher) => [teacher.id, teacher]));
+  const hasLinks = directory.parentLinks.length > 0 || directory.teacherLinks.length > 0;
+
+  if (!hasLinks) {
+    return (
+      <div className="mt-5 rounded-lg border border-dashed border-[#c2c6d1] px-4 py-3 text-sm text-[#727781]">
+        No relationship links have been created yet.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-5 rounded-lg border border-[#e7e8e9] p-4">
+      <div className="flex items-center gap-2">
+        <Link2 className="h-4 w-4 text-[#003461]" />
+        <h3 className="text-sm font-semibold text-[#191c1d]">Existing relationship links</h3>
+      </div>
+      <div className="mt-4 grid gap-3">
+        {directory.parentLinks.map((link) => {
+          const student = studentsById.get(link.studentId);
+          const parent = parentsById.get(link.parentId);
+          const loadingKey = `parent:${link.parentId}:${link.studentId}`;
+          return (
+            <RelationshipLinkRow
+              key={loadingKey}
+              title={`${parent?.name ?? 'Unknown parent'} -> ${student?.name ?? 'Unknown student'}`}
+              detail="Parent access"
+              loading={unlinkLoadingKey === loadingKey}
+              onDelete={() =>
+                onDeleteLink({
+                  kind: 'parent',
+                  parentId: link.parentId,
+                  studentId: link.studentId,
+                })
+              }
+            />
+          );
+        })}
+        {directory.teacherLinks.map((link) => {
+          const student = studentsById.get(link.studentId);
+          const teacher = teachersById.get(link.teacherId);
+          const loadingKey = `teacher:${link.teacherId}:${link.studentId}`;
+          return (
+            <RelationshipLinkRow
+              key={loadingKey}
+              title={`${teacher?.name ?? 'Unknown teacher'} -> ${student?.name ?? 'Unknown student'}`}
+              detail={`Teacher access · ${link.subjects.join(', ') || 'Math'}`}
+              loading={unlinkLoadingKey === loadingKey}
+              onDelete={() =>
+                onDeleteLink({
+                  kind: 'teacher',
+                  teacherId: link.teacherId,
+                  studentId: link.studentId,
+                })
+              }
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function RelationshipLinkRow({
+  title,
+  detail,
+  loading,
+  onDelete,
+}: {
+  title: string;
+  detail: string;
+  loading: boolean;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-md bg-[#f8f9fa] px-3 py-2">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-[#191c1d]">{title}</p>
+        <p className="mt-0.5 text-xs text-[#727781]">{detail}</p>
+      </div>
+      <button
+        type="button"
+        onClick={onDelete}
+        disabled={loading}
+        className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-red-200 bg-white px-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-label={`Remove ${title}`}
+      >
+        {loading ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Trash2 className="h-3.5 w-3.5" />
+        )}
+        Remove
+      </button>
     </div>
   );
 }

@@ -13,6 +13,11 @@ export function normalizeRelationshipSubjects(subjects?: string[]) {
   return [...new Set((subjects ?? []).map((subject) => subject.trim()).filter(Boolean))];
 }
 
+export function relationshipSubjectsOrDefault(subjects?: string[]) {
+  const normalizedSubjects = normalizeRelationshipSubjects(subjects);
+  return normalizedSubjects.length ? normalizedSubjects : ['Math'];
+}
+
 export async function createParentStudentLink({
   parentId,
   studentId,
@@ -57,12 +62,12 @@ export async function createTeacherStudentLink({
   await assertRowExists('teachers', teacherId, 'Teacher account not found');
   await assertRowExists('students', studentId, 'Student account not found');
 
-  const normalizedSubjects = normalizeRelationshipSubjects(subjects);
+  const linkSubjects = relationshipSubjectsOrDefault(subjects);
   const { error } = await supabase.from('teacher_student_links').upsert(
     {
       teacher_id: teacherId,
       student_id: studentId,
-      subjects: normalizedSubjects.length ? normalizedSubjects : ['Math'],
+      subjects: linkSubjects,
     },
     { onConflict: 'teacher_id,student_id' },
   );
@@ -75,7 +80,59 @@ export async function createTeacherStudentLink({
     kind: 'teacher',
     studentId,
     accountId: teacherId,
-    subjects: normalizedSubjects.length ? normalizedSubjects : ['Math'],
+    subjects: linkSubjects,
+  };
+}
+
+export async function deleteParentStudentLink({
+  parentId,
+  studentId,
+}: {
+  parentId: string;
+  studentId: string;
+}): Promise<RelationshipLinkResult> {
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase
+    .from('parent_student_links')
+    .delete()
+    .eq('parent_id', parentId)
+    .eq('student_id', studentId);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    kind: 'parent',
+    studentId,
+    accountId: parentId,
+    subjects: [],
+  };
+}
+
+export async function deleteTeacherStudentLink({
+  teacherId,
+  studentId,
+}: {
+  teacherId: string;
+  studentId: string;
+}): Promise<RelationshipLinkResult> {
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase
+    .from('teacher_student_links')
+    .delete()
+    .eq('teacher_id', teacherId)
+    .eq('student_id', studentId);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    kind: 'teacher',
+    studentId,
+    accountId: teacherId,
+    subjects: [],
   };
 }
 
