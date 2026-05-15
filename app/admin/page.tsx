@@ -96,15 +96,18 @@ export default function AdminDashboardPage() {
   const [linkError, setLinkError] = useState('');
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace('/login');
         return;
       }
-      if (data.user.user_metadata?.role !== 'admin') {
+
+      const response = await fetch('/api/admin/me');
+      if (!response.ok) {
         router.replace('/student');
         return;
       }
+
       setLoading(false);
     });
   }, [router, supabase.auth]);

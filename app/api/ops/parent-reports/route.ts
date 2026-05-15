@@ -5,6 +5,7 @@ import {
 import { buildParentReportRunView } from '@/lib/ops/parent-report-run-status';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createClient } from '@/lib/supabase/server';
+import { AdminAuthError, assertAdminUser } from '@/lib/admin/auth';
 
 export async function POST(req: Request) {
   try {
@@ -13,12 +14,7 @@ export async function POST(req: Request) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      return apiError('INVALID_REQUEST', 401, 'Authentication required');
-    }
-    if (user.user_metadata?.role !== 'admin') {
-      return apiError('INVALID_REQUEST', 403, 'Admin account required');
-    }
+    await assertAdminUser(user);
 
     const body = (await req.json().catch(() => ({}))) as { date?: string };
     const result = await generateDailyReportsForAllParents({
@@ -27,6 +23,10 @@ export async function POST(req: Request) {
 
     return apiSuccess({ result: buildParentReportRunView(result) });
   } catch (error) {
+    if (error instanceof AdminAuthError) {
+      return apiError('INVALID_REQUEST', error.status, error.message);
+    }
+
     return apiError(
       'INTERNAL_ERROR',
       500,

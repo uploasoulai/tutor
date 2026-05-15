@@ -9,13 +9,15 @@ export default function RootPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace('/signup');
         return;
       }
       // User is logged in — route by role
-      const role = data.user.user_metadata?.role ?? 'student';
+      const response = await fetch('/api/auth/role');
+      const roleData = response.ok ? ((await response.json()) as { role?: string }) : null;
+      const role = roleData?.role ?? data.user.user_metadata?.role ?? 'student';
       if (role === 'admin') router.replace('/admin');
       else if (role === 'teacher') router.replace('/teacher');
       else if (role === 'parent') router.replace('/parent');

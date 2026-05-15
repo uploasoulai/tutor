@@ -1,7 +1,6 @@
-import { getRuntimeStatus } from '@/lib/ops/runtime-status';
+import { AdminAuthError, assertAdminUser } from '@/lib/admin/auth';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createClient } from '@/lib/supabase/server';
-import { AdminAuthError, assertAdminUser } from '@/lib/admin/auth';
 
 export async function GET() {
   try {
@@ -10,9 +9,9 @@ export async function GET() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    await assertAdminUser(user);
+    const admin = await assertAdminUser(user);
 
-    return apiSuccess({ status: getRuntimeStatus() });
+    return apiSuccess({ admin: { id: admin.id } });
   } catch (error) {
     if (error instanceof AdminAuthError) {
       return apiError('INVALID_REQUEST', error.status, error.message);
@@ -21,7 +20,7 @@ export async function GET() {
     return apiError(
       'INTERNAL_ERROR',
       500,
-      error instanceof Error ? error.message : 'Failed to load runtime status',
+      error instanceof Error ? error.message : 'Failed to verify admin account',
     );
   }
 }
