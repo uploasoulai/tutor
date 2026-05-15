@@ -15,6 +15,7 @@ import {
   Trophy,
   Volume2,
 } from 'lucide-react';
+import { nanoid } from 'nanoid';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -293,13 +294,31 @@ function LessonContent() {
 
   const handleOpenGenerator = () => {
     const prompt =
+      session?.lesson_payload?.openmaic?.requirement ??
       session?.lesson_payload?.prompt ??
       `Create an interactive lesson on ${title} for a ${grade} student aligned with BC curriculum.`;
-    sessionStorage.setItem('coastaltutor_lesson_prompt', prompt);
+    const generationSession = {
+      sessionId: `coastaltutor-${session?.id ?? nanoid(10)}`,
+      requirements: {
+        requirement: prompt,
+        userNickname: user?.user_metadata?.first_name ?? firstName,
+        userBio: `${grade} ${subject} learner. Current focus: ${title}.`,
+        webSearch: false,
+        interactiveMode: true,
+      },
+      pdfText: '',
+      pdfImages: [],
+      imageStorageIds: [],
+      sceneOutlines: null,
+      currentStep: 'generating' as const,
+    };
+
+    sessionStorage.setItem('generationSession', JSON.stringify(generationSession));
     router.push('/generation-preview');
   };
 
   const openmaic = session?.lesson_payload?.openmaic;
+  const firstName = user?.user_metadata?.first_name ?? 'Student';
 
   if (loading) {
     return (
@@ -308,8 +327,6 @@ function LessonContent() {
       </div>
     );
   }
-
-  const firstName = user?.user_metadata?.first_name ?? 'Student';
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
