@@ -64,6 +64,17 @@ export interface ParentDailyReport {
   createdAt: string;
 }
 
+export interface ParentDailyReportBatchResult {
+  ok: true;
+  checkedAt: string;
+  date: string;
+  generated: number;
+  skipped: number;
+  failed: number;
+  reports: ParentDailyReport[];
+  errors: string[];
+}
+
 export function buildDailyReportMetrics({
   sessions,
   attempts,
@@ -255,6 +266,102 @@ export async function generateParentDailyReport({
   return mapParentReport(report);
 }
 
+export async function generateDailyReportsForAllParents({
+  date = new Date(),
+}: {
+  date?: Date;
+} = {}): Promise<ParentDailyReportBatchResult> {
+  const supabase = createSupabaseAdminClient();
+  const { dateKey } = getDayRange(date);
+  const { data: parents, error: parentsError } = await supabase
+    .from('parents')
+    .select('id')
+    .eq('report_frequency', 'daily');
+
+  if (parentsError) {
+    throw new Error(parentsError.message);
+  }
+
+  const parentIds = (parents ?? []).map((parent) => parent.id as string).filter(Boolean);
+  if (parentIds.length === 0) {
+    return {
+      ok: true,
+      checkedAt: new Date().toISOString(),
+      date: dateKey,
+      generated: 0,
+      skipped: 0,
+      failed: 0,
+      reports: [],
+      errors: [],
+    };
+  }
+
+  const { data: links, error: linksError } = await supabase
+    .from('parent_student_links')
+    .select('parent_id, student_id')
+    .in('parent_id', parentIds);
+
+  if (linksError) {
+    throw new Error(linksError.message);
+  }
+
+  const reports: ParentDailyReport[] = [];
+  const errors: string[] = [];
+  let skipped = 0;
+
+  for (const link of links ?? []) {
+    const parentId = link.parent_id as string | undefined;
+    const studentId = link.student_id as string | undefined;
+
+    if (!parentId || !studentId) {
+      skipped += 1;
+      continue;
+    }
+
+    try {
+      reports.push(await generateParentDailyReport({ parentId, studentId, date }));
+    } catch (error) {
+      errors.push(
+        `${parentId}/${studentId}: ${
+          error instanceof Error ? error.message : 'Failed to generate daily report'
+        }`,
+      );
+    }
+  }
+
+  return {
+    ok: true,
+    checkedAt: new Date().toISOString(),
+    date: dateKey,
+    generated: reports.length,
+    skipped,
+    failed: errors.length,
+    reports,
+    errors,
+  };
+}
+
+export function isAuthorizedParentReportCronRequest(authHeader: string | null) {
+  const secret = process.env.PARENT_REPORT_CRON_SECRET;
+  if (!secret) return false;
+
+  return authHeader === `Bearer ${secret}`;
+}
+
+export function parseDailyReportDate(value: string | null) {
+  if (!value) return new Date();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return new Date(`${value}T12:00:00`);
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error('Invalid report date');
+  }
+
+  return parsed;
+}
+
 function average(values: number[], fallback: number) {
   if (values.length === 0) {
     return fallback;
@@ -313,16 +420,67 @@ function buildFocusAreas({
 }
 
 function getDayRange(date: Date) {
-  const dayStart = new Date(date);
-  dayStart.setHours(0, 0, 0, 0);
-  const dayEnd = new Date(dayStart);
-  dayEnd.setDate(dayEnd.getDate() + 1);
+  const timeZone = 'America/Vancouver';
+  const parts = getZonedDateParts(date, timeZone);
+  const dayStart = zonedTimeToUtc(parts.year, parts.month, parts.day, timeZone);
+  const nextDay = new Date(Date.UTC(parts.year, parts.month - 1, parts.day + 1, 12));
+  const nextParts = getZonedDateParts(nextDay, timeZone);
+  const dayEnd = zonedTimeToUtc(nextParts.year, nextParts.month, nextParts.day, timeZone);
 
   return {
     dayStart,
     dayEnd,
-    dateKey: dayStart.toISOString().slice(0, 10),
+    dateKey: `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(
+      2,
+      '0',
+    )}`,
   };
+}
+
+function getZonedDateParts(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+
+  return {
+    year: Number(parts.find((part) => part.type === 'year')?.value),
+    month: Number(parts.find((part) => part.type === 'month')?.value),
+    day: Number(parts.find((part) => part.type === 'day')?.value),
+  };
+}
+
+function zonedTimeToUtc(year: number, month: number, day: number, timeZone: string) {
+  const utcGuess = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+  const offsetMs = getTimeZoneOffsetMs(utcGuess, timeZone);
+
+  return new Date(utcGuess.getTime() - offsetMs);
+}
+
+function getTimeZoneOffsetMs(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(date);
+  const getPart = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+  const zonedAsUtc = Date.UTC(
+    getPart('year'),
+    getPart('month') - 1,
+    getPart('day'),
+    getPart('hour'),
+    getPart('minute'),
+    getPart('second'),
+  );
+
+  return zonedAsUtc - date.getTime();
 }
 
 function readStudentProfile(

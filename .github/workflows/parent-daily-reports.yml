@@ -1,0 +1,29 @@
+name: Parent Daily Reports
+
+on:
+  schedule:
+    # 21:00 America/Vancouver is 04:00 UTC during daylight time and 05:00 UTC
+    # during standard time. The API is idempotent for a parent/student/day.
+    - cron: '5 4,5 * * *'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Optional report date in YYYY-MM-DD format'
+        required: false
+        type: string
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate parent daily reports
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          PARENT_REPORT_CRON_SECRET: ${{ secrets.PARENT_REPORT_CRON_SECRET }}
+          PARENT_REPORT_DATE: ${{ inputs.date }}
+        run: node scripts/generate-parent-daily-reports.mjs
