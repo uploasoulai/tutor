@@ -6,6 +6,7 @@ import {
   buildLessonReuseKey,
   mergeOpenMAICJobStatus,
 } from '@/lib/curriculum/lesson-artifact';
+import { getTeacherPersonaById } from '@/lib/curriculum/teacher-personas';
 
 describe('Grade 2 lesson artifact builder', () => {
   it('builds stable reuse keys from student, grade, subject, and outcome', () => {
@@ -48,7 +49,13 @@ describe('Grade 2 lesson artifact builder', () => {
       outcome_code: 'MATH-2-04-addition-and-subtraction-to-100',
       knowledge_point: 'Addition and subtraction to 100',
     });
+    expect(payload.teacher).toMatchObject({
+      id: 'mira',
+      name: 'Mira',
+      style: 'Patient coach',
+    });
     expect(payload.prompt).toContain('Voyage query-retrieved BC curriculum context');
+    expect(payload.prompt).toContain('Teacher persona');
     expect(payload.prompt).toContain('Use personal strategies');
     expect(payload.slides).toHaveLength(3);
     expect(payload.slides[0].visualCue).toContain('ten-frames');
@@ -65,6 +72,25 @@ describe('Grade 2 lesson artifact builder', () => {
       retrieval: 'voyage-query-pgvector',
       estimatedDurationSeconds: 120,
     });
+  });
+
+  it('injects the selected teacher persona into lesson generation', () => {
+    const payload = buildLessonPayloadFromMatches({
+      grade: 'Grade 2',
+      subject: 'Math',
+      title: 'Number concepts to 100',
+      teacherPersona: getTeacherPersonaById('leo'),
+      matches: [],
+    });
+
+    expect(payload.teacher).toMatchObject({
+      id: 'leo',
+      name: 'Leo',
+      style: 'Game guide',
+      riveState: 'playful',
+    });
+    expect(payload.prompt).toContain('Leo');
+    expect(buildOpenMAICRequirement(payload)).toContain('Game guide');
   });
 
   it('creates an OpenMAIC requirement from Grade 2 lesson payload', () => {

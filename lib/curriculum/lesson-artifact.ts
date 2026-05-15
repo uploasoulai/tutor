@@ -4,6 +4,13 @@ import { searchBCCurriculum } from '@/lib/curriculum/search';
 import type { ClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { readClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import {
+  DEFAULT_TEACHER_PERSONA,
+  formatTeacherPersonaForLessonPrompt,
+  toTeacherPersonaSnapshot,
+  type TeacherPersona,
+  type TeacherPersonaSnapshot,
+} from '@/lib/curriculum/teacher-personas';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -15,6 +22,7 @@ export type LessonArtifactRequest = {
   outcomeId?: string;
   outcomeCode?: string;
   sessionId?: string;
+  teacherPersona?: TeacherPersona;
 };
 
 export type LessonPayload = {
@@ -27,6 +35,7 @@ export type LessonPayload = {
     knowledge_point: string;
     matches: BCCurriculumMatch[];
   };
+  teacher: TeacherPersonaSnapshot;
   slides: {
     title: string;
     body: string;
@@ -80,6 +89,7 @@ export function buildLessonReuseKey({
 }
 
 export function buildOpenMAICRequirement(payload: LessonPayload) {
+  const teacher = payload.teacher ?? toTeacherPersonaSnapshot(DEFAULT_TEACHER_PERSONA);
   const context = payload.bc_context.matches
     .slice(0, 3)
     .map(
@@ -116,7 +126,8 @@ Required quiz checks:
 ${quiz}
 
 Personalization:
-- Prefer a patient coach tone
+- Use the selected teacher style below
+${formatTeacherPersonaForLessonPrompt(teacher)}
 - If the student struggles, offer one scaffold instead of giving the final answer immediately
 - Update mastery from quiz performance after the lesson in CoastalTutor`;
 }
@@ -127,12 +138,14 @@ export function buildLessonPayloadFromMatches({
   title,
   outcomeCode = '',
   matches,
+  teacherPersona,
 }: {
   grade: string;
   subject: string;
   title: string;
   outcomeCode?: string;
   matches: BCCurriculumMatch[];
+  teacherPersona?: TeacherPersona;
 }): LessonPayload {
   const primary = matches[0];
   const contextLines = matches
@@ -146,6 +159,8 @@ export function buildLessonPayloadFromMatches({
     .join('\n');
   const focusedTitle = primary?.content_knowledge ?? title;
   const selectedOutcomeCode = outcomeCode || primary?.outcome_code || '';
+  const teacher = toTeacherPersonaSnapshot(teacherPersona ?? DEFAULT_TEACHER_PERSONA);
+  const teacherPrompt = formatTeacherPersonaForLessonPrompt(teacher);
 
   return {
     version: 1,
@@ -156,7 +171,8 @@ export function buildLessonPayloadFromMatches({
       knowledge_point: focusedTitle,
       matches,
     },
-    prompt: `Create a 2 minute ${grade} ${subject} lesson for ${focusedTitle}. Use the Voyage query-retrieved BC curriculum context below. Include short slides, voiceover cues, a warm tutor persona, one worked example, and a 3 question quiz.\n\nBC context:\n${contextLines || 'Use the selected BC learning outcome as the source of truth.'}`,
+    teacher,
+    prompt: `Create a 2 minute ${grade} ${subject} lesson for ${focusedTitle}. Use the Voyage query-retrieved BC curriculum context below. Include short slides, voiceover cues, one worked example, simple visuals, and a 3 question mini-game quiz.\n\n${teacherPrompt}\n\nBC context:\n${contextLines || 'Use the selected BC learning outcome as the source of truth.'}`,
     slides: [
       {
         title: focusedTitle,
@@ -330,6 +346,7 @@ export async function getOrCreateLessonArtifact({
   outcomeId,
   outcomeCode,
   sessionId,
+  teacherPersona,
 }: LessonArtifactRequest): Promise<LessonArtifact> {
   const supabase = createSupabaseAdminClient();
 
@@ -385,6 +402,7 @@ export async function getOrCreateLessonArtifact({
     title,
     outcomeCode,
     matches,
+    teacherPersona,
   });
   const lessonId = `lesson-${nanoid(10)}`;
   const validOutcomeId = outcomeId && UUID_RE.test(outcomeId) ? outcomeId : matches[0]?.id;

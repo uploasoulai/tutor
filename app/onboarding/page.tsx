@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
+import { TEACHER_PERSONAS } from '@/lib/curriculum/teacher-personas';
 import {
   ArrowLeft,
   ArrowRight,
@@ -38,7 +39,6 @@ const SUBJECTS = [
   { id: 'ADST', label: 'ADST', icon: Compass },
 ];
 const GOALS = ['Catch up', 'Stay on track', 'Get ahead', 'Build confidence'];
-const TUTOR_STYLES = ['Patient coach', 'Playful guide', 'Challenge mode'];
 const DAILY_MINUTES = [15, 20, 30, 45];
 
 export default function OnboardingPage() {
@@ -55,7 +55,7 @@ export default function OnboardingPage() {
     subjects: [DEFAULT_SUBJECT],
     goal: 'Build confidence',
     favoriteColor: 'Ocean blue',
-    tutorStyle: 'Patient coach',
+    tutorPersonaId: TEACHER_PERSONAS[0].id,
     dailyMinutes: 20,
     reminderTime: '21:00',
   });
@@ -76,7 +76,10 @@ export default function OnboardingPage() {
         subjects: metadata.subjects ?? current.subjects,
         goal: metadata.learning_goal ?? current.goal,
         favoriteColor: metadata.favorite_color ?? current.favoriteColor,
-        tutorStyle: metadata.tutor_style ?? current.tutorStyle,
+        tutorPersonaId:
+          metadata.tutor_persona_id ??
+          TEACHER_PERSONAS.find((persona) => persona.style === metadata.tutor_style)?.id ??
+          current.tutorPersonaId,
         dailyMinutes: metadata.daily_minutes ?? current.dailyMinutes,
         reminderTime: metadata.parent_report_time ?? current.reminderTime,
       }));
@@ -107,6 +110,9 @@ export default function OnboardingPage() {
 
     try {
       const gradeLevel = Number(profile.grade.replace('Grade ', ''));
+      const teacherPersona =
+        TEACHER_PERSONAS.find((persona) => persona.id === profile.tutorPersonaId) ??
+        TEACHER_PERSONAS[0];
       const { error: updateError } = await supabase.auth.updateUser({
         data: {
           onboarding_complete: true,
@@ -114,7 +120,8 @@ export default function OnboardingPage() {
           subjects: profile.subjects,
           learning_goal: profile.goal,
           favorite_color: profile.favoriteColor,
-          tutor_style: profile.tutorStyle,
+          tutor_persona_id: teacherPersona.id,
+          tutor_style: teacherPersona.style,
           daily_minutes: profile.dailyMinutes,
           parent_report_time: profile.reminderTime,
         },
@@ -135,7 +142,12 @@ export default function OnboardingPage() {
         grade_level: gradeLevel,
         avatar_preferences: {
           favorite_color: profile.favoriteColor,
-          teacher_style: profile.tutorStyle,
+          teacher_persona_id: teacherPersona.id,
+          teacher_name: teacherPersona.name,
+          teacher_style: teacherPersona.style,
+          teacher_avatar: teacherPersona.avatar,
+          teacher_color: teacherPersona.color,
+          teacher_rive_state: teacherPersona.riveState,
         },
         daily_target_minutes: profile.dailyMinutes,
       });
@@ -299,14 +311,36 @@ export default function OnboardingPage() {
           {step === 3 && (
             <StepShell icon={Sparkles} title="Pick the tutor personality.">
               <div className="grid gap-3">
-                {TUTOR_STYLES.map((style) => (
-                  <Choice
-                    key={style}
-                    selected={profile.tutorStyle === style}
-                    onClick={() => setProfile((current) => ({ ...current, tutorStyle: style }))}
+                {TEACHER_PERSONAS.map((persona) => (
+                  <button
+                    key={persona.id}
+                    type="button"
+                    onClick={() =>
+                      setProfile((current) => ({ ...current, tutorPersonaId: persona.id }))
+                    }
+                    className={cn(
+                      'flex items-center gap-4 rounded-lg border p-4 text-left transition-all',
+                      profile.tutorPersonaId === persona.id
+                        ? 'border-[#003461] bg-[#f0f4ff] text-[#003461]'
+                        : 'border-[#e7e8e9] bg-white text-[#424750] hover:border-[#003461]',
+                    )}
                   >
-                    {style}
-                  </Choice>
+                    <span
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
+                      style={{ backgroundColor: persona.color }}
+                    >
+                      {persona.avatar}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold">
+                        {persona.name} · {persona.style}
+                      </span>
+                      <span className="mt-1 block text-sm text-[#727781]">{persona.tone}</span>
+                    </span>
+                    {profile.tutorPersonaId === persona.id ? (
+                      <Check className="ml-auto h-4 w-4 shrink-0" />
+                    ) : null}
+                  </button>
                 ))}
               </div>
             </StepShell>

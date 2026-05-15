@@ -12,6 +12,7 @@ import { createClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { runClassroomGenerationJob } from '@/lib/server/classroom-job-runner';
 import { buildRequestOrigin } from '@/lib/server/classroom-storage';
 import { createClient } from '@/lib/supabase/server';
+import { resolveTeacherPersonaPreference } from '@/lib/curriculum/teacher-personas';
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
 
     const subject = body.subject ?? DEFAULT_SUBJECT;
     const title = body.title ?? subject;
+    const teacherPersona = resolveTeacherPersonaPreference(user.user_metadata);
     let artifact = await getOrCreateLessonArtifact({
       studentId: user.id,
       grade: body.grade ?? DEFAULT_GRADE_LABEL,
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest) {
       outcomeId: body.outcomeId,
       outcomeCode: body.outcomeCode,
       sessionId: body.sessionId,
+      teacherPersona,
     });
 
     if (!artifact.payload.openmaic) {

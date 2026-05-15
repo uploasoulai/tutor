@@ -5,6 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import {
+  getTeacherPersonaById,
+  resolveTeacherPersonaPreference,
+  TEACHER_PERSONAS,
+  type TeacherPersonaSnapshot,
+} from '@/lib/curriculum/teacher-personas';
+import {
   ArrowLeft,
   CheckCircle2,
   ChevronLeft,
@@ -34,6 +40,7 @@ type LessonSession = {
       knowledge_point: string;
       matches?: BCCurriculumContextMatch[];
     };
+    teacher?: TeacherPersonaSnapshot;
     slides?: {
       title: string;
       body: string;
@@ -68,33 +75,6 @@ type BCCurriculumContextMatch = {
   elaboration: string | null;
   similarity: number;
 };
-
-const TEACHER_PERSONAS = [
-  {
-    id: 'mira',
-    name: 'Mira',
-    style: 'Patient coach',
-    tone: 'Warm, visual, step by step',
-    avatar: 'M',
-    color: '#0f766e',
-  },
-  {
-    id: 'leo',
-    name: 'Leo',
-    style: 'Game guide',
-    tone: 'Energetic, rewards strategy',
-    avatar: 'L',
-    color: '#7c3aed',
-  },
-  {
-    id: 'sage',
-    name: 'Sage',
-    style: 'Calm explainer',
-    tone: 'Quiet, precise, confidence first',
-    avatar: 'S',
-    color: '#003461',
-  },
-];
 
 function LessonContent() {
   const router = useRouter();
@@ -156,6 +136,7 @@ function LessonContent() {
         router.replace('/login');
         return;
       }
+      setTeacherId(resolveTeacherPersonaPreference(data.user.user_metadata).id);
       setUser(data.user);
       try {
         await prepareSession();
@@ -213,6 +194,9 @@ function LessonContent() {
       coastaltutor_lesson_id: artifact.lessonId,
       lesson_payload: artifact.payload,
     });
+    if (artifact.payload?.teacher?.id) {
+      setTeacherId(artifact.payload.teacher.id);
+    }
   }
 
   async function syncOpenMAICJob() {
@@ -250,6 +234,7 @@ function LessonContent() {
   }
 
   async function buildLessonPayload() {
+    const selectedTeacher = getTeacherPersonaById(teacherId);
     return {
       bc_context: {
         grade,
@@ -257,6 +242,16 @@ function LessonContent() {
         outcome_code: outcomeCode,
         knowledge_point: title,
         matches: [],
+      },
+      teacher: {
+        id: selectedTeacher.id,
+        name: selectedTeacher.name,
+        style: selectedTeacher.style,
+        tone: selectedTeacher.tone,
+        persona: selectedTeacher.persona,
+        avatar: selectedTeacher.avatar,
+        color: selectedTeacher.color,
+        riveState: selectedTeacher.riveState,
       },
       prompt: `Create a 2 minute ${grade} ${subject} lesson for ${title}. Include BC context, a warm tutor persona, short slides, voiceover cues, and a 3 question quiz.`,
       slides: [
@@ -359,6 +354,21 @@ function LessonContent() {
     void answerQuestion(index, choice === correctChoice);
   }
 
+  async function handleTeacherSelect(nextTeacherId: string) {
+    const nextTeacher = getTeacherPersonaById(nextTeacherId);
+    setTeacherId(nextTeacher.id);
+    try {
+      await supabase.auth.updateUser({
+        data: {
+          tutor_persona_id: nextTeacher.id,
+          tutor_style: nextTeacher.style,
+        },
+      });
+    } catch {
+      // Local choice still applies to this lesson; persistence can retry on the next selection.
+    }
+  }
+
   async function finishLesson() {
     if (!user || completed) return;
 
@@ -408,7 +418,7 @@ function LessonContent() {
       requirements: {
         requirement: prompt,
         userNickname: user?.user_metadata?.first_name ?? firstName,
-        userBio: `${grade} ${subject} learner. Current focus: ${title}.`,
+        userBio: `${grade} ${subject} learner. Current focus: ${title}. Preferred teacher: ${teacher.name}, ${teacher.style}.`,
         webSearch: false,
         interactiveMode: false,
       },
@@ -427,7 +437,7 @@ function LessonContent() {
   const firstName = user?.user_metadata?.first_name ?? 'Student';
   const slides = session?.lesson_payload?.slides ?? [];
   const currentSlide = slides[currentSlideIndex];
-  const teacher = TEACHER_PERSONAS.find((item) => item.id === teacherId) ?? TEACHER_PERSONAS[0];
+  const teacher = getTeacherPersonaById(teacherId);
   const attemptedCount = answered.filter((item) => item !== undefined).length;
   const correctCount = answered.filter(Boolean).length;
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
@@ -664,7 +674,7 @@ function LessonContent() {
               {TEACHER_PERSONAS.map((persona) => (
                 <button
                   key={persona.id}
-                  onClick={() => setTeacherId(persona.id)}
+                  onClick={() => void handleTeacherSelect(persona.id)}
                   className={[
                     'rounded-md border px-3 py-2 text-left text-sm font-semibold transition-all',
                     teacherId === persona.id
