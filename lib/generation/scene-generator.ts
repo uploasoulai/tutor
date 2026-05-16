@@ -749,7 +749,7 @@ async function generateSlideContent(
   });
 
   if (!prompts) {
-    return null;
+    return generateFallbackSlideContent(outline);
   }
 
   log.debug(`Generating slide content for: ${outline.title}`);
@@ -765,7 +765,7 @@ async function generateSlideContent(
 
   if (!generatedData || !generatedData.elements || !Array.isArray(generatedData.elements)) {
     log.error(`Failed to parse AI response for: ${outline.title}`);
-    return null;
+    return generateFallbackSlideContent(outline);
   }
 
   log.debug(`Got ${generatedData.elements.length} elements for: ${outline.title}`);
@@ -832,6 +832,129 @@ async function generateSlideContent(
     background,
     remark: generatedData.remark || outline.description,
   };
+}
+
+function generateFallbackSlideContent(outline: SceneOutline): GeneratedSlideContent {
+  const keyPoints = (outline.keyPoints || []).slice(0, 3);
+  const title = escapeHtml(outline.title || 'Lesson');
+  const description = escapeHtml(outline.description || 'Let us look at the idea together.');
+  const bulletText =
+    keyPoints.length > 0
+      ? keyPoints.map((point) => `<p>${escapeHtml(point)}</p>`).join('')
+      : '<p>Notice the model.</p><p>Try one step.</p><p>Explain your strategy.</p>';
+
+  const elements: PPTElement[] = [
+    {
+      id: `shape_${nanoid(8)}`,
+      type: 'shape',
+      left: 55,
+      top: 45,
+      width: 890,
+      height: 470,
+      rotate: 0,
+      viewBox: [1, 1],
+      path: 'M 0 0 L 1 0 L 1 1 L 0 1 Z',
+      fixedRatio: false,
+      fill: '#f3f8fb',
+      outline: { color: '#d8e7f0', width: 2, style: 'solid' },
+    },
+    {
+      id: `text_${nanoid(8)}`,
+      type: 'text',
+      left: 90,
+      top: 75,
+      width: 820,
+      height: 70,
+      rotate: 0,
+      content: `<p style="font-size: 32px; font-weight: 700; color: #153243;">${title}</p>`,
+      defaultFontName: '',
+      defaultColor: '#153243',
+      textType: 'title',
+    },
+    {
+      id: `text_${nanoid(8)}`,
+      type: 'text',
+      left: 95,
+      top: 158,
+      width: 790,
+      height: 90,
+      rotate: 0,
+      content: `<p style="font-size: 21px; line-height: 1.35; color: #334155;">${description}</p>`,
+      defaultFontName: '',
+      defaultColor: '#334155',
+      textType: 'content',
+    },
+    {
+      id: `shape_${nanoid(8)}`,
+      type: 'shape',
+      left: 100,
+      top: 275,
+      width: 70,
+      height: 70,
+      rotate: 0,
+      viewBox: [1, 1],
+      path: 'M 1 0.5 A 0.5 0.5 0 1 1 0 0.5 A 0.5 0.5 0 1 1 1 0.5 Z',
+      fixedRatio: true,
+      fill: '#ffcf56',
+      outline: { color: '#b97800', width: 2, style: 'solid' },
+    },
+    {
+      id: `shape_${nanoid(8)}`,
+      type: 'shape',
+      left: 185,
+      top: 275,
+      width: 70,
+      height: 70,
+      rotate: 0,
+      viewBox: [1, 1],
+      path: 'M 1 0.5 A 0.5 0.5 0 1 1 0 0.5 A 0.5 0.5 0 1 1 1 0.5 Z',
+      fixedRatio: true,
+      fill: '#6ec6ca',
+      outline: { color: '#14747a', width: 2, style: 'solid' },
+    },
+    {
+      id: `shape_${nanoid(8)}`,
+      type: 'shape',
+      left: 270,
+      top: 275,
+      width: 70,
+      height: 70,
+      rotate: 0,
+      viewBox: [1, 1],
+      path: 'M 1 0.5 A 0.5 0.5 0 1 1 0 0.5 A 0.5 0.5 0 1 1 1 0.5 Z',
+      fixedRatio: true,
+      fill: '#f28b82',
+      outline: { color: '#a83d35', width: 2, style: 'solid' },
+    },
+    {
+      id: `text_${nanoid(8)}`,
+      type: 'text',
+      left: 400,
+      top: 260,
+      width: 490,
+      height: 170,
+      rotate: 0,
+      content: `<div style="font-size: 22px; line-height: 1.45; color: #243447;">${bulletText}</div>`,
+      defaultFontName: '',
+      defaultColor: '#243447',
+      textType: 'content',
+    },
+  ];
+
+  return {
+    elements,
+    background: { type: 'solid', color: '#ffffff' },
+    remark: `${outline.description} Use the visible counters or cards to invite a short learner response.`,
+  };
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 /**

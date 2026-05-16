@@ -69,6 +69,27 @@ describe('scene-generator language directive threading (issue #472)', () => {
       expect(lastUser()).not.toContain('{{languageDirective}}');
     });
 
+    it('falls back to deterministic slide content when the model returns invalid JSON', async () => {
+      const { aiCall } = makeCapturingAiCall('not json');
+
+      const content = await generateSceneContent(
+        baseOutline({
+          type: 'slide',
+          title: 'Introduction',
+          description: 'Introduce number concepts to 100 with counters.',
+          keyPoints: ['Count the objects', 'Show tens and ones', 'Explain the strategy'],
+        }),
+        aiCall,
+        { languageDirective: DIRECTIVE },
+      );
+
+      expect(content).toBeTruthy();
+      expect(content && 'elements' in content ? content.elements.length : 0).toBeGreaterThan(0);
+      expect(content && 'remark' in content ? content.remark : '').toContain(
+        'number concepts to 100',
+      );
+    });
+
     it('threads languageDirective into quiz content prompt', async () => {
       const { aiCall, lastUser } = makeCapturingAiCall(JSON.stringify([]));
 
