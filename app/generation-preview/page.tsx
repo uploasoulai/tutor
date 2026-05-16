@@ -34,6 +34,18 @@ import { type GenerationSessionState, ALL_STEPS, getActiveSteps } from './types'
 import { StepVisualizer } from './components/visualizers';
 
 const log = createLogger('GenerationPreview');
+const TRIAL_CLIENT_ID_KEY = 'coastaltutorTrialClientId';
+
+function getTrialClientId() {
+  if (typeof window === 'undefined') return '';
+
+  const existing = window.localStorage.getItem(TRIAL_CLIENT_ID_KEY);
+  if (existing) return existing;
+
+  const nextId = `trial-${nanoid(12)}`;
+  window.localStorage.setItem(TRIAL_CLIENT_ID_KEY, nextId);
+  return nextId;
+}
 
 function GenerationPreviewContent() {
   const router = useRouter();
@@ -110,6 +122,8 @@ function GenerationPreviewContent() {
       'x-api-key': useServerFreeFallback ? '' : modelConfig.apiKey,
       'x-base-url': useServerFreeFallback ? '' : modelConfig.baseUrl,
       'x-provider-type': useServerFreeFallback ? '' : modelConfig.providerType || '',
+      'x-generation-session-id': session?.sessionId || '',
+      'x-trial-client-id': useServerFreeFallback ? getTrialClientId() : '',
       // Image generation provider
       'x-image-provider': settings.imageProviderId || '',
       'x-image-model': settings.imageModelId || '',

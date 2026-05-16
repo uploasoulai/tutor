@@ -16,6 +16,10 @@ import {
   resolveProxy,
 } from '@/lib/server/provider-config';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import {
+  canUseCoastalTutorFreeModelTrial,
+  getCoastalTutorFreeModelTrialLimit,
+} from '@/lib/server/free-model-trial-quota';
 
 export interface ResolvedModel extends ModelWithInfo {
   /** Original model string (e.g. "openai/gpt-4o-mini") */
@@ -45,16 +49,23 @@ export async function resolveModel(params: {
   baseUrl?: string;
   providerType?: string;
   thinkingConfig?: ThinkingConfig;
+  generationSessionId?: string;
+  trialClientId?: string;
 }): Promise<ResolvedModel> {
   let modelString = params.modelString || process.env.DEFAULT_MODEL || 'auto:free';
   let { providerId, modelId } = parseModelString(modelString);
   const isAutoFreeRequest = providerId === 'auto';
   const serverFreeModelsAllowed =
-    process.env.NODE_ENV !== 'production' || process.env.ALLOW_SERVER_FREE_MODELS === 'true';
+    process.env.NODE_ENV !== 'production' ||
+    process.env.ALLOW_SERVER_FREE_MODELS === 'true' ||
+    canUseCoastalTutorFreeModelTrial({
+      sessionId: params.generationSessionId,
+      trialClientId: params.trialClientId,
+    });
 
   if (isAutoFreeRequest && !serverFreeModelsAllowed) {
     throw new Error(
-      'Server free model fallback is disabled. Configure your own model API key in settings.',
+      `This free CoastalTutor trial is limited to ${getCoastalTutorFreeModelTrialLimit()} course generations. Add your own model API key in settings to keep generating courses and unlock stronger models.`,
     );
   }
 
@@ -160,6 +171,8 @@ export async function resolveModelFromHeaders(req: NextRequest): Promise<Resolve
     apiKey: req.headers.get('x-api-key') || undefined,
     baseUrl: req.headers.get('x-base-url') || undefined,
     providerType: req.headers.get('x-provider-type') || undefined,
+    generationSessionId: req.headers.get('x-generation-session-id') || undefined,
+    trialClientId: req.headers.get('x-trial-client-id') || undefined,
   });
 }
 
