@@ -29,6 +29,8 @@ type RuntimeStatus = {
     serverFreeModelsAllowed: boolean;
     autoFreeModelsConfigured: boolean;
     gemini3FreeTierAllowed: boolean;
+    configuredFreeModelProviders: string[];
+    eligibleAutoFreeModels: string[];
   };
 };
 
@@ -370,6 +372,18 @@ export default function AdminDashboardPage() {
             {
               label: 'Gemini 3 free-tier override disabled',
               ok: !status.aiRouting.gemini3FreeTierAllowed,
+            },
+            {
+              label: `Configured free providers: ${
+                status.aiRouting.configuredFreeModelProviders.join(', ') || 'none'
+              }`,
+              ok: status.aiRouting.configuredFreeModelProviders.length > 0,
+            },
+            {
+              label: `Eligible free models: ${
+                status.aiRouting.eligibleAutoFreeModels.join(', ') || 'none'
+              }`,
+              ok: status.aiRouting.eligibleAutoFreeModels.length > 0,
             },
           ],
         },

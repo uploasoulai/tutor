@@ -10,6 +10,8 @@ describe('getRuntimeStatus', () => {
       KEEPALIVE_SECRET: '',
       ALLOW_SERVER_FREE_MODELS: 'true',
       AUTO_FREE_MODELS: 'siliconflow:Qwen/Qwen2.5-7B-Instruct',
+      SILICONFLOW_API_KEY: 'sf-key',
+      SILICONFLOW_MODELS: 'Qwen/Qwen2.5-7B-Instruct',
       ALLOW_GEMINI_3_FREE_TIER: 'false',
     });
 
@@ -25,6 +27,8 @@ describe('getRuntimeStatus', () => {
         serverFreeModelsAllowed: true,
         autoFreeModelsConfigured: true,
         gemini3FreeTierAllowed: false,
+        configuredFreeModelProviders: ['siliconflow'],
+        eligibleAutoFreeModels: ['siliconflow:Qwen/Qwen2.5-7B-Instruct'],
       },
     });
     expect(JSON.stringify(status)).not.toContain('secret-value');
