@@ -17,6 +17,12 @@ import {
   type LessonWidget,
 } from '@/lib/curriculum/lesson-widgets';
 import type { LessonProgressState } from '@/lib/curriculum/lesson-progress';
+import {
+  buildLessonBlueprint,
+  evaluateLessonQuality,
+  type LessonBlueprint,
+  type LessonQualityReport,
+} from '@/lib/curriculum/lesson-blueprint';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -48,6 +54,11 @@ export type LessonPayload = {
     voiceCue: string;
     visualCue: string;
     interaction: string;
+    visualSpec?: string;
+    manipulativeSpec?: string;
+    avatarCue?: string;
+    misconceptionCheck?: string;
+    repairMove?: string;
     widget: LessonWidget;
   }[];
   quiz: {
@@ -64,6 +75,8 @@ export type LessonPayload = {
     retrieval: 'voyage-query-pgvector';
     estimatedDurationSeconds: number;
   };
+  blueprint: LessonBlueprint;
+  quality: LessonQualityReport;
   progress?: LessonProgressState;
   openmaic?: OpenMAICLessonJob;
 };
@@ -110,6 +123,17 @@ export function buildOpenMAICRequirement(payload: LessonPayload) {
   const quiz = payload.quiz
     .map((item, index) => `${index + 1}. ${item.prompt} Expected answer: ${item.answer}`)
     .join('\n');
+  const blueprint = payload.blueprint;
+  const blueprintScenes = blueprint.scenes
+    .map(
+      (scene, index) =>
+        `${index + 1}. ${scene.phase}: ${scene.teachingMove}
+   Visual: ${scene.visualSpec}
+   Manipulative: ${scene.manipulativeSpec}
+   Misconception check: ${scene.misconceptionCheck}
+   Repair move: ${scene.repairMove}`,
+    )
+    .join('\n');
 
   return `Create a Grade 2-first OpenMAIC interactive classroom lesson.
 
@@ -126,9 +150,22 @@ Duration and structure:
 - Use concrete examples, visual representations, simple image prompts, and gentle tutor feedback
 - Include a short Rive-avatar-friendly teacher narration cue for each scene
 - Include the quiz checks below as active mini-games, not text-only slides
+- Follow the instructional design blueprint exactly before adding extra decoration
 
 BC curriculum context:
 ${context || 'Use the selected BC outcome and Grade 2 Math expectations as source of truth.'}
+
+Instructional design blueprint:
+- Child objective: ${blueprint.childFriendlyObjective}
+- Real-world story: ${blueprint.realWorldStory}
+- Worked example: ${blueprint.workedExample}
+- Guided practice: ${blueprint.guidedPractice}
+- Mini-game goal: ${blueprint.miniGameGoal}
+- Required concrete representations: ${blueprint.concreteRepresentations.join(', ')}
+- Common misconceptions: ${blueprint.commonMisconceptions.join(' | ')}
+
+Scene blueprint:
+${blueprintScenes}
 
 Required quiz checks:
 ${quiz}
@@ -170,6 +207,14 @@ export function buildLessonPayloadFromMatches({
   const teacher = toTeacherPersonaSnapshot(teacherPersona ?? DEFAULT_TEACHER_PERSONA);
   const teacherPrompt = formatTeacherPersonaForLessonPrompt(teacher);
   const widgets = buildGrade2MathWidgets(focusedTitle);
+  const blueprint = buildLessonBlueprint({
+    grade,
+    subject,
+    title: focusedTitle,
+    outcomeCode: selectedOutcomeCode,
+    matches,
+  });
+  const quality = evaluateLessonQuality(blueprint);
 
   return {
     version: 1,
@@ -181,33 +226,45 @@ export function buildLessonPayloadFromMatches({
       matches,
     },
     teacher,
-    prompt: `Create a 2 minute ${grade} ${subject} lesson for ${focusedTitle}. Use the Voyage query-retrieved BC curriculum context below. Include short slides, voiceover cues, one worked example, simple visuals, and a 3 question mini-game quiz.\n\n${teacherPrompt}\n\nBC context:\n${contextLines || 'Use the selected BC learning outcome as the source of truth.'}`,
+    prompt: `Create a 2 minute ${grade} ${subject} lesson for ${focusedTitle}. Use the Voyage query-retrieved BC curriculum context below. First follow the instructional blueprint: child objective, real-world story, worked example, guided practice, mini-game check, misconception repair, and multimodal cues. Then render short slides, voiceover cues, concrete visuals, and a 3 question mini-game quiz.\n\n${teacherPrompt}\n\nInstructional blueprint:\n- Objective: ${blueprint.childFriendlyObjective}\n- Story: ${blueprint.realWorldStory}\n- Worked example: ${blueprint.workedExample}\n- Guided practice: ${blueprint.guidedPractice}\n- Mini-game: ${blueprint.miniGameGoal}\n- Misconceptions: ${blueprint.commonMisconceptions.join(' | ')}\n- Quality score target: ${quality.score}/100\n\nBC context:\n${contextLines || 'Use the selected BC learning outcome as the source of truth.'}`,
     slides: [
       {
         title: focusedTitle,
-        body: `Connect ${focusedTitle} to a concrete Grade 2 example. Keep the explanation short and invite the student to say what they notice.`,
-        voiceCue: 'Warm, curious, and slow enough for a Grade 2 learner.',
-        visualCue:
-          'Show two neat rows of ten-frames or counting objects with a clear number label.',
-        interaction: 'Ask the learner to tap the picture that matches the number story.',
+        body: `${blueprint.realWorldStory} ${blueprint.childFriendlyObjective}`,
+        voiceCue: blueprint.scenes[0].voiceCue,
+        visualCue: blueprint.scenes[0].visualSpec,
+        interaction: blueprint.scenes[0].manipulativeSpec,
+        visualSpec: blueprint.scenes[0].visualSpec,
+        manipulativeSpec: blueprint.scenes[0].manipulativeSpec,
+        avatarCue: blueprint.scenes[0].avatarCue,
+        misconceptionCheck: blueprint.scenes[0].misconceptionCheck,
+        repairMove: blueprint.scenes[0].repairMove,
         widget: widgets[0],
       },
       {
         title: 'Try it together',
-        body:
-          primary?.elaboration?.slice(0, 220) ||
-          'Use drawings, objects, number lines, or a short story to make the idea visible.',
-        voiceCue: 'Ask one question, pause, then model one strategy.',
-        visualCue: 'Use a number line, base-ten blocks, or counters with one highlighted step.',
-        interaction: 'Let the learner choose which strategy they want the tutor to model.',
+        body: `${blueprint.workedExample} ${blueprint.guidedPractice}`,
+        voiceCue: blueprint.scenes[1].voiceCue,
+        visualCue: blueprint.scenes[1].visualSpec,
+        interaction: blueprint.scenes[1].manipulativeSpec,
+        visualSpec: blueprint.scenes[1].visualSpec,
+        manipulativeSpec: blueprint.scenes[1].manipulativeSpec,
+        avatarCue: blueprint.scenes[1].avatarCue,
+        misconceptionCheck: blueprint.scenes[1].misconceptionCheck,
+        repairMove: blueprint.scenes[1].repairMove,
         widget: widgets[1],
       },
       {
         title: 'Quick check',
-        body: 'Ask three short questions. Update mastery and XP after each answer, then save a session snapshot.',
-        voiceCue: 'Celebrate effort and name the next tiny step.',
-        visualCue: 'Show three compact quiz cards with friendly success and retry states.',
-        interaction: 'Turn each quiz item into a choice-card or reflection mini-game.',
+        body: `${blueprint.miniGameGoal} Exit ticket: ${blueprint.exitTicket}`,
+        voiceCue: blueprint.scenes[3].voiceCue,
+        visualCue: blueprint.scenes[3].visualSpec,
+        interaction: blueprint.scenes[3].manipulativeSpec,
+        visualSpec: blueprint.scenes[3].visualSpec,
+        manipulativeSpec: blueprint.scenes[3].manipulativeSpec,
+        avatarCue: blueprint.scenes[3].avatarCue,
+        misconceptionCheck: blueprint.scenes[3].misconceptionCheck,
+        repairMove: blueprint.scenes[3].repairMove,
         widget: widgets[2] ?? getFallbackLessonWidget(2, focusedTitle),
       },
     ],
@@ -245,6 +302,8 @@ export function buildLessonPayloadFromMatches({
       retrieval: 'voyage-query-pgvector',
       estimatedDurationSeconds: 120,
     },
+    blueprint,
+    quality,
   };
 }
 

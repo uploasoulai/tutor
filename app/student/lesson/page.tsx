@@ -53,6 +53,11 @@ type LessonSession = {
       voiceCue?: string;
       visualCue?: string;
       interaction?: string;
+      visualSpec?: string;
+      manipulativeSpec?: string;
+      avatarCue?: string;
+      misconceptionCheck?: string;
+      repairMove?: string;
       widget?: LessonWidget;
     }[];
     quiz?: {
@@ -660,13 +665,21 @@ function LessonContent() {
                   <div className="mt-3 rounded-md bg-white p-3 text-sm text-[#424750]">
                     <p className="font-semibold text-[#003461]">Student action</p>
                     <p className="mt-1">
-                      {currentSlide.interaction ?? 'Say what you notice and choose one strategy.'}
+                      {currentSlide.manipulativeSpec ??
+                        currentSlide.interaction ??
+                        'Say what you notice and choose one strategy.'}
                     </p>
                   </div>
+                  {currentSlide.repairMove ? (
+                    <div className="mt-3 rounded-md border border-amber-100 bg-amber-50 p-3 text-sm text-amber-800">
+                      <p className="font-semibold">If stuck</p>
+                      <p className="mt-1">{currentSlide.repairMove}</p>
+                    </div>
+                  ) : null}
                 </div>
                 <LessonWidgetPanel
                   title={currentSlide.title}
-                  cue={currentSlide.visualCue}
+                  cue={currentSlide.visualSpec ?? currentSlide.visualCue}
                   widget={currentSlide.widget ?? getFallbackLessonWidget(currentSlideIndex, title)}
                   completed={widgetAnswered[currentSlideIndex]}
                   onSignal={(value) =>

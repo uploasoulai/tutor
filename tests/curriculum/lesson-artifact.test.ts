@@ -55,10 +55,19 @@ describe('Grade 2 lesson artifact builder', () => {
       style: 'Patient coach',
     });
     expect(payload.prompt).toContain('Voyage query-retrieved BC curriculum context');
+    expect(payload.prompt).toContain('Instructional blueprint');
     expect(payload.prompt).toContain('Teacher persona');
     expect(payload.prompt).toContain('Use personal strategies');
+    expect(payload.blueprint).toMatchObject({
+      learningGoal: 'Addition and subtraction to 100',
+      gradeBand: 'early-elementary',
+    });
+    expect(payload.quality).toMatchObject({
+      passed: true,
+    });
     expect(payload.slides).toHaveLength(3);
-    expect(payload.slides[0].visualCue).toContain('ten-frames');
+    expect(payload.slides[0].visualCue).toContain('ten-frame');
+    expect(payload.slides[0].repairMove).toContain('touch or count');
     expect(payload.slides[0].widget).toMatchObject({
       kind: 'ten-frame',
       target: 7,
@@ -67,7 +76,7 @@ describe('Grade 2 lesson artifact builder', () => {
       kind: 'number-line',
       max: 100,
     });
-    expect(payload.slides[1].interaction).toContain('strategy');
+    expect(payload.slides[1].interaction).toContain('Tutor highlights');
     expect(payload.quiz.every((item) => item.outcomeCode === payload.bc_context.outcome_code)).toBe(
       true,
     );
@@ -127,6 +136,8 @@ describe('Grade 2 lesson artifact builder', () => {
     expect(requirement).toContain('OpenMAIC interactive classroom lesson');
     expect(requirement).toContain('Grade: Grade 2');
     expect(requirement).toContain('MATH-2-04-addition-and-subtraction-to-100');
+    expect(requirement).toContain('Instructional design blueprint');
+    expect(requirement).toContain('Scene blueprint');
     expect(requirement).toContain('Required quiz checks');
     expect(requirement).toContain('active mini-games');
   });
