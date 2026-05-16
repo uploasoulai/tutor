@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { syncLessonOpenMAICJob } from '@/lib/curriculum/lesson-artifact';
+import { syncLessonEngineJob } from '@/lib/curriculum/lesson-artifact';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createClient } from '@/lib/supabase/server';
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'sessionId is required');
     }
 
-    const result = await syncLessonOpenMAICJob({
+    const result = await syncLessonEngineJob({
       studentId: user.id,
       sessionId: body.sessionId,
     });
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     return apiError(
       'INTERNAL_ERROR',
       500,
-      error instanceof Error ? error.message : 'Failed to sync OpenMAIC lesson job',
+      error instanceof Error ? error.message : 'Failed to sync lesson generation job',
     );
   }
 }

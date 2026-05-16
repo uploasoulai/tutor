@@ -43,7 +43,7 @@ export type LessonBlueprint = {
 export type LessonQualityReport = {
   score: number;
   passed: boolean;
-  openmaic?: {
+  lessonEngine?: {
     status: 'queued' | 'running' | 'succeeded' | 'failed';
     scenesGenerated: number;
     expectedScenes: number;

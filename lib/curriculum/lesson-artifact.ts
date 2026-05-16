@@ -78,7 +78,7 @@ export type LessonPayload = {
   blueprint: LessonBlueprint;
   quality: LessonQualityReport;
   progress?: LessonProgressState;
-  openmaic?: OpenMAICLessonJob;
+  lessonEngine?: LessonEngineJob;
 };
 
 export type LessonArtifact = {
@@ -88,7 +88,7 @@ export type LessonArtifact = {
   payload: LessonPayload;
 };
 
-export type OpenMAICLessonJob = {
+export type LessonEngineJob = {
   jobId: string;
   status: 'queued' | 'running' | 'succeeded' | 'failed';
   pollUrl: string;
@@ -109,7 +109,7 @@ export function buildLessonReuseKey({
   return `${studentId}:${grade}:${subject}:${outcomeCode || title}`;
 }
 
-export function buildOpenMAICRequirement(payload: LessonPayload) {
+export function buildLessonEngineRequirement(payload: LessonPayload) {
   const teacher = payload.teacher ?? toTeacherPersonaSnapshot(DEFAULT_TEACHER_PERSONA);
   const context = payload.bc_context.matches
     .slice(0, 3)
@@ -135,7 +135,7 @@ export function buildOpenMAICRequirement(payload: LessonPayload) {
     )
     .join('\n');
 
-  return `Create a Grade 2-first OpenMAIC interactive classroom lesson.
+  return `Create a Grade 2-first CoastalTutor interactive classroom lesson.
 
 Audience:
 - Grade: ${payload.bc_context.grade}
@@ -308,45 +308,45 @@ export function buildLessonPayloadFromMatches({
   };
 }
 
-export function attachOpenMAICJob(
+export function attachLessonEngineJob(
   payload: LessonPayload,
-  openmaic: OpenMAICLessonJob,
+  lessonEngine: LessonEngineJob,
 ): LessonPayload {
   return {
     ...payload,
-    openmaic,
+    lessonEngine,
   };
 }
 
-export function mergeOpenMAICJobStatus(
+export function mergeLessonEngineJobStatus(
   payload: LessonPayload,
   job: ClassroomGenerationJob | null,
 ): LessonPayload {
-  if (!payload.openmaic || !job || payload.openmaic.jobId !== job.id) return payload;
+  if (!payload.lessonEngine || !job || payload.lessonEngine.jobId !== job.id) return payload;
 
-  const classroomUrl = job.result?.url ?? payload.openmaic.classroomUrl;
-  const generatedQuality = evaluateOpenMAICGenerationQuality(payload, job, classroomUrl);
+  const classroomUrl = job.result?.url ?? payload.lessonEngine.classroomUrl;
+  const generatedQuality = evaluateLessonEngineGenerationQuality(payload, job, classroomUrl);
 
   return {
     ...payload,
-    openmaic: {
-      ...payload.openmaic,
+    lessonEngine: {
+      ...payload.lessonEngine,
       status: job.status,
-      classroomId: job.result?.classroomId ?? payload.openmaic.classroomId,
+      classroomId: job.result?.classroomId ?? payload.lessonEngine.classroomId,
       classroomUrl,
     },
     quality: {
       ...payload.quality,
-      openmaic: generatedQuality,
+      lessonEngine: generatedQuality,
     },
   };
 }
 
-export function evaluateOpenMAICGenerationQuality(
+export function evaluateLessonEngineGenerationQuality(
   payload: LessonPayload,
   job: ClassroomGenerationJob,
   classroomUrl?: string,
-): NonNullable<LessonQualityReport['openmaic']> {
+): NonNullable<LessonQualityReport['lessonEngine']> {
   const expectedScenes = Math.max(3, payload.blueprint?.scenes?.length ?? 3);
   const sceneRatio = Math.min(1, job.scenesGenerated / expectedScenes);
   const statusScore =
@@ -364,7 +364,7 @@ export function evaluateOpenMAICGenerationQuality(
   const revisionNotes: string[] = [];
 
   if (job.status === 'failed') {
-    revisionNotes.push(job.error || 'OpenMAIC generation failed; retry with the same blueprint.');
+    revisionNotes.push(job.error || 'Lesson generation failed; retry with the same blueprint.');
   }
   if (job.scenesGenerated < expectedScenes) {
     revisionNotes.push(`Generated ${job.scenesGenerated}/${expectedScenes} expected scenes.`);
@@ -385,22 +385,22 @@ export function evaluateOpenMAICGenerationQuality(
   };
 }
 
-export async function updateLessonOpenMAICJob({
+export async function updateLessonEngineJob({
   sessionId,
   payload,
-  openmaic,
+  lessonEngine,
 }: {
   sessionId: string;
   payload: LessonPayload;
-  openmaic: OpenMAICLessonJob;
+  lessonEngine: LessonEngineJob;
 }) {
   const supabase = createSupabaseAdminClient();
-  const nextPayload = attachOpenMAICJob(payload, openmaic);
+  const nextPayload = attachLessonEngineJob(payload, lessonEngine);
   const { error } = await supabase
     .from('learning_sessions')
     .update({
       lesson_payload: nextPayload,
-      coastaltutor_lesson_id: openmaic.jobId,
+      coastaltutor_lesson_id: lessonEngine.jobId,
     })
     .eq('id', sessionId);
 
@@ -408,7 +408,7 @@ export async function updateLessonOpenMAICJob({
   return nextPayload;
 }
 
-export async function syncLessonOpenMAICJob({
+export async function syncLessonEngineJob({
   studentId,
   sessionId,
 }: {
@@ -429,7 +429,7 @@ export async function syncLessonOpenMAICJob({
   }
 
   const payload = session.lesson_payload as LessonPayload;
-  if (!payload.openmaic?.jobId) {
+  if (!payload.lessonEngine?.jobId) {
     return {
       sessionId,
       synced: false,
@@ -437,15 +437,16 @@ export async function syncLessonOpenMAICJob({
     };
   }
 
-  const job = await readClassroomGenerationJob(payload.openmaic.jobId);
-  const nextPayload = mergeOpenMAICJobStatus(payload, job);
+  const job = await readClassroomGenerationJob(payload.lessonEngine.jobId);
+  const nextPayload = mergeLessonEngineJobStatus(payload, job);
 
   if (nextPayload !== payload) {
     const { error: updateError } = await supabase
       .from('learning_sessions')
       .update({
         lesson_payload: nextPayload,
-        coastaltutor_lesson_id: nextPayload.openmaic?.classroomId ?? session.coastaltutor_lesson_id,
+        coastaltutor_lesson_id:
+          nextPayload.lessonEngine?.classroomId ?? session.coastaltutor_lesson_id,
       })
       .eq('id', sessionId)
       .eq('student_id', studentId);

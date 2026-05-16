@@ -57,7 +57,7 @@ type StudentSession = {
   xpEarned: number;
   activitiesCompleted: number;
   lessonQualityScore: number | null;
-  openmaicQualityScore: number | null;
+  lessonEngineQualityScore: number | null;
   canReuse: boolean;
   openPath: string;
 };
@@ -659,7 +659,7 @@ function LearningHistory({
               </span>
               <span className="text-sm text-[#424750]">
                 <span className="font-semibold text-[#727781] md:hidden">Quality: </span>
-                {formatQualityScore(session.lessonQualityScore, session.openmaicQualityScore)}
+                {formatQualityScore(session.lessonQualityScore, session.lessonEngineQualityScore)}
               </span>
               <button
                 onClick={() => onOpenSession(session.openPath)}
@@ -683,8 +683,8 @@ function formatShortDate(value: string | null) {
   }).format(new Date(value));
 }
 
-function formatQualityScore(lessonQuality: number | null, openmaicQuality: number | null) {
-  if (openmaicQuality != null) return `${openmaicQuality}/100`;
+function formatQualityScore(lessonQuality: number | null, lessonEngineQuality: number | null) {
+  if (lessonEngineQuality != null) return `${lessonEngineQuality}/100`;
   if (lessonQuality != null) return `${lessonQuality}/100`;
   return 'Pending';
 }

@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { buildFallbackSceneOutlines } from '@/lib/generation/outline-generator';
 
 describe('CoastalTutor outline fallback', () => {
-  it('builds a Grade 2 friendly three-scene outline from OpenMAIC requirements', () => {
+  it('builds a Grade 2 friendly three-scene outline from CoastalTutor requirements', () => {
     const outlines = buildFallbackSceneOutlines({
-      requirement: `Create a Grade 2-first OpenMAIC interactive classroom lesson.
+      requirement: `Create a Grade 2-first CoastalTutor interactive classroom lesson.
 
 Audience:
 - Grade: Grade 2

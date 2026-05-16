@@ -2,15 +2,16 @@ import { after, NextRequest } from 'next/server';
 import { nanoid } from 'nanoid';
 import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import {
-  buildOpenMAICRequirement,
+  buildLessonEngineRequirement,
   getOrCreateLessonArtifact,
-  syncLessonOpenMAICJob,
-  updateLessonOpenMAICJob,
+  syncLessonEngineJob,
+  updateLessonEngineJob,
 } from '@/lib/curriculum/lesson-artifact';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { createClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { runClassroomGenerationJob } from '@/lib/server/classroom-job-runner';
 import { buildRequestOrigin } from '@/lib/server/classroom-storage';
+import { resolveLessonEngineMediaFlags } from '@/lib/server/lesson-engine-media-flags';
 import { createClient } from '@/lib/supabase/server';
 import { resolveTeacherPersonaPreference } from '@/lib/curriculum/teacher-personas';
 
@@ -48,19 +49,21 @@ export async function POST(req: NextRequest) {
       teacherPersona,
     });
 
-    if (!artifact.payload.openmaic) {
+    if (!artifact.payload.lessonEngine) {
       const baseUrl = buildRequestOrigin(req);
       const jobId = nanoid(10);
-      const requirement = buildOpenMAICRequirement(artifact.payload);
+      const requirement = buildLessonEngineRequirement(artifact.payload);
+      const mediaFlags = resolveLessonEngineMediaFlags({
+        userId: user.id,
+        email: user.email,
+      });
       const generationInput = {
         requirement,
-        enableImageGeneration: false,
-        enableVideoGeneration: false,
-        enableTTS: false,
+        ...mediaFlags,
         agentMode: 'default' as const,
       };
       const job = await createClassroomGenerationJob(jobId, generationInput);
-      const openmaic = {
+      const lessonEngine = {
         jobId,
         status: job.status,
         pollUrl: `${baseUrl}/api/generate-classroom/${jobId}`,
@@ -68,10 +71,10 @@ export async function POST(req: NextRequest) {
         requirement,
         createdAt: job.createdAt,
       };
-      const payload = await updateLessonOpenMAICJob({
+      const payload = await updateLessonEngineJob({
         sessionId: artifact.sessionId,
         payload: artifact.payload,
-        openmaic,
+        lessonEngine,
       });
 
       artifact = {
@@ -82,7 +85,7 @@ export async function POST(req: NextRequest) {
 
       after(() => runClassroomGenerationJob(jobId, generationInput, baseUrl));
     } else {
-      const synced = await syncLessonOpenMAICJob({
+      const synced = await syncLessonEngineJob({
         studentId: user.id,
         sessionId: artifact.sessionId,
       });
@@ -90,8 +93,8 @@ export async function POST(req: NextRequest) {
         ...artifact,
         payload: synced.payload,
         lessonId:
-          synced.payload.openmaic?.classroomId ??
-          synced.payload.openmaic?.jobId ??
+          synced.payload.lessonEngine?.classroomId ??
+          synced.payload.lessonEngine?.jobId ??
           artifact.lessonId,
       };
     }

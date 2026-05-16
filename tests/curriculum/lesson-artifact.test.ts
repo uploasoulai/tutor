@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
-  attachOpenMAICJob,
-  buildOpenMAICRequirement,
+  attachLessonEngineJob,
+  buildLessonEngineRequirement,
   buildLessonPayloadFromMatches,
   buildLessonReuseKey,
-  evaluateOpenMAICGenerationQuality,
-  mergeOpenMAICJobStatus,
+  evaluateLessonEngineGenerationQuality,
+  mergeLessonEngineJobStatus,
 } from '@/lib/curriculum/lesson-artifact';
 import { getTeacherPersonaById } from '@/lib/curriculum/teacher-personas';
 
@@ -112,10 +112,10 @@ describe('Grade 2 lesson artifact builder', () => {
       riveState: 'playful',
     });
     expect(payload.prompt).toContain('Leo');
-    expect(buildOpenMAICRequirement(payload)).toContain('Game guide');
+    expect(buildLessonEngineRequirement(payload)).toContain('Game guide');
   });
 
-  it('creates an OpenMAIC requirement from Grade 2 lesson payload', () => {
+  it('creates a CoastalTutor requirement from Grade 2 lesson payload', () => {
     const payload = buildLessonPayloadFromMatches({
       grade: 'Grade 2',
       subject: 'Math',
@@ -136,9 +136,9 @@ describe('Grade 2 lesson artifact builder', () => {
       ],
     });
 
-    const requirement = buildOpenMAICRequirement(payload);
+    const requirement = buildLessonEngineRequirement(payload);
 
-    expect(requirement).toContain('OpenMAIC interactive classroom lesson');
+    expect(requirement).toContain('CoastalTutor interactive classroom lesson');
     expect(requirement).toContain('Grade: Grade 2');
     expect(requirement).toContain('MATH-2-04-addition-and-subtraction-to-100');
     expect(requirement).toContain('Instructional design blueprint');
@@ -147,14 +147,14 @@ describe('Grade 2 lesson artifact builder', () => {
     expect(requirement).toContain('active mini-games');
   });
 
-  it('attaches OpenMAIC job metadata without losing the structured lesson', () => {
+  it('attaches CoastalTutor job metadata without losing the structured lesson', () => {
     const payload = buildLessonPayloadFromMatches({
       grade: 'Grade 2',
       subject: 'Math',
       title: 'Number concepts to 100',
       matches: [],
     });
-    const nextPayload = attachOpenMAICJob(payload, {
+    const nextPayload = attachLessonEngineJob(payload, {
       jobId: 'job-123',
       status: 'queued',
       pollUrl: 'https://app.example.com/api/generate-classroom/job-123',
@@ -164,14 +164,14 @@ describe('Grade 2 lesson artifact builder', () => {
     });
 
     expect(nextPayload.slides).toHaveLength(3);
-    expect(nextPayload.openmaic).toMatchObject({
+    expect(nextPayload.lessonEngine).toMatchObject({
       jobId: 'job-123',
       status: 'queued',
     });
   });
 
-  it('merges succeeded OpenMAIC job result back into lesson payload', () => {
-    const payload = attachOpenMAICJob(
+  it('merges succeeded CoastalTutor job result back into lesson payload', () => {
+    const payload = attachLessonEngineJob(
       buildLessonPayloadFromMatches({
         grade: 'Grade 2',
         subject: 'Math',
@@ -188,7 +188,7 @@ describe('Grade 2 lesson artifact builder', () => {
       },
     );
 
-    const nextPayload = mergeOpenMAICJobStatus(payload, {
+    const nextPayload = mergeLessonEngineJobStatus(payload, {
       id: 'job-123',
       status: 'succeeded',
       step: 'completed',
@@ -210,12 +210,12 @@ describe('Grade 2 lesson artifact builder', () => {
       },
     });
 
-    expect(nextPayload.openmaic).toMatchObject({
+    expect(nextPayload.lessonEngine).toMatchObject({
       status: 'succeeded',
       classroomId: 'classroom-1',
       classroomUrl: 'https://app.example.com/classroom/classroom-1',
     });
-    expect(nextPayload.quality.openmaic).toMatchObject({
+    expect(nextPayload.quality.lessonEngine).toMatchObject({
       status: 'succeeded',
       scenesGenerated: 3,
       expectedScenes: 4,
@@ -226,8 +226,8 @@ describe('Grade 2 lesson artifact builder', () => {
     expect(nextPayload.slides).toHaveLength(3);
   });
 
-  it('merges failed OpenMAIC job status without removing lesson content', () => {
-    const payload = attachOpenMAICJob(
+  it('merges failed CoastalTutor job status without removing lesson content', () => {
+    const payload = attachLessonEngineJob(
       buildLessonPayloadFromMatches({
         grade: 'Grade 2',
         subject: 'Math',
@@ -244,7 +244,7 @@ describe('Grade 2 lesson artifact builder', () => {
       },
     );
 
-    const nextPayload = mergeOpenMAICJobStatus(payload, {
+    const nextPayload = mergeLessonEngineJobStatus(payload, {
       id: 'job-123',
       status: 'failed',
       step: 'failed',
@@ -262,17 +262,17 @@ describe('Grade 2 lesson artifact builder', () => {
       error: 'model unavailable',
     });
 
-    expect(nextPayload.openmaic?.status).toBe('failed');
-    expect(nextPayload.quality.openmaic).toMatchObject({
+    expect(nextPayload.lessonEngine?.status).toBe('failed');
+    expect(nextPayload.quality.lessonEngine).toMatchObject({
       status: 'failed',
       scenesGenerated: 0,
       passed: false,
     });
-    expect(nextPayload.quality.openmaic?.revisionNotes.length).toBeGreaterThan(0);
+    expect(nextPayload.quality.lessonEngine?.revisionNotes.length).toBeGreaterThan(0);
     expect(nextPayload.quiz).toHaveLength(3);
   });
 
-  it('scores partial OpenMAIC generations below the ready threshold', () => {
+  it('scores partial CoastalTutor generations below the ready threshold', () => {
     const payload = buildLessonPayloadFromMatches({
       grade: 'Grade 2',
       subject: 'Math',
@@ -280,7 +280,7 @@ describe('Grade 2 lesson artifact builder', () => {
       matches: [],
     });
 
-    const quality = evaluateOpenMAICGenerationQuality(payload, {
+    const quality = evaluateLessonEngineGenerationQuality(payload, {
       id: 'job-123',
       status: 'running',
       step: 'generating_scenes',

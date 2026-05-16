@@ -73,7 +73,7 @@ type LessonSession = {
     quality?: {
       score: number;
       passed: boolean;
-      openmaic?: {
+      lessonEngine?: {
         status: 'queued' | 'running' | 'succeeded' | 'failed';
         scenesGenerated: number;
         expectedScenes: number;
@@ -84,7 +84,7 @@ type LessonSession = {
         revisionNotes: string[];
       };
     };
-    openmaic?: {
+    lessonEngine?: {
       jobId: string;
       status: 'queued' | 'running' | 'succeeded' | 'failed';
       pollUrl: string;
@@ -153,7 +153,7 @@ function LessonContent() {
   const [teacherId, setTeacherId] = useState(TEACHER_PERSONAS[0].id);
   const [xp, setXp] = useState(0);
   const [completed, setCompleted] = useState(false);
-  const [syncingOpenMAIC, setSyncingOpenMAIC] = useState(false);
+  const [syncingLessonEngine, setSyncingLessonEngine] = useState(false);
 
   const quiz = useMemo(
     () =>
@@ -209,17 +209,17 @@ function LessonContent() {
   }, [router, supabase.auth]);
 
   useEffect(() => {
-    const openmaic = session?.lesson_payload?.openmaic;
-    if (!session?.id || !UUID_RE.test(session.id) || !openmaic) return;
-    if (openmaic.status === 'succeeded' || openmaic.status === 'failed') return;
+    const lessonEngine = session?.lesson_payload?.lessonEngine;
+    if (!session?.id || !UUID_RE.test(session.id) || !lessonEngine) return;
+    if (lessonEngine.status === 'succeeded' || lessonEngine.status === 'failed') return;
 
     const timer = window.setInterval(() => {
-      void syncOpenMAICJob();
-    }, openmaic.pollIntervalMs || 5000);
+      void syncLessonEngineJob();
+    }, lessonEngine.pollIntervalMs || 5000);
 
     return () => window.clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.id, session?.lesson_payload?.openmaic?.status]);
+  }, [session?.id, session?.lesson_payload?.lessonEngine?.status]);
 
   async function prepareSession() {
     const response = await fetch('/api/student/lesson', {
@@ -264,12 +264,12 @@ function LessonContent() {
     setXp(progress.correct * 8);
   }
 
-  async function syncOpenMAICJob() {
+  async function syncLessonEngineJob() {
     if (!session?.id || !UUID_RE.test(session.id)) return;
 
     try {
-      setSyncingOpenMAIC(true);
-      const response = await fetch('/api/student/lesson/sync-openmaic', {
+      setSyncingLessonEngine(true);
+      const response = await fetch('/api/student/lesson/sync-engine', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId: session.id }),
@@ -294,7 +294,7 @@ function LessonContent() {
     } catch {
       // Polling is opportunistic; the poll URL remains available for manual checks.
     } finally {
-      setSyncingOpenMAIC(false);
+      setSyncingLessonEngine(false);
     }
   }
 
@@ -551,19 +551,19 @@ function LessonContent() {
   }
 
   const handleOpenGenerator = () => {
-    const classroomUrl = session?.lesson_payload?.openmaic?.classroomUrl;
+    const classroomUrl = session?.lesson_payload?.lessonEngine?.classroomUrl;
     if (classroomUrl) {
       window.open(classroomUrl, '_blank', 'noopener,noreferrer');
       return;
     }
 
-    if (session?.lesson_payload?.openmaic?.jobId) {
-      void syncOpenMAICJob();
+    if (session?.lesson_payload?.lessonEngine?.jobId) {
+      void syncLessonEngineJob();
       return;
     }
 
     const prompt =
-      session?.lesson_payload?.openmaic?.requirement ??
+      session?.lesson_payload?.lessonEngine?.requirement ??
       session?.lesson_payload?.prompt ??
       `Create an interactive lesson on ${title} for a ${grade} student aligned with BC curriculum.`;
     const generationSession = {
@@ -586,7 +586,7 @@ function LessonContent() {
     router.push('/generation-preview');
   };
 
-  const openmaic = session?.lesson_payload?.openmaic;
+  const lessonEngine = session?.lesson_payload?.lessonEngine;
   const quality = session?.lesson_payload?.quality;
   const firstName = user?.user_metadata?.first_name ?? 'Student';
   const slides = session?.lesson_payload?.slides ?? [];
@@ -654,10 +654,10 @@ function LessonContent() {
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#003461] px-4 text-sm font-semibold text-white hover:bg-[#002b50]"
               >
                 <Sparkles className="h-4 w-4" />
-                {openmaic?.classroomUrl
+                {lessonEngine?.classroomUrl
                   ? 'Open classroom'
-                  : openmaic?.jobId
-                    ? syncingOpenMAIC
+                  : lessonEngine?.jobId
+                    ? syncingLessonEngine
                       ? 'Checking...'
                       : 'Check generation'
                     : 'Open generator'}
@@ -860,33 +860,34 @@ function LessonContent() {
           </div>
 
           <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-[#191c1d]">OpenMAIC engine</h2>
-            {openmaic ? (
+            <h2 className="text-base font-semibold text-[#191c1d]">CoastalTutor engine</h2>
+            {lessonEngine ? (
               <div className="mt-4 space-y-3">
                 <div className="rounded-md bg-[#f8f9fa] p-3">
                   <p className="text-xs font-semibold uppercase tracking-wider text-[#727781]">
                     Job
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-[#191c1d]">{openmaic.jobId}</p>
-                  <p className="mt-1 text-xs text-[#727781]">status: {openmaic.status}</p>
-                  {quality?.openmaic ? (
+                  <p className="mt-1 text-sm font-semibold text-[#191c1d]">{lessonEngine.jobId}</p>
+                  <p className="mt-1 text-xs text-[#727781]">status: {lessonEngine.status}</p>
+                  {quality?.lessonEngine ? (
                     <p className="mt-1 text-xs text-[#727781]">
-                      scenes: {quality.openmaic.scenesGenerated}/{quality.openmaic.expectedScenes}
+                      scenes: {quality.lessonEngine.scenesGenerated}/
+                      {quality.lessonEngine.expectedScenes}
                     </p>
                   ) : null}
                 </div>
                 <a
-                  href={openmaic.classroomUrl ?? openmaic.pollUrl}
+                  href={lessonEngine.classroomUrl ?? lessonEngine.pollUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex h-9 items-center gap-2 rounded-md border border-[#e7e8e9] px-3 text-sm font-semibold text-[#003461] hover:bg-[#f0f4ff]"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  {openmaic.classroomUrl ? 'Open classroom' : 'Check generation'}
+                  {lessonEngine.classroomUrl ? 'Open classroom' : 'Check generation'}
                 </a>
-                {openmaic.status !== 'succeeded' && openmaic.status !== 'failed' ? (
+                {lessonEngine.status !== 'succeeded' && lessonEngine.status !== 'failed' ? (
                   <button
-                    onClick={() => void syncOpenMAICJob()}
+                    onClick={() => void syncLessonEngineJob()}
                     className="ml-2 inline-flex h-9 items-center gap-2 rounded-md border border-[#e7e8e9] px-3 text-sm font-semibold text-[#424750] hover:bg-[#f8f9fa]"
                   >
                     Sync
@@ -895,8 +896,8 @@ function LessonContent() {
               </div>
             ) : (
               <p className="mt-4 text-sm text-[#727781]">
-                Structured lesson is ready. OpenMAIC generation will attach when the server job is
-                queued.
+                Structured lesson is ready. CoastalTutor generation will attach when the server job
+                is queued.
               </p>
             )}
             {quality ? (
@@ -907,10 +908,10 @@ function LessonContent() {
                 <p className="mt-1 text-sm font-semibold text-[#191c1d]">
                   {quality.score}/100 {quality.passed ? 'ready' : 'needs review'}
                 </p>
-                {quality.openmaic ? (
+                {quality.lessonEngine ? (
                   <p className="mt-1 text-xs font-semibold text-[#003461]">
-                    OpenMAIC {quality.openmaic.score}/100{' '}
-                    {quality.openmaic.passed ? 'ready' : 'generating'}
+                    CoastalTutor {quality.lessonEngine.score}/100{' '}
+                    {quality.lessonEngine.passed ? 'ready' : 'generating'}
                   </p>
                 ) : null}
               </div>

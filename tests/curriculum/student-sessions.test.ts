@@ -24,7 +24,7 @@ describe('mapStudentSession', () => {
         },
         quality: {
           score: 100,
-          openmaic: {
+          lessonEngine: {
             score: 93,
           },
         },
@@ -38,7 +38,7 @@ describe('mapStudentSession', () => {
       xpEarned: 24,
       activitiesCompleted: 3,
       lessonQualityScore: 100,
-      openmaicQualityScore: 93,
+      lessonEngineQualityScore: 93,
       canReuse: true,
       openPath: '/student/lesson?sessionId=session-1',
     });

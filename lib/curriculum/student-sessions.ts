@@ -9,7 +9,7 @@ export interface StudentSessionListItem {
   xpEarned: number;
   activitiesCompleted: number;
   lessonQualityScore: number | null;
-  openmaicQualityScore: number | null;
+  lessonEngineQualityScore: number | null;
   reuseKey: string | null;
   canReuse: boolean;
   openPath: string;
@@ -28,7 +28,7 @@ export function mapStudentSession(row: Record<string, unknown>): StudentSessionL
     xpEarned: Number(row.xp_earned ?? 0),
     activitiesCompleted: countLessonProgressActivities(row.lesson_payload),
     lessonQualityScore: readLessonQualityScore(row.lesson_payload, 'score'),
-    openmaicQualityScore: readOpenMAICQualityScore(row.lesson_payload),
+    lessonEngineQualityScore: readLessonEngineQualityScore(row.lesson_payload),
     reuseKey,
     canReuse: !!reuseKey && ['planned', 'generated', 'started', 'completed'].includes(status),
     openPath: `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`,
@@ -87,14 +87,14 @@ function readLessonQualityScore(payload: unknown, key: 'score') {
   return typeof value === 'number' ? value : null;
 }
 
-function readOpenMAICQualityScore(payload: unknown) {
+function readLessonEngineQualityScore(payload: unknown) {
   const quality =
     payload && typeof payload === 'object' ? (payload as { quality?: unknown }).quality : null;
   if (!quality || typeof quality !== 'object') return null;
 
-  const openmaic = (quality as { openmaic?: unknown }).openmaic;
-  if (!openmaic || typeof openmaic !== 'object') return null;
+  const lessonEngine = (quality as { lessonEngine?: unknown }).lessonEngine;
+  if (!lessonEngine || typeof lessonEngine !== 'object') return null;
 
-  const value = (openmaic as { score?: unknown }).score;
+  const value = (lessonEngine as { score?: unknown }).score;
   return typeof value === 'number' ? value : null;
 }
