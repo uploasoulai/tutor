@@ -3,7 +3,15 @@
 import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle2, Sparkles, AlertCircle, AlertTriangle, ArrowLeft, Bot } from 'lucide-react';
+import {
+  CheckCircle2,
+  Sparkles,
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  Bot,
+  Volume2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -22,7 +30,10 @@ import {
 } from '@/lib/utils/image-storage';
 import { getCurrentModelConfig } from '@/lib/utils/model-config';
 import { db } from '@/lib/utils/database';
-import { shouldUseServerFreeModelFallback } from '@/lib/generation/model-routing';
+import {
+  isCoastalTutorGenerationSession,
+  shouldUseServerFreeModelFallback,
+} from '@/lib/generation/model-routing';
 import { MAX_PDF_CONTENT_CHARS, MAX_VISION_IMAGES } from '@/lib/constants/generation';
 import { buildVideoManifestFromOutlines } from '@/lib/media/video-manifest';
 import { nanoid } from 'nanoid';
@@ -35,6 +46,7 @@ import { StepVisualizer } from './components/visualizers';
 
 const log = createLogger('GenerationPreview');
 const TRIAL_CLIENT_ID_KEY = 'coastaltutorTrialClientId';
+const FREE_TRIAL_LESSON_LIMIT = 2;
 
 function getTrialClientId() {
   if (typeof window === 'undefined') return '';
@@ -45,6 +57,14 @@ function getTrialClientId() {
   const nextId = `trial-${nanoid(12)}`;
   window.localStorage.setItem(TRIAL_CLIENT_ID_KEY, nextId);
   return nextId;
+}
+
+function formatGenerationError(message: string) {
+  if (message.includes('free CoastalTutor trial') || message.includes('own model API key')) {
+    return `This tester account can generate up to ${FREE_TRIAL_LESSON_LIMIT} free sample lessons with CoastalTutor's shared model pool. To keep generating, add your own model API key in settings. Personal keys can also unlock stronger models, image/video generation, and higher-quality cloud TTS.`;
+  }
+
+  return message;
 }
 
 function GenerationPreviewContent() {
@@ -943,6 +963,10 @@ function GenerationPreviewContent() {
     activeSteps.length > 0
       ? activeSteps[Math.min(currentStepIndex, activeSteps.length - 1)]
       : ALL_STEPS[0];
+  const modelConfig = getCurrentModelConfig();
+  const isCoastalTutorTrial =
+    isCoastalTutorGenerationSession(session.sessionId) && !modelConfig.apiKey?.trim();
+  const displayError = error ? formatGenerationError(error) : null;
 
   return (
     <div className="min-h-[100dvh] w-full bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center p-4 relative overflow-hidden text-center">
@@ -1055,14 +1079,34 @@ function GenerationPreviewContent() {
                           : t(activeStep.title)}
                     </h2>
                     <p className="text-muted-foreground text-base">
-                      {error
-                        ? error
+                      {displayError
+                        ? displayError
                         : isComplete
                           ? t('generation.classroomReady')
                           : statusMessage || t(activeStep.description)}
                     </p>
                   </motion.div>
                 </AnimatePresence>
+
+                {isCoastalTutorTrial && !isComplete ? (
+                  <div className="rounded-lg border border-blue-200/70 bg-blue-50/80 p-3 text-left text-xs leading-relaxed text-blue-950 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-100">
+                    <div className="flex gap-2">
+                      <Sparkles className="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-300" />
+                      <p>
+                        Free trial generation is limited to {FREE_TRIAL_LESSON_LIMIT} sample
+                        lessons. Browser Native TTS is free and will read teacher speech during
+                        playback.
+                      </p>
+                    </div>
+                    <div className="mt-2 flex gap-2">
+                      <Volume2 className="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-300" />
+                      <p>
+                        Add your own model key later for stronger lesson reasoning, image/video
+                        generation, and premium cloud voices.
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
 
                 {/* Truncation warning indicator */}
                 <AnimatePresence>
