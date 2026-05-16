@@ -325,6 +325,7 @@ export function mergeOpenMAICJobStatus(
   if (!payload.openmaic || !job || payload.openmaic.jobId !== job.id) return payload;
 
   const classroomUrl = job.result?.url ?? payload.openmaic.classroomUrl;
+  const generatedQuality = evaluateOpenMAICGenerationQuality(payload, job, classroomUrl);
 
   return {
     ...payload,
@@ -336,13 +337,51 @@ export function mergeOpenMAICJobStatus(
     },
     quality: {
       ...payload.quality,
-      openmaic: {
-        status: job.status,
-        scenesGenerated: job.scenesGenerated,
-        classroomUrl,
-        checkedAt: job.updatedAt,
-      },
+      openmaic: generatedQuality,
     },
+  };
+}
+
+export function evaluateOpenMAICGenerationQuality(
+  payload: LessonPayload,
+  job: ClassroomGenerationJob,
+  classroomUrl?: string,
+): NonNullable<LessonQualityReport['openmaic']> {
+  const expectedScenes = Math.max(3, payload.blueprint?.scenes?.length ?? 3);
+  const sceneRatio = Math.min(1, job.scenesGenerated / expectedScenes);
+  const statusScore =
+    job.status === 'succeeded'
+      ? 45
+      : job.status === 'running'
+        ? 25
+        : job.status === 'queued'
+          ? 10
+          : 0;
+  const sceneScore = Math.round(sceneRatio * 30);
+  const urlScore = classroomUrl ? 15 : 0;
+  const completionScore = job.progress >= 100 ? 10 : Math.round(Math.max(0, job.progress) / 10);
+  const score = Math.min(100, statusScore + sceneScore + urlScore + completionScore);
+  const revisionNotes: string[] = [];
+
+  if (job.status === 'failed') {
+    revisionNotes.push(job.error || 'OpenMAIC generation failed; retry with the same blueprint.');
+  }
+  if (job.scenesGenerated < expectedScenes) {
+    revisionNotes.push(`Generated ${job.scenesGenerated}/${expectedScenes} expected scenes.`);
+  }
+  if (!classroomUrl) {
+    revisionNotes.push('No classroom URL is available yet.');
+  }
+
+  return {
+    status: job.status,
+    scenesGenerated: job.scenesGenerated,
+    expectedScenes,
+    score,
+    passed: score >= 85 && job.status === 'succeeded',
+    classroomUrl,
+    checkedAt: job.updatedAt,
+    revisionNotes,
   };
 }
 

@@ -22,6 +22,12 @@ describe('mapStudentSession', () => {
             'widget-1': { isCorrect: false },
           },
         },
+        quality: {
+          score: 100,
+          openmaic: {
+            score: 93,
+          },
+        },
       },
     });
 
@@ -31,6 +37,8 @@ describe('mapStudentSession', () => {
       accuracyRate: 0.68,
       xpEarned: 24,
       activitiesCompleted: 3,
+      lessonQualityScore: 100,
+      openmaicQualityScore: 93,
       canReuse: true,
       openPath: '/student/lesson?sessionId=session-1',
     });

@@ -56,6 +56,8 @@ type StudentSession = {
   accuracyRate: number | null;
   xpEarned: number;
   activitiesCompleted: number;
+  lessonQualityScore: number | null;
+  openmaicQualityScore: number | null;
   canReuse: boolean;
   openPath: string;
 };
@@ -608,12 +610,13 @@ function LearningHistory({
         </h2>
       </div>
       <div className="rounded-lg border border-[#e7e8e9] bg-white shadow-sm">
-        <div className="hidden grid-cols-[minmax(0,1fr)_110px_120px_100px_90px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781] md:grid">
+        <div className="hidden grid-cols-[minmax(0,1fr)_110px_120px_100px_90px_100px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781] md:grid">
           <span>Lesson</span>
           <span>Status</span>
           <span>Accuracy</span>
           <span>Activities</span>
           <span>XP</span>
+          <span>Quality</span>
           <span>Action</span>
         </div>
         {loading && <div className="p-6 text-sm text-[#727781]">Loading learning history...</div>}
@@ -627,7 +630,7 @@ function LearningHistory({
           sessions.map((session) => (
             <div
               key={session.id}
-              className="grid gap-3 border-t border-[#e7e8e9] p-4 first:border-t-0 md:grid-cols-[minmax(0,1fr)_110px_120px_100px_90px_90px] md:items-center md:gap-4 md:px-5"
+              className="grid gap-3 border-t border-[#e7e8e9] p-4 first:border-t-0 md:grid-cols-[minmax(0,1fr)_110px_120px_100px_90px_100px_90px] md:items-center md:gap-4 md:px-5"
             >
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-[#191c1d] md:truncate">
@@ -654,6 +657,10 @@ function LearningHistory({
                 <span className="font-semibold text-[#727781] md:hidden">XP: </span>
                 {session.xpEarned}
               </span>
+              <span className="text-sm text-[#424750]">
+                <span className="font-semibold text-[#727781] md:hidden">Quality: </span>
+                {formatQualityScore(session.lessonQualityScore, session.openmaicQualityScore)}
+              </span>
               <button
                 onClick={() => onOpenSession(session.openPath)}
                 className="rounded-md bg-[#003461] px-3 py-2 text-xs font-semibold text-white hover:bg-[#002b50]"
@@ -674,4 +681,10 @@ function formatShortDate(value: string | null) {
     month: 'short',
     day: 'numeric',
   }).format(new Date(value));
+}
+
+function formatQualityScore(lessonQuality: number | null, openmaicQuality: number | null) {
+  if (openmaicQuality != null) return `${openmaicQuality}/100`;
+  if (lessonQuality != null) return `${lessonQuality}/100`;
+  return 'Pending';
 }

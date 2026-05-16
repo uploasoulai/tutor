@@ -76,8 +76,12 @@ type LessonSession = {
       openmaic?: {
         status: 'queued' | 'running' | 'succeeded' | 'failed';
         scenesGenerated: number;
+        expectedScenes: number;
+        score: number;
+        passed: boolean;
         classroomUrl?: string;
         checkedAt: string;
+        revisionNotes: string[];
       };
     };
     openmaic?: {
@@ -867,7 +871,7 @@ function LessonContent() {
                   <p className="mt-1 text-xs text-[#727781]">status: {openmaic.status}</p>
                   {quality?.openmaic ? (
                     <p className="mt-1 text-xs text-[#727781]">
-                      scenes: {quality.openmaic.scenesGenerated}
+                      scenes: {quality.openmaic.scenesGenerated}/{quality.openmaic.expectedScenes}
                     </p>
                   ) : null}
                 </div>
@@ -903,6 +907,12 @@ function LessonContent() {
                 <p className="mt-1 text-sm font-semibold text-[#191c1d]">
                   {quality.score}/100 {quality.passed ? 'ready' : 'needs review'}
                 </p>
+                {quality.openmaic ? (
+                  <p className="mt-1 text-xs font-semibold text-[#003461]">
+                    OpenMAIC {quality.openmaic.score}/100{' '}
+                    {quality.openmaic.passed ? 'ready' : 'generating'}
+                  </p>
+                ) : null}
               </div>
             ) : null}
           </div>

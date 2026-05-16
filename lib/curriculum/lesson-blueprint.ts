@@ -46,8 +46,12 @@ export type LessonQualityReport = {
   openmaic?: {
     status: 'queued' | 'running' | 'succeeded' | 'failed';
     scenesGenerated: number;
+    expectedScenes: number;
+    score: number;
+    passed: boolean;
     classroomUrl?: string;
     checkedAt: string;
+    revisionNotes: string[];
   };
   checks: {
     bcAligned: boolean;

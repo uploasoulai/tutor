@@ -8,6 +8,8 @@ export interface StudentSessionListItem {
   accuracyRate: number | null;
   xpEarned: number;
   activitiesCompleted: number;
+  lessonQualityScore: number | null;
+  openmaicQualityScore: number | null;
   reuseKey: string | null;
   canReuse: boolean;
   openPath: string;
@@ -25,6 +27,8 @@ export function mapStudentSession(row: Record<string, unknown>): StudentSessionL
     accuracyRate: typeof row.accuracy_rate === 'number' ? roundRatio(row.accuracy_rate) : null,
     xpEarned: Number(row.xp_earned ?? 0),
     activitiesCompleted: countLessonProgressActivities(row.lesson_payload),
+    lessonQualityScore: readLessonQualityScore(row.lesson_payload, 'score'),
+    openmaicQualityScore: readOpenMAICQualityScore(row.lesson_payload),
     reuseKey,
     canReuse: !!reuseKey && ['planned', 'generated', 'started', 'completed'].includes(status),
     openPath: `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`,
@@ -72,4 +76,25 @@ function countLessonProgressActivities(payload: unknown) {
 
 function countRecordKeys(value: unknown) {
   return value && typeof value === 'object' ? Object.keys(value).length : 0;
+}
+
+function readLessonQualityScore(payload: unknown, key: 'score') {
+  const quality =
+    payload && typeof payload === 'object' ? (payload as { quality?: unknown }).quality : null;
+  if (!quality || typeof quality !== 'object') return null;
+
+  const value = (quality as Record<string, unknown>)[key];
+  return typeof value === 'number' ? value : null;
+}
+
+function readOpenMAICQualityScore(payload: unknown) {
+  const quality =
+    payload && typeof payload === 'object' ? (payload as { quality?: unknown }).quality : null;
+  if (!quality || typeof quality !== 'object') return null;
+
+  const openmaic = (quality as { openmaic?: unknown }).openmaic;
+  if (!openmaic || typeof openmaic !== 'object') return null;
+
+  const value = (openmaic as { score?: unknown }).score;
+  return typeof value === 'number' ? value : null;
 }

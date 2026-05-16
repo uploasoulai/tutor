@@ -4,6 +4,7 @@ import {
   buildOpenMAICRequirement,
   buildLessonPayloadFromMatches,
   buildLessonReuseKey,
+  evaluateOpenMAICGenerationQuality,
   mergeOpenMAICJobStatus,
 } from '@/lib/curriculum/lesson-artifact';
 import { getTeacherPersonaById } from '@/lib/curriculum/teacher-personas';
@@ -217,6 +218,9 @@ describe('Grade 2 lesson artifact builder', () => {
     expect(nextPayload.quality.openmaic).toMatchObject({
       status: 'succeeded',
       scenesGenerated: 3,
+      expectedScenes: 4,
+      score: 93,
+      passed: true,
       classroomUrl: 'https://app.example.com/classroom/classroom-1',
     });
     expect(nextPayload.slides).toHaveLength(3);
@@ -259,6 +263,43 @@ describe('Grade 2 lesson artifact builder', () => {
     });
 
     expect(nextPayload.openmaic?.status).toBe('failed');
+    expect(nextPayload.quality.openmaic).toMatchObject({
+      status: 'failed',
+      scenesGenerated: 0,
+      passed: false,
+    });
+    expect(nextPayload.quality.openmaic?.revisionNotes.length).toBeGreaterThan(0);
     expect(nextPayload.quiz).toHaveLength(3);
+  });
+
+  it('scores partial OpenMAIC generations below the ready threshold', () => {
+    const payload = buildLessonPayloadFromMatches({
+      grade: 'Grade 2',
+      subject: 'Math',
+      title: 'Number concepts to 100',
+      matches: [],
+    });
+
+    const quality = evaluateOpenMAICGenerationQuality(payload, {
+      id: 'job-123',
+      status: 'running',
+      step: 'generating_scenes',
+      progress: 55,
+      message: 'Generating',
+      createdAt: '2026-05-14T00:00:00.000Z',
+      updatedAt: '2026-05-14T00:01:00.000Z',
+      inputSummary: {
+        requirementPreview: 'Create a lesson',
+        hasPdf: false,
+        pdfTextLength: 0,
+        pdfImageCount: 0,
+      },
+      scenesGenerated: 2,
+      totalScenes: 4,
+    });
+
+    expect(quality.passed).toBe(false);
+    expect(quality.score).toBeLessThan(85);
+    expect(quality.revisionNotes).toContain('Generated 2/4 expected scenes.');
   });
 });
