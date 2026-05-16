@@ -98,7 +98,7 @@ export async function resolveModel(params: {
       throw new Error(
         `No configured provider matches AUTO_FREE_MODELS. Configured providers: ${configuredProviderIds.join(
           ', ',
-        )}. Update AUTO_FREE_MODELS or provider *_MODELS in .env.local.`,
+        )}. Update AUTO_FREE_MODELS or provider *_MODELS in the server environment. On Vercel, check Project Settings > Environment Variables, then redeploy. For local development, update .env.local and restart the dev server.`,
       );
     }
 
