@@ -76,6 +76,10 @@ describe('Grade 2 lesson artifact builder', () => {
       kind: 'number-line',
       max: 100,
     });
+    expect(payload.slides[2].widget).toMatchObject({
+      kind: 'place-value-builder',
+      target: 73,
+    });
     expect(payload.slides[1].interaction).toContain('Tutor highlights');
     expect(payload.quiz.every((item) => item.outcomeCode === payload.bc_context.outcome_code)).toBe(
       true,

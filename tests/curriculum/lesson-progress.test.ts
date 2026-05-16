@@ -50,11 +50,30 @@ describe('Grade 2 lesson progress scoring', () => {
       choices: ['Draw it', 'Guess'],
       correctChoice: 'Draw it',
     };
+    const placeValueBuilder: LessonWidget = {
+      kind: 'place-value-builder',
+      target: 73,
+      tens: 7,
+      ones: 3,
+      prompt: 'Build 73',
+    };
+    const matchingPairs: LessonWidget = {
+      kind: 'matching-pairs',
+      prompt: 'Match the pairs',
+      pairs: [
+        { left: '7 tens', right: '70' },
+        { left: '3 ones', right: '3' },
+      ],
+    };
 
     expect(evaluateWidgetResult(tenFrame, 7)).toBe(true);
     expect(evaluateWidgetResult(tenFrame, 6)).toBe(false);
     expect(evaluateWidgetResult(numberLine, 80)).toBe(true);
     expect(evaluateWidgetResult(numberLine, 50)).toBe(false);
+    expect(evaluateWidgetResult(placeValueBuilder, 73)).toBe(true);
+    expect(evaluateWidgetResult(placeValueBuilder, 72)).toBe(false);
+    expect(evaluateWidgetResult(matchingPairs, 2)).toBe(true);
+    expect(evaluateWidgetResult(matchingPairs, 1)).toBe(false);
     expect(evaluateWidgetResult(choiceCard, 'Draw it')).toBe(true);
     expect(calculateWidgetXp(true)).toBeGreaterThan(calculateWidgetXp(false));
   });

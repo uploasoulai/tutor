@@ -151,6 +151,7 @@ Duration and structure:
 - Include a short Rive-avatar-friendly teacher narration cue for each scene
 - Include the quiz checks below as active mini-games, not text-only slides
 - Follow the instructional design blueprint exactly before adding extra decoration
+- Animate the manipulatives: counters should appear one by one, number lines should slide, base-ten blocks should build, and matching cards should flip or glow on success
 
 BC curriculum context:
 ${context || 'Use the selected BC outcome and Grade 2 Math expectations as source of truth.'}
@@ -226,7 +227,7 @@ export function buildLessonPayloadFromMatches({
       matches,
     },
     teacher,
-    prompt: `Create a 2 minute ${grade} ${subject} lesson for ${focusedTitle}. Use the Voyage query-retrieved BC curriculum context below. First follow the instructional blueprint: child objective, real-world story, worked example, guided practice, mini-game check, misconception repair, and multimodal cues. Then render short slides, voiceover cues, concrete visuals, and a 3 question mini-game quiz.\n\n${teacherPrompt}\n\nInstructional blueprint:\n- Objective: ${blueprint.childFriendlyObjective}\n- Story: ${blueprint.realWorldStory}\n- Worked example: ${blueprint.workedExample}\n- Guided practice: ${blueprint.guidedPractice}\n- Mini-game: ${blueprint.miniGameGoal}\n- Misconceptions: ${blueprint.commonMisconceptions.join(' | ')}\n- Quality score target: ${quality.score}/100\n\nBC context:\n${contextLines || 'Use the selected BC learning outcome as the source of truth.'}`,
+    prompt: `Create a 2 minute ${grade} ${subject} lesson for ${focusedTitle}. Use the Voyage query-retrieved BC curriculum context below. First follow the instructional blueprint: child objective, real-world story, worked example, guided practice, mini-game check, misconception repair, and multimodal cues. Then render short animated scenes, voiceover cues, concrete visuals, and mini-games with visible manipulatives.\n\n${teacherPrompt}\n\nInstructional blueprint:\n- Objective: ${blueprint.childFriendlyObjective}\n- Story: ${blueprint.realWorldStory}\n- Worked example: ${blueprint.workedExample}\n- Guided practice: ${blueprint.guidedPractice}\n- Mini-game: ${blueprint.miniGameGoal}\n- Animation requirement: counters appear one by one; number lines slide; base-ten blocks build; cards flip or glow after a match.\n- Misconceptions: ${blueprint.commonMisconceptions.join(' | ')}\n- Quality score target: ${quality.score}/100\n\nBC context:\n${contextLines || 'Use the selected BC learning outcome as the source of truth.'}`,
     slides: [
       {
         title: focusedTitle,

@@ -14,6 +14,18 @@ export type LessonWidget =
       prompt: string;
     }
   | {
+      kind: 'place-value-builder';
+      target: number;
+      tens: number;
+      ones: number;
+      prompt: string;
+    }
+  | {
+      kind: 'matching-pairs';
+      prompt: string;
+      pairs: { left: string; right: string }[];
+    }
+  | {
       kind: 'choice-card';
       prompt: string;
       choices: string[];
@@ -37,10 +49,20 @@ export function buildGrade2MathWidgets(topic: string): LessonWidget[] {
       prompt: `Slide along the number line and stop near the useful benchmark for ${topic}.`,
     },
     {
-      kind: 'choice-card',
-      prompt: `Pick the strategy that makes ${topic} visible.`,
-      choices: ['Draw it', 'Use objects', 'Guess silently'],
-      correctChoice: 'Draw it',
+      kind: 'place-value-builder',
+      target: 73,
+      tens: 7,
+      ones: 3,
+      prompt: `Build a base-ten model for ${topic}. Choose tens and ones, then check the total.`,
+    },
+    {
+      kind: 'matching-pairs',
+      prompt: `Match the ${topic} representation to the strategy it shows.`,
+      pairs: [
+        { left: '7 tens and 3 ones', right: '73' },
+        { left: '70 + 3', right: '73' },
+        { left: 'Count by tens, then ones', right: 'Place value strategy' },
+      ],
     },
   ];
 }
@@ -57,6 +79,14 @@ export function evaluateWidgetResult(widget: LessonWidget, value: number | strin
 
   if (widget.kind === 'number-line') {
     return Math.abs(Number(value) - widget.target) <= widget.step;
+  }
+
+  if (widget.kind === 'place-value-builder') {
+    return Number(value) === widget.target;
+  }
+
+  if (widget.kind === 'matching-pairs') {
+    return Number(value) >= widget.pairs.length;
   }
 
   return String(value) === widget.correctChoice;

@@ -955,11 +955,23 @@ function LessonWidgetPanel({
 }) {
   return (
     <div className="rounded-lg border border-[#dbe5ef] bg-white p-4">
+      <style>{`
+        @keyframes placeValuePop {
+          from { opacity: 0; transform: translateY(8px) scale(0.92); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+      `}</style>
       {widget.kind === 'ten-frame' ? (
         <TenFrameWidget completed={completed} onSignal={onSignal} widget={widget} />
       ) : null}
       {widget.kind === 'number-line' ? (
         <NumberLineWidget completed={completed} onSignal={onSignal} widget={widget} />
+      ) : null}
+      {widget.kind === 'place-value-builder' ? (
+        <PlaceValueBuilderWidget completed={completed} onSignal={onSignal} widget={widget} />
+      ) : null}
+      {widget.kind === 'matching-pairs' ? (
+        <MatchingPairsWidget completed={completed} onSignal={onSignal} widget={widget} />
       ) : null}
       {widget.kind === 'choice-card' ? (
         <ChoiceCardPreview completed={completed} onSignal={onSignal} widget={widget} />
@@ -1006,8 +1018,10 @@ function TenFrameWidget({
                 if (evaluateWidgetResult(widget, nextCount)) onSignal(nextCount);
               }}
               className={[
-                'aspect-square rounded-md border transition-all',
-                active ? 'border-[#003461] bg-[#003461]' : 'border-[#c9d5df] bg-[#f8f9fa]',
+                'aspect-square rounded-md border transition-all duration-200',
+                active
+                  ? 'scale-105 border-[#003461] bg-[#003461] shadow-sm'
+                  : 'border-[#c9d5df] bg-[#f8f9fa] hover:border-[#003461]/60',
               ].join(' ')}
               aria-label={`Set counter ${index + 1}`}
             />
@@ -1026,6 +1040,186 @@ function TenFrameWidget({
   );
 }
 
+function PlaceValueBuilderWidget({
+  completed,
+  onSignal,
+  widget,
+}: {
+  completed?: boolean;
+  onSignal: (value: number) => void;
+  widget: Extract<LessonWidget, { kind: 'place-value-builder' }>;
+}) {
+  const [tens, setTens] = useState(Math.max(0, widget.tens - 1));
+  const [ones, setOnes] = useState(Math.max(0, widget.ones - 1));
+  const total = tens * 10 + ones;
+  const isMatched = total === widget.target;
+  const status = completed === undefined ? null : completed ? 'Saved' : 'Try again later';
+
+  function update(nextTens: number, nextOnes: number) {
+    if (completed !== undefined) return;
+    const safeTens = Math.max(0, Math.min(9, nextTens));
+    const safeOnes = Math.max(0, Math.min(9, nextOnes));
+    setTens(safeTens);
+    setOnes(safeOnes);
+    const nextTotal = safeTens * 10 + safeOnes;
+    if (evaluateWidgetResult(widget, nextTotal)) onSignal(nextTotal);
+  }
+
+  return (
+    <div>
+      <p className="mb-3 text-sm font-semibold text-[#191c1d]">{widget.prompt}</p>
+      <div className="rounded-lg border border-[#e7e8e9] bg-[#f8f9fa] p-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#727781]">Tens</p>
+              <Stepper
+                value={tens}
+                onMinus={() => update(tens - 1, ones)}
+                onPlus={() => update(tens + 1, ones)}
+              />
+            </div>
+            <div className="mt-3 flex min-h-28 flex-wrap content-start gap-1.5 rounded-md bg-white p-3">
+              {Array.from({ length: tens }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-20 w-4 rounded-sm bg-[#1f7a8c] shadow-sm transition-transform duration-200"
+                  style={{ animation: `placeValuePop 220ms ease-out ${index * 20}ms both` }}
+                />
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#727781]">Ones</p>
+              <Stepper
+                value={ones}
+                onMinus={() => update(tens, ones - 1)}
+                onPlus={() => update(tens, ones + 1)}
+              />
+            </div>
+            <div className="mt-3 grid min-h-28 grid-cols-5 content-start gap-1.5 rounded-md bg-white p-3">
+              {Array.from({ length: ones }).map((_, index) => (
+                <div
+                  key={index}
+                  className="aspect-square rounded-sm bg-[#f4a261] shadow-sm"
+                  style={{ animation: `placeValuePop 220ms ease-out ${index * 25}ms both` }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 rounded-md bg-white p-3 text-center">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#727781]">Total</p>
+          <p className="text-3xl font-bold text-[#191c1d]">{total}</p>
+          <p
+            className={
+              isMatched ? 'text-sm font-semibold text-emerald-700' : 'text-sm text-[#727781]'
+            }
+          >
+            {status ?? (isMatched ? 'Built exactly' : `Build ${widget.target}`)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MatchingPairsWidget({
+  completed,
+  onSignal,
+  widget,
+}: {
+  completed?: boolean;
+  onSignal: (value: number) => void;
+  widget: Extract<LessonWidget, { kind: 'matching-pairs' }>;
+}) {
+  const [selectedLeft, setSelectedLeft] = useState('');
+  const [matched, setMatched] = useState<Record<string, boolean>>({});
+  const matchedCount = Object.keys(matched).length;
+  const status = completed === undefined ? null : completed ? 'Saved' : 'Try again later';
+
+  function handleRight(right: string) {
+    if (completed !== undefined || !selectedLeft) return;
+    const pair = widget.pairs.find((item) => item.left === selectedLeft && item.right === right);
+    if (!pair) {
+      setSelectedLeft('');
+      return;
+    }
+    const nextMatched = { ...matched, [pair.left]: true };
+    setMatched(nextMatched);
+    setSelectedLeft('');
+    const nextCount = Object.keys(nextMatched).length;
+    if (evaluateWidgetResult(widget, nextCount)) onSignal(nextCount);
+  }
+
+  return (
+    <div>
+      <p className="mb-3 text-sm font-semibold text-[#191c1d]">{widget.prompt}</p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-2">
+          {widget.pairs.map((pair) => (
+            <button
+              key={pair.left}
+              type="button"
+              disabled={completed !== undefined || matched[pair.left]}
+              onClick={() => setSelectedLeft(pair.left)}
+              className={[
+                'rounded-md border px-3 py-2 text-left text-sm font-semibold transition-all',
+                matched[pair.left]
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                  : selectedLeft === pair.left
+                    ? 'scale-[1.02] border-[#003461] bg-[#f0f4ff] text-[#003461]'
+                    : 'border-[#e7e8e9] text-[#424750] hover:bg-[#f8f9fa]',
+              ].join(' ')}
+            >
+              {pair.left}
+            </button>
+          ))}
+        </div>
+        <div className="grid gap-2">
+          {widget.pairs.map((pair, index) => (
+            <button
+              key={`${pair.right}-${index}`}
+              type="button"
+              disabled={completed !== undefined}
+              onClick={() => handleRight(pair.right)}
+              className="rounded-md border border-[#e7e8e9] px-3 py-2 text-left text-sm font-semibold text-[#424750] transition-all hover:border-[#003461] hover:bg-[#f8f9fa]"
+            >
+              {pair.right}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className="mt-3 text-sm font-semibold text-[#727781]">
+        {status ?? `${matchedCount}/${widget.pairs.length} matches`}
+      </p>
+    </div>
+  );
+}
+
+function Stepper({
+  value,
+  onMinus,
+  onPlus,
+}: {
+  value: number;
+  onMinus: () => void;
+  onPlus: () => void;
+}) {
+  return (
+    <div className="inline-flex items-center rounded-md border border-[#dbe5ef] bg-white">
+      <button type="button" onClick={onMinus} className="h-8 w-8 text-sm font-bold text-[#003461]">
+        -
+      </button>
+      <span className="w-8 text-center text-sm font-bold text-[#191c1d]">{value}</span>
+      <button type="button" onClick={onPlus} className="h-8 w-8 text-sm font-bold text-[#003461]">
+        +
+      </button>
+    </div>
+  );
+}
+
 function NumberLineWidget({
   completed,
   onSignal,
@@ -1038,11 +1232,32 @@ function NumberLineWidget({
   const [value, setValue] = useState(widget.min);
   const isClose = Math.abs(value - widget.target) <= widget.step;
   const status = completed === undefined ? null : completed ? 'Saved' : 'Try again later';
+  const range = Math.max(1, widget.max - widget.min);
+  const valuePct = ((value - widget.min) / range) * 100;
+  const targetPct = ((widget.target - widget.min) / range) * 100;
 
   return (
     <div>
       <p className="mb-3 text-sm font-semibold text-[#191c1d]">{widget.prompt}</p>
       <div className="rounded-lg border border-[#e7e8e9] bg-[#f8f9fa] p-4">
+        <div className="relative mb-5 h-16 rounded-lg bg-white px-4 py-5">
+          <div className="absolute left-4 right-4 top-1/2 h-2 -translate-y-1/2 rounded-full bg-[#dbe5ef]" />
+          <div
+            className="absolute top-1/2 h-8 w-1 -translate-y-1/2 rounded-full bg-emerald-500"
+            style={{ left: `${targetPct}%` }}
+          />
+          <div
+            className="absolute top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#003461] shadow-md transition-all duration-300"
+            style={{ left: `${valuePct}%` }}
+          />
+          <div className="absolute bottom-1 left-4 right-4 flex justify-between text-[10px] font-semibold text-[#727781]">
+            {Array.from({ length: Math.floor((widget.max - widget.min) / widget.step) + 1 }).map(
+              (_, index) => (
+                <span key={index}>{widget.min + index * widget.step}</span>
+              ),
+            )}
+          </div>
+        </div>
         <input
           type="range"
           min={widget.min}
