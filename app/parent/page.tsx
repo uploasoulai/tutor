@@ -23,6 +23,7 @@ type DailyReportMetrics = {
   learningMinutes: number;
   masteryAverage: number;
   xpEarned: number;
+  activitiesCompleted?: number;
 };
 
 type DailyReport = {
@@ -184,6 +185,12 @@ export default function ParentDashboardPage() {
       value: `${Math.round((dailyReport?.metrics.masteryAverage ?? 0) * 100)}%`,
       icon: TrendingUp,
       color: 'text-green-600 bg-green-50',
+    },
+    {
+      label: 'Activities',
+      value: `${dailyReport?.metrics.activitiesCompleted ?? 0}`,
+      icon: BookOpen,
+      color: 'text-purple-600 bg-purple-50',
     },
     {
       label: 'XP Earned',
@@ -356,7 +363,7 @@ function DashboardSummary({
   return (
     <>
       <h2 className="text-lg font-semibold text-[#191c1d] mb-4">Today&apos;s Summary</h2>
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid gap-4 mb-8 sm:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((s) => (
           <div
             key={s.label}

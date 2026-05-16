@@ -22,6 +22,12 @@ export async function POST(req: NextRequest) {
       correctCount?: number;
       responseLatencyMs?: number;
       hintLevelUsed?: number;
+      activity?: {
+        type?: 'quiz' | 'widget';
+        index?: number;
+        id?: string;
+        value?: string | number | boolean | null;
+      };
     };
 
     if (!body.sessionId) {
@@ -41,6 +47,7 @@ export async function POST(req: NextRequest) {
       correctCount: body.correctCount ?? (body.isCorrect ? 1 : 0),
       responseLatencyMs: body.responseLatencyMs,
       hintLevelUsed: body.hintLevelUsed,
+      activity: parseActivityProgress(body.activity),
     });
 
     return apiSuccess(result);
@@ -51,4 +58,27 @@ export async function POST(req: NextRequest) {
       error instanceof Error ? error.message : 'Failed to record lesson attempt',
     );
   }
+}
+
+function parseActivityProgress(
+  activity:
+    | {
+        type?: 'quiz' | 'widget';
+        index?: number;
+        id?: string;
+        value?: string | number | boolean | null;
+      }
+    | undefined,
+) {
+  if (!activity) return undefined;
+  if (activity.type !== 'quiz' && activity.type !== 'widget') return undefined;
+  if (typeof activity.index !== 'number' || !Number.isInteger(activity.index)) return undefined;
+  if (typeof activity.id !== 'string' || !activity.id) return undefined;
+
+  return {
+    type: activity.type,
+    index: activity.index,
+    id: activity.id,
+    value: activity.value,
+  };
 }

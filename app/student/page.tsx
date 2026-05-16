@@ -55,6 +55,7 @@ type StudentSession = {
   startedAt: string | null;
   accuracyRate: number | null;
   xpEarned: number;
+  activitiesCompleted: number;
   canReuse: boolean;
   openPath: string;
 };
@@ -607,10 +608,11 @@ function LearningHistory({
         </h2>
       </div>
       <div className="rounded-lg border border-[#e7e8e9] bg-white shadow-sm">
-        <div className="hidden grid-cols-[minmax(0,1fr)_110px_120px_90px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781] md:grid">
+        <div className="hidden grid-cols-[minmax(0,1fr)_110px_120px_100px_90px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781] md:grid">
           <span>Lesson</span>
           <span>Status</span>
           <span>Accuracy</span>
+          <span>Activities</span>
           <span>XP</span>
           <span>Action</span>
         </div>
@@ -625,7 +627,7 @@ function LearningHistory({
           sessions.map((session) => (
             <div
               key={session.id}
-              className="grid gap-3 border-t border-[#e7e8e9] p-4 first:border-t-0 md:grid-cols-[minmax(0,1fr)_110px_120px_90px_90px] md:items-center md:gap-4 md:px-5"
+              className="grid gap-3 border-t border-[#e7e8e9] p-4 first:border-t-0 md:grid-cols-[minmax(0,1fr)_110px_120px_100px_90px_90px] md:items-center md:gap-4 md:px-5"
             >
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-[#191c1d] md:truncate">
@@ -643,6 +645,10 @@ function LearningHistory({
                 {session.accuracyRate == null
                   ? 'Not scored'
                   : `${Math.round(session.accuracyRate * 100)}%`}
+              </span>
+              <span className="text-sm text-[#424750]">
+                <span className="font-semibold text-[#727781] md:hidden">Activities: </span>
+                {session.activitiesCompleted}
               </span>
               <span className="text-sm font-semibold text-[#191c1d]">
                 <span className="font-semibold text-[#727781] md:hidden">XP: </span>

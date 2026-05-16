@@ -17,6 +17,49 @@ describe('Grade 2 parent daily report', () => {
           xp_earned: 28,
           needs_tutor_review: false,
           status: 'completed',
+          lesson_payload: {
+            progress: {
+              version: 1,
+              attempts: 4,
+              correct: 3,
+              quiz: {
+                'quiz-0': {
+                  type: 'quiz',
+                  index: 0,
+                  id: 'quiz-0',
+                  isCorrect: true,
+                  updatedAt: '2026-05-14T18:00:00.000Z',
+                },
+              },
+              widgets: {
+                'widget-0': {
+                  type: 'widget',
+                  index: 0,
+                  id: 'widget-0',
+                  isCorrect: true,
+                  value: 70,
+                  updatedAt: '2026-05-14T18:01:00.000Z',
+                },
+                'widget-1': {
+                  type: 'widget',
+                  index: 1,
+                  id: 'widget-1',
+                  isCorrect: false,
+                  value: 'count by tens',
+                  updatedAt: '2026-05-14T18:02:00.000Z',
+                },
+                'widget-2': {
+                  type: 'widget',
+                  index: 2,
+                  id: 'widget-2',
+                  isCorrect: true,
+                  value: true,
+                  updatedAt: '2026-05-14T18:03:00.000Z',
+                },
+              },
+              updatedAt: '2026-05-14T18:03:00.000Z',
+            },
+          },
         },
       ],
       attempts: [
@@ -31,6 +74,7 @@ describe('Grade 2 parent daily report', () => {
     expect(metrics.learningMinutes).toBe(16);
     expect(metrics.averageAccuracy).toBe(0.67);
     expect(metrics.xpEarned).toBe(28);
+    expect(metrics.activitiesCompleted).toBe(4);
     expect(metrics.questionsAnswered).toBe(3);
     expect(metrics.correctAnswers).toBe(2);
     expect(metrics.masteryAverage).toBe(0.6);
@@ -80,6 +124,7 @@ describe('Grade 2 parent daily report', () => {
         learningMinutes: 12,
         averageAccuracy: 0.8,
         xpEarned: 20,
+        activitiesCompleted: 3,
         questionsAnswered: 3,
         correctAnswers: 2,
         masteryAverage: 0.55,

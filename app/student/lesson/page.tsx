@@ -63,6 +63,7 @@ type LessonSession = {
       hint?: string;
       gameType?: 'choice-card' | 'strategy-pick' | 'reflection';
     }[];
+    progress?: LessonProgressState;
     openmaic?: {
       jobId: string;
       status: 'queued' | 'running' | 'succeeded' | 'failed';
@@ -74,6 +75,24 @@ type LessonSession = {
       createdAt: string;
     };
   } | null;
+};
+
+type LessonProgressState = {
+  version: 1;
+  attempts: number;
+  correct: number;
+  quiz: Record<string, LessonProgressItem>;
+  widgets: Record<string, LessonProgressItem>;
+  updatedAt: string;
+};
+
+type LessonProgressItem = {
+  type: 'quiz' | 'widget';
+  index: number;
+  id: string;
+  isCorrect: boolean;
+  value?: string | number | boolean | null;
+  updatedAt: string;
 };
 
 type BCCurriculumContextMatch = {
@@ -202,9 +221,18 @@ function LessonContent() {
       coastaltutor_lesson_id: artifact.lessonId,
       lesson_payload: artifact.payload,
     });
+    hydrateProgressState(artifact.payload?.progress);
     if (artifact.payload?.teacher?.id) {
       setTeacherId(artifact.payload.teacher.id);
     }
+  }
+
+  function hydrateProgressState(progress?: LessonProgressState) {
+    if (!progress) return;
+    setAnswered(buildAnsweredState(progress));
+    setSelectedChoices(buildSelectedChoices(progress));
+    setWidgetAnswered(buildWidgetAnsweredState(progress));
+    setXp(progress.correct * 8);
   }
 
   async function syncOpenMAICJob() {
@@ -317,7 +345,7 @@ function LessonContent() {
     };
   }
 
-  async function answerQuestion(index: number, correct: boolean) {
+  async function answerQuestion(index: number, correct: boolean, value?: string) {
     if (!user || answered[index] !== undefined) return;
 
     const nextAnswered = [...answered];
@@ -328,6 +356,12 @@ function LessonContent() {
     setXp((current) => current + earned);
 
     await persistLearningAttempt({
+      activity: {
+        type: 'quiz',
+        index,
+        id: `quiz-${index}`,
+        value: value ?? selectedChoices[index],
+      },
       correct,
       attemptNumber: getTotalAttemptCount(nextAnswered, widgetAnswered),
       correctCount: getTotalCorrectCount(nextAnswered, widgetAnswered),
@@ -355,6 +389,12 @@ function LessonContent() {
     setXp((current) => current + earned);
 
     await persistLearningAttempt({
+      activity: {
+        type: 'widget',
+        index: slideIndex,
+        id: `widget-${slideIndex}`,
+        value,
+      },
       correct,
       attemptNumber: getTotalAttemptCount(answered, nextWidgetAnswered),
       correctCount: getTotalCorrectCount(answered, nextWidgetAnswered),
@@ -365,6 +405,7 @@ function LessonContent() {
   }
 
   async function persistLearningAttempt({
+    activity,
     correct,
     attemptNumber,
     correctCount,
@@ -372,6 +413,12 @@ function LessonContent() {
     hintLevelUsed,
     localEarned,
   }: {
+    activity: {
+      type: 'quiz' | 'widget';
+      index: number;
+      id: string;
+      value?: string | number | boolean | null;
+    };
     correct: boolean;
     attemptNumber: number;
     correctCount: number;
@@ -392,13 +439,30 @@ function LessonContent() {
             correctCount,
             responseLatencyMs,
             hintLevelUsed,
+            activity,
           }),
         });
 
         if (response.ok) {
-          const result = (await response.json()) as { xpEarned?: number };
+          const result = (await response.json()) as {
+            xpEarned?: number;
+            progress?: LessonProgressState;
+          };
           if (typeof result.xpEarned === 'number' && result.xpEarned !== localEarned) {
             setXp((current) => current - localEarned + result.xpEarned!);
+          }
+          if (result.progress) {
+            setSession((current) =>
+              current?.lesson_payload
+                ? {
+                    ...current,
+                    lesson_payload: {
+                      ...current.lesson_payload,
+                      progress: result.progress,
+                    },
+                  }
+                : current,
+            );
           }
         }
       } catch {
@@ -411,7 +475,7 @@ function LessonContent() {
     const item = quiz[index];
     const correctChoice = item.correctChoice ?? item.choices?.[0] ?? item.answer;
     setSelectedChoices((current) => ({ ...current, [index]: choice }));
-    void answerQuestion(index, choice === correctChoice);
+    void answerQuestion(index, choice === correctChoice, choice);
   }
 
   async function handleTeacherSelect(nextTeacherId: string) {
@@ -500,6 +564,7 @@ function LessonContent() {
   const teacher = getTeacherPersonaById(teacherId);
   const attemptedCount = getTotalAttemptCount(answered, widgetAnswered);
   const correctCount = getTotalCorrectCount(answered, widgetAnswered);
+  const totalActivityCount = quiz.length + slides.length;
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
   const masteryEstimate =
     attemptedCount > 0
@@ -646,7 +711,7 @@ function LessonContent() {
                 <h2 className="text-lg font-semibold text-[#191c1d]">Quick quiz</h2>
               </div>
               <p className="text-sm font-semibold text-[#727781]">
-                {attemptedCount}/{quiz.length} answered · {accuracy}% accuracy
+                {attemptedCount}/{totalActivityCount} activities · {accuracy}% accuracy
               </p>
             </div>
             <div className="mt-4 grid gap-3">
@@ -711,8 +776,8 @@ function LessonContent() {
               <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
                 <p className="text-sm font-semibold text-emerald-800">Lesson snapshot saved</p>
                 <p className="mt-1 text-sm text-emerald-700">
-                  Accuracy {accuracy}% · estimated mastery {masteryEstimate}% · {xp} XP earned. The
-                  next dashboard plan will use this signal.
+                  Accuracy {accuracy}% across {attemptedCount} activities · estimated mastery{' '}
+                  {masteryEstimate}% · {xp} XP earned. The next dashboard plan will use this signal.
                 </p>
               </div>
             ) : null}
@@ -775,7 +840,7 @@ function LessonContent() {
             <div className="mt-4 grid grid-cols-3 gap-2">
               <MetricTile label="Accuracy" value={`${accuracy}%`} />
               <MetricTile label="Mastery" value={masteryEstimate ? `${masteryEstimate}%` : '--'} />
-              <MetricTile label="Answered" value={`${attemptedCount}/${quiz.length}`} />
+              <MetricTile label="Activities" value={`${attemptedCount}/${totalActivityCount}`} />
             </div>
           </div>
 
@@ -1061,6 +1126,29 @@ function getTotalAttemptCount(answered: boolean[], widgetAnswered: Record<number
 
 function getTotalCorrectCount(answered: boolean[], widgetAnswered: Record<number, boolean>) {
   return answered.filter(Boolean).length + Object.values(widgetAnswered).filter(Boolean).length;
+}
+
+function buildAnsweredState(progress: LessonProgressState) {
+  return Object.values(progress.quiz).reduce<boolean[]>((items, item) => {
+    items[item.index] = item.isCorrect;
+    return items;
+  }, []);
+}
+
+function buildWidgetAnsweredState(progress: LessonProgressState) {
+  return Object.values(progress.widgets).reduce<Record<number, boolean>>((items, item) => {
+    items[item.index] = item.isCorrect;
+    return items;
+  }, {});
+}
+
+function buildSelectedChoices(progress: LessonProgressState) {
+  return Object.values(progress.quiz).reduce<Record<number, string>>((items, item) => {
+    if (typeof item.value === 'string') {
+      items[item.index] = item.value;
+    }
+    return items;
+  }, {});
 }
 
 export default function LessonPage() {

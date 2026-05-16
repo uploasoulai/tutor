@@ -12,6 +12,17 @@ describe('mapStudentSession', () => {
       accuracy_rate: 0.678,
       xp_earned: 24,
       reuse_key: 'grade-2-math-number-concepts',
+      lesson_payload: {
+        progress: {
+          quiz: {
+            'quiz-0': { isCorrect: true },
+          },
+          widgets: {
+            'widget-0': { isCorrect: true },
+            'widget-1': { isCorrect: false },
+          },
+        },
+      },
     });
 
     expect(session).toMatchObject({
@@ -19,6 +30,7 @@ describe('mapStudentSession', () => {
       lessonTitle: 'Number concepts to 100',
       accuracyRate: 0.68,
       xpEarned: 24,
+      activitiesCompleted: 3,
       canReuse: true,
       openPath: '/student/lesson?sessionId=session-1',
     });

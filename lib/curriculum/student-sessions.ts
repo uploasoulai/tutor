@@ -7,6 +7,7 @@ export interface StudentSessionListItem {
   startedAt: string | null;
   accuracyRate: number | null;
   xpEarned: number;
+  activitiesCompleted: number;
   reuseKey: string | null;
   canReuse: boolean;
   openPath: string;
@@ -23,6 +24,7 @@ export function mapStudentSession(row: Record<string, unknown>): StudentSessionL
     startedAt: (row.started_at as string | null) ?? null,
     accuracyRate: typeof row.accuracy_rate === 'number' ? roundRatio(row.accuracy_rate) : null,
     xpEarned: Number(row.xp_earned ?? 0),
+    activitiesCompleted: countLessonProgressActivities(row.lesson_payload),
     reuseKey,
     canReuse: !!reuseKey && ['planned', 'generated', 'started', 'completed'].includes(status),
     openPath: `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`,
@@ -39,7 +41,9 @@ export async function listStudentSessions({
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('learning_sessions')
-    .select('id, lesson_title, status, started_at, accuracy_rate, xp_earned, reuse_key')
+    .select(
+      'id, lesson_title, status, started_at, accuracy_rate, xp_earned, reuse_key, lesson_payload',
+    )
     .eq('student_id', studentId)
     .order('started_at', { ascending: false })
     .limit(limit);
@@ -53,4 +57,19 @@ export async function listStudentSessions({
 
 function roundRatio(value: number) {
   return Math.max(0, Math.min(1, Math.round(value * 100) / 100));
+}
+
+function countLessonProgressActivities(payload: unknown) {
+  const progress =
+    payload && typeof payload === 'object' ? (payload as { progress?: unknown }).progress : null;
+  if (!progress || typeof progress !== 'object') return 0;
+
+  const quiz = (progress as { quiz?: unknown }).quiz;
+  const widgets = (progress as { widgets?: unknown }).widgets;
+
+  return countRecordKeys(quiz) + countRecordKeys(widgets);
+}
+
+function countRecordKeys(value: unknown) {
+  return value && typeof value === 'object' ? Object.keys(value).length : 0;
 }

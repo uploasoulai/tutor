@@ -24,6 +24,7 @@ describe('buildParentReportRunView', () => {
             learningMinutes: 10,
             averageAccuracy: 0.8,
             xpEarned: 20,
+            activitiesCompleted: 3,
             questionsAnswered: 3,
             correctAnswers: 2,
             masteryAverage: 0.5,

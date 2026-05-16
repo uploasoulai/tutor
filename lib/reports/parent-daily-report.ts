@@ -1,4 +1,5 @@
 import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
+import type { LessonProgressState } from '@/lib/curriculum/lesson-progress';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export interface DailyReportSession {
@@ -11,6 +12,7 @@ export interface DailyReportSession {
   started_at?: string | null;
   ended_at?: string | null;
   status?: string | null;
+  lesson_payload?: unknown | null;
 }
 
 export interface DailyReportAttempt {
@@ -31,6 +33,7 @@ export interface DailyReportMetrics {
   learningMinutes: number;
   averageAccuracy: number;
   xpEarned: number;
+  activitiesCompleted: number;
   questionsAnswered: number;
   correctAnswers: number;
   masteryAverage: number;
@@ -96,6 +99,11 @@ export function buildDailyReportMetrics({
     .map((session) => session.accuracy_rate)
     .filter((accuracy): accuracy is number => typeof accuracy === 'number');
   const correctAnswers = attempts.filter((attempt) => attempt.is_correct).length;
+  const progressActivities = sessions.reduce(
+    (total, session) => total + countLessonProgressActivities(session.lesson_payload),
+    0,
+  );
+  const activitiesCompleted = Math.max(attempts.length, progressActivities);
   const masteryValues = masteryRows
     .map((row) => row.mastery_level)
     .filter((mastery): mastery is number => typeof mastery === 'number');
@@ -119,6 +127,7 @@ export function buildDailyReportMetrics({
     learningMinutes,
     averageAccuracy: roundRatio(averageAccuracy),
     xpEarned,
+    activitiesCompleted,
     questionsAnswered: attempts.length,
     correctAnswers,
     masteryAverage: roundRatio(masteryAverage),
@@ -153,7 +162,7 @@ export function buildDailyReportSummary({
 
   const accuracy = `${Math.round(metrics.averageAccuracy * 100)}%`;
   const mastery = `${Math.round(metrics.masteryAverage * 100)}%`;
-  const activity = `${metrics.learningMinutes} minutes, ${metrics.questionsAnswered} questions, and ${metrics.xpEarned} XP`;
+  const activity = `${metrics.learningMinutes} minutes, ${metrics.activitiesCompleted} activities, and ${metrics.xpEarned} XP`;
   const strength =
     metrics.strengths[0] ?? `steady progress in ${grade} ${subjectLabel.toLowerCase()}`;
   const focus = metrics.focusAreas[0] ?? 'the next recommended Grade 2 skill';
@@ -200,7 +209,7 @@ export async function generateParentDailyReport({
       supabase
         .from('learning_sessions')
         .select(
-          'id, lesson_title, duration_seconds, accuracy_rate, xp_earned, needs_tutor_review, started_at, ended_at, status',
+          'id, lesson_title, duration_seconds, accuracy_rate, xp_earned, needs_tutor_review, started_at, ended_at, status, lesson_payload',
         )
         .eq('student_id', studentId)
         .gte('started_at', dayStart.toISOString())
@@ -487,6 +496,26 @@ function buildFocusAreas({
   if (needsTutorReview) focusAreas.push('ask a tutor to review confusing steps');
 
   return focusAreas.slice(0, 3);
+}
+
+function countLessonProgressActivities(payload: unknown) {
+  const progress = readLessonProgress(payload);
+  if (!progress) return 0;
+
+  return Object.keys(progress.quiz ?? {}).length + Object.keys(progress.widgets ?? {}).length;
+}
+
+function readLessonProgress(payload: unknown): LessonProgressState | null {
+  if (!payload || typeof payload !== 'object') {
+    return null;
+  }
+
+  const progress = (payload as { progress?: unknown }).progress;
+  if (!progress || typeof progress !== 'object') {
+    return null;
+  }
+
+  return progress as LessonProgressState;
 }
 
 function getDayRange(date: Date) {

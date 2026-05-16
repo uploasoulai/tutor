@@ -16,6 +16,7 @@ import {
   getFallbackLessonWidget,
   type LessonWidget,
 } from '@/lib/curriculum/lesson-widgets';
+import type { LessonProgressState } from '@/lib/curriculum/lesson-progress';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -63,6 +64,7 @@ export type LessonPayload = {
     retrieval: 'voyage-query-pgvector';
     estimatedDurationSeconds: number;
   };
+  progress?: LessonProgressState;
   openmaic?: OpenMAICLessonJob;
 };
 

@@ -12,6 +12,7 @@ export type LessonAttemptInput = {
   correctCount: number;
   responseLatencyMs?: number;
   hintLevelUsed?: number;
+  activity?: LessonActivityProgressInput;
 };
 
 export type LessonAttemptResult = {
@@ -19,6 +20,7 @@ export type LessonAttemptResult = {
   masteryLevel: number | null;
   attempts: number;
   correctAttempts: number;
+  progress?: LessonProgressState;
 };
 
 export type LessonCompleteInput = {
@@ -29,6 +31,31 @@ export type LessonCompleteInput = {
   attempts: number;
   durationSeconds?: number;
   reason: string;
+};
+
+export type LessonActivityProgressInput = {
+  type: 'quiz' | 'widget';
+  index: number;
+  id: string;
+  value?: string | number | boolean | null;
+};
+
+export type LessonProgressItem = {
+  type: 'quiz' | 'widget';
+  index: number;
+  id: string;
+  isCorrect: boolean;
+  value?: string | number | boolean | null;
+  updatedAt: string;
+};
+
+export type LessonProgressState = {
+  version: 1;
+  attempts: number;
+  correct: number;
+  quiz: Record<string, LessonProgressItem>;
+  widgets: Record<string, LessonProgressItem>;
+  updatedAt: string;
 };
 
 export function calculateAttemptXp(isCorrect: boolean, hintLevelUsed = 0) {
@@ -53,18 +80,63 @@ function isUuid(value: string | null | undefined) {
   return !!value && UUID_RE.test(value);
 }
 
-async function resolveOutcomeId(sessionId: string, requestedOutcomeId?: string | null) {
-  if (isUuid(requestedOutcomeId)) return requestedOutcomeId;
+export function mergeLessonProgress({
+  activity,
+  correctCount,
+  existingProgress,
+  isCorrect,
+  attemptNumber,
+  now = new Date().toISOString(),
+}: {
+  activity?: LessonActivityProgressInput;
+  correctCount: number;
+  existingProgress?: Partial<LessonProgressState> | null;
+  isCorrect: boolean;
+  attemptNumber: number;
+  now?: string;
+}): LessonProgressState {
+  const base: LessonProgressState = {
+    version: 1,
+    attempts: Math.max(1, attemptNumber),
+    correct: Math.max(0, Math.min(correctCount, Math.max(1, attemptNumber))),
+    quiz: existingProgress?.quiz ?? {},
+    widgets: existingProgress?.widgets ?? {},
+    updatedAt: now,
+  };
 
+  if (!activity) return base;
+
+  const item: LessonProgressItem = {
+    type: activity.type,
+    index: activity.index,
+    id: activity.id,
+    isCorrect,
+    value: activity.value,
+    updatedAt: now,
+  };
+
+  return {
+    ...base,
+    quiz: activity.type === 'quiz' ? { ...base.quiz, [activity.id]: item } : base.quiz,
+    widgets: activity.type === 'widget' ? { ...base.widgets, [activity.id]: item } : base.widgets,
+  };
+}
+
+async function resolveSessionContext(sessionId: string, requestedOutcomeId?: string | null) {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('learning_sessions')
-    .select('bc_outcome_ids')
+    .select('bc_outcome_ids,lesson_payload')
     .eq('id', sessionId)
     .maybeSingle();
 
   if (error) throw error;
-  return (data?.bc_outcome_ids?.[0] as string | undefined) ?? null;
+  return {
+    outcomeId: isUuid(requestedOutcomeId)
+      ? requestedOutcomeId
+      : ((data?.bc_outcome_ids?.[0] as string | undefined) ?? null),
+    lessonPayload: (data?.lesson_payload as Record<string, unknown> | null | undefined) ?? null,
+  };
 }
 
 export async function recordLessonAttempt({
@@ -76,9 +148,11 @@ export async function recordLessonAttempt({
   correctCount,
   responseLatencyMs,
   hintLevelUsed = isCorrect ? 0 : 1,
+  activity,
 }: LessonAttemptInput): Promise<LessonAttemptResult> {
   const supabase = createSupabaseAdminClient();
-  const resolvedOutcomeId = await resolveOutcomeId(sessionId, outcomeId);
+  const sessionContext = await resolveSessionContext(sessionId, outcomeId);
+  const resolvedOutcomeId = sessionContext.outcomeId;
   const xpEarned = calculateAttemptXp(isCorrect, hintLevelUsed);
   const safeAttempts = Math.max(1, attemptNumber);
   const safeCorrectCount = Math.max(0, Math.min(correctCount, safeAttempts));
@@ -100,6 +174,29 @@ export async function recordLessonAttempt({
   });
 
   if (attemptError) throw attemptError;
+
+  const progress = mergeLessonProgress({
+    activity,
+    correctCount: safeCorrectCount,
+    existingProgress: sessionContext.lessonPayload?.progress as Partial<LessonProgressState> | null,
+    isCorrect,
+    attemptNumber: safeAttempts,
+  });
+
+  if (sessionContext.lessonPayload) {
+    const { error: progressError } = await supabase
+      .from('learning_sessions')
+      .update({
+        lesson_payload: {
+          ...sessionContext.lessonPayload,
+          progress,
+        },
+      })
+      .eq('id', sessionId)
+      .eq('student_id', studentId);
+
+    if (progressError) throw progressError;
+  }
 
   if (resolvedOutcomeId && masteryLevel != null) {
     const { error: masteryError } = await supabase.from('student_mastery').upsert(
@@ -123,6 +220,7 @@ export async function recordLessonAttempt({
     masteryLevel,
     attempts: safeAttempts,
     correctAttempts: safeCorrectCount,
+    progress,
   };
 }
 
