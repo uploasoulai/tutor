@@ -12,10 +12,15 @@ Audience:
 - Knowledge point: number concepts to 100`,
     });
 
-    expect(outlines).toHaveLength(3);
+    expect(outlines).toHaveLength(4);
     expect(outlines[0].title).toBe('number concepts to 100');
-    expect(outlines.map((outline) => outline.order)).toEqual([1, 2, 3]);
-    expect(outlines[2].type).toBe('quiz');
-    expect(outlines[2].quizConfig?.questionCount).toBe(3);
+    expect(outlines.map((outline) => outline.order)).toEqual([1, 2, 3, 4]);
+    expect(outlines[1]).toMatchObject({
+      type: 'interactive',
+      widgetType: 'game',
+    });
+    expect(outlines[1].keyPoints.join(' ')).toContain('Misconception repair');
+    expect(outlines[3].type).toBe('quiz');
+    expect(outlines[3].quizConfig?.questionCount).toBe(3);
   });
 });

@@ -64,6 +64,19 @@ Infer the course language from all available signals and produce:
 - **Logical Flow**: Scenes form a natural teaching progression
 - **Experience Design**: Consider learning experience and emotional response from the student's perspective
 
+### CoastalTutor K-4 Lesson Quality Contract
+
+When the requirement is for Grade 1, Grade 2, Grade 3, Grade 4, BC curriculum, or a young child:
+
+- Treat the course as a short tutoring activity, not a lecture deck.
+- Use 3-4 scenes for a 2 minute lesson: warm intro, worked example, guided practice, mini-game or quiz check.
+- At least one scene must be `interactive` or `quiz`; do not generate text-only slide sequences for early elementary.
+- Each scene must include a concrete representation in `keyPoints`: ten-frame, counters, base-ten blocks, number line, picture cards, word cards, or story sequence.
+- Each scene description must name the teacher move and the learner action, for example: "Tutor models with counters; learner taps the matching group."
+- Include one misconception-and-repair note in a key point for each worked example or practice scene.
+- Prefer playful, concrete visual language over abstract summaries.
+- Keep the cognitive load low: one new idea per scene, short labels, and a visible scaffold before independent practice.
+
 ---
 
 ## Default Assumption Rules

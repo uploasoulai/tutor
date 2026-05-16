@@ -175,7 +175,17 @@ Personalization:
 - Use the selected teacher style below
 ${formatTeacherPersonaForLessonPrompt(teacher)}
 - If the student struggles, offer one scaffold instead of giving the final answer immediately
-- Update mastery from quiz performance after the lesson in CoastalTutor`;
+- Update mastery from quiz performance after the lesson in CoastalTutor
+
+Delivery quality bar:
+- This lesson is for young children, so it must feel like a short guided activity, not a text deck.
+- Every scene needs one clear learning job: notice, model, practice, or prove.
+- Use teacher speech for explanations and keep slide text to labels, keywords, and short prompts.
+- Build visuals from manipulatives even when image generation is off: ten-frames, counters, base-ten blocks, cards, number lines, arrows, and highlighted groups.
+- Include at least one active interaction where the student taps, chooses, drags, builds, matches, or explains.
+- Include one explicit wrong-answer path: name the likely misconception, show the scaffold, and retry with a smaller or more visible example.
+- Use Browser Native TTS-friendly narration: short sentences, natural pauses, and no long paragraphs.
+- Avoid generic encouragement only. Feedback must mention the student's strategy or representation.`;
 }
 
 export function buildLessonPayloadFromMatches({

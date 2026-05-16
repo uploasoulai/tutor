@@ -145,6 +145,9 @@ describe('Grade 2 lesson artifact builder', () => {
     expect(requirement).toContain('Scene blueprint');
     expect(requirement).toContain('Required quiz checks');
     expect(requirement).toContain('active mini-games');
+    expect(requirement).toContain('Delivery quality bar');
+    expect(requirement).toContain('Browser Native TTS-friendly narration');
+    expect(requirement).toContain('wrong-answer path');
   });
 
   it('attaches CoastalTutor job metadata without losing the structured lesson', () => {

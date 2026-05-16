@@ -49,18 +49,38 @@ export function buildFallbackSceneOutlines(requirements: UserRequirements): Scen
     },
     {
       id: nanoid(),
-      type: 'slide',
-      title: 'Try It Together',
+      type: 'interactive',
+      title: 'Build It Together',
       description:
-        'Guide the learner through one worked example using drawings, objects, or a number line.',
+        'Guide the learner through one worked example using movable counters, blocks, cards, or a number line.',
       keyPoints: [
-        'Model one strategy step by step',
-        'Pause for the learner to predict the next step',
-        'Give a scaffold before revealing the answer',
+        'Tutor models one strategy step by step with a visible manipulative',
+        'Learner taps, drags, or chooses the next representation',
+        'Misconception repair: if the learner guesses, reduce the model and ask them to rebuild it',
       ],
       teachingObjective: `Practice ${topic} with support.`,
       estimatedDuration: 55,
       order: 2,
+      widgetType: 'game',
+      widgetOutline: {
+        gameType: 'puzzle',
+        challenge: `Build or match the representation that proves ${topic}.`,
+        playerControls: ['tap', 'drag', 'choose'],
+      },
+    },
+    {
+      id: nanoid(),
+      type: 'slide',
+      title: 'Explain Your Strategy',
+      description: 'Help the learner connect the manipulative model to a simple strategy sentence.',
+      keyPoints: [
+        'Keep the completed model visible',
+        'Use one sentence frame: I used ___ because ___',
+        'Teacher praises the strategy before moving to the quick check',
+      ],
+      teachingObjective: `Explain the strategy used for ${topic}.`,
+      estimatedDuration: 25,
+      order: 3,
     },
     {
       id: nanoid(),
@@ -71,11 +91,11 @@ export function buildFallbackSceneOutlines(requirements: UserRequirements): Scen
       keyPoints: [
         'One confidence-building question',
         'One strategy-choice question',
-        'One next-review question',
+        'One next-review question with scaffolded retry feedback',
       ],
       teachingObjective: `Check whether the learner can apply ${topic}.`,
       estimatedDuration: 30,
-      order: 3,
+      order: 4,
       quizConfig: {
         questionCount: 3,
         difficulty: 'easy',
