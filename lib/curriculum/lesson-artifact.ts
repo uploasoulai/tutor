@@ -324,13 +324,24 @@ export function mergeOpenMAICJobStatus(
 ): LessonPayload {
   if (!payload.openmaic || !job || payload.openmaic.jobId !== job.id) return payload;
 
+  const classroomUrl = job.result?.url ?? payload.openmaic.classroomUrl;
+
   return {
     ...payload,
     openmaic: {
       ...payload.openmaic,
       status: job.status,
       classroomId: job.result?.classroomId ?? payload.openmaic.classroomId,
-      classroomUrl: job.result?.url ?? payload.openmaic.classroomUrl,
+      classroomUrl,
+    },
+    quality: {
+      ...payload.quality,
+      openmaic: {
+        status: job.status,
+        scenesGenerated: job.scenesGenerated,
+        classroomUrl,
+        checkedAt: job.updatedAt,
+      },
     },
   };
 }

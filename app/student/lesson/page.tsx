@@ -27,6 +27,7 @@ import {
   Mic,
   Play,
   Sparkles,
+  Star,
   Trophy,
   Volume2,
 } from 'lucide-react';
@@ -69,6 +70,16 @@ type LessonSession = {
       gameType?: 'choice-card' | 'strategy-pick' | 'reflection';
     }[];
     progress?: LessonProgressState;
+    quality?: {
+      score: number;
+      passed: boolean;
+      openmaic?: {
+        status: 'queued' | 'running' | 'succeeded' | 'failed';
+        scenesGenerated: number;
+        classroomUrl?: string;
+        checkedAt: string;
+      };
+    };
     openmaic?: {
       jobId: string;
       status: 'queued' | 'running' | 'succeeded' | 'failed';
@@ -98,6 +109,15 @@ type LessonProgressItem = {
   isCorrect: boolean;
   value?: string | number | boolean | null;
   updatedAt: string;
+};
+
+type LessonQuizItem = {
+  prompt: string;
+  answer: string;
+  choices?: string[];
+  correctChoice?: string;
+  hint?: string;
+  gameType?: 'choice-card' | 'strategy-pick' | 'reflection';
 };
 
 type BCCurriculumContextMatch = {
@@ -563,6 +583,7 @@ function LessonContent() {
   };
 
   const openmaic = session?.lesson_payload?.openmaic;
+  const quality = session?.lesson_payload?.quality;
   const firstName = user?.user_metadata?.first_name ?? 'Student';
   const slides = session?.lesson_payload?.slides ?? [];
   const currentSlide = slides[currentSlideIndex];
@@ -729,59 +750,15 @@ function LessonContent() {
             </div>
             <div className="mt-4 grid gap-3">
               {quiz.map((item, index) => (
-                <div key={item.prompt} className="rounded-lg border border-[#e7e8e9] p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[#191c1d]">{item.prompt}</p>
-                      <p className="mt-1 text-sm text-[#727781]">{item.answer}</p>
-                    </div>
-                    <span className="shrink-0 rounded-full bg-[#f0f4ff] px-2.5 py-1 text-xs font-semibold text-[#003461]">
-                      {item.gameType ?? 'choice-card'}
-                    </span>
-                  </div>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    {(item.choices?.length ? item.choices : ['Correct', 'Needs help']).map(
-                      (choice) => {
-                        const wasSelected = selectedChoices[index] === choice;
-                        const wasAnswered = answered[index] !== undefined;
-                        const isCorrectChoice =
-                          choice === (item.correctChoice ?? item.choices?.[0]);
-
-                        return (
-                          <button
-                            key={choice}
-                            onClick={() => handleChoiceAnswer(index, choice)}
-                            disabled={wasAnswered}
-                            className={[
-                              'rounded-md border px-3 py-2 text-sm font-semibold transition-all disabled:cursor-default',
-                              wasAnswered && wasSelected && isCorrectChoice
-                                ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
-                                : wasAnswered && wasSelected
-                                  ? 'border-amber-500 bg-amber-50 text-amber-700'
-                                  : 'border-[#e7e8e9] text-[#424750] hover:bg-[#f8f9fa]',
-                            ].join(' ')}
-                          >
-                            {choice}
-                          </button>
-                        );
-                      },
-                    )}
-                  </div>
-                  {answered[index] !== undefined ? (
-                    <div className="mt-3 flex items-start gap-2 rounded-md bg-[#f8f9fa] p-3 text-sm text-[#424750]">
-                      {answered[index] ? (
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                      ) : (
-                        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-                      )}
-                      <p>
-                        {answered[index]
-                          ? `${teacher.name}: Nice strategy. I saved your XP and mastery signal.`
-                          : `${teacher.name}: ${item.hint ?? 'Try one scaffold, then answer again next time.'}`}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
+                <QuizGameCard
+                  key={item.prompt}
+                  item={item}
+                  index={index}
+                  answered={answered[index]}
+                  selectedChoice={selectedChoices[index]}
+                  teacherName={teacher.name}
+                  onAnswer={handleChoiceAnswer}
+                />
               ))}
             </div>
 
@@ -888,6 +865,11 @@ function LessonContent() {
                   </p>
                   <p className="mt-1 text-sm font-semibold text-[#191c1d]">{openmaic.jobId}</p>
                   <p className="mt-1 text-xs text-[#727781]">status: {openmaic.status}</p>
+                  {quality?.openmaic ? (
+                    <p className="mt-1 text-xs text-[#727781]">
+                      scenes: {quality.openmaic.scenesGenerated}
+                    </p>
+                  ) : null}
                 </div>
                 <a
                   href={openmaic.classroomUrl ?? openmaic.pollUrl}
@@ -913,6 +895,16 @@ function LessonContent() {
                 queued.
               </p>
             )}
+            {quality ? (
+              <div className="mt-4 rounded-md border border-[#e7e8e9] p-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#727781]">
+                  Lesson quality
+                </p>
+                <p className="mt-1 text-sm font-semibold text-[#191c1d]">
+                  {quality.score}/100 {quality.passed ? 'ready' : 'needs review'}
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
@@ -984,6 +976,123 @@ function LessonWidgetPanel({
           {cue ?? `Make ${title} visible with counters, a number line, or a simple picture.`}
         </p>
       </div>
+    </div>
+  );
+}
+
+function QuizGameCard({
+  item,
+  index,
+  answered,
+  selectedChoice,
+  teacherName,
+  onAnswer,
+}: {
+  item: LessonQuizItem;
+  index: number;
+  answered?: boolean;
+  selectedChoice?: string;
+  teacherName: string;
+  onAnswer: (index: number, choice: string) => void;
+}) {
+  const gameType = item.gameType ?? 'choice-card';
+  const choices = item.choices?.length ? item.choices : ['Correct', 'Needs help'];
+  const correctChoice = item.correctChoice ?? choices[0] ?? item.answer;
+  const gameLabel =
+    gameType === 'strategy-pick'
+      ? 'Strategy pick'
+      : gameType === 'reflection'
+        ? 'Reflection token'
+        : 'Flip cards';
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-[#e7e8e9] bg-white">
+      <div className="border-b border-[#edf0f2] bg-[#f8f9fa] p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-[#191c1d]">{item.prompt}</p>
+            <p className="mt-1 text-sm text-[#727781]">{item.answer}</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-[#f0f4ff] px-2.5 py-1 text-xs font-semibold text-[#003461]">
+            {gameLabel}
+          </span>
+        </div>
+        {gameType === 'strategy-pick' ? (
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-white">
+            <div className="h-full w-2/3 rounded-full bg-[#1f7a8c]" />
+          </div>
+        ) : null}
+      </div>
+
+      <div
+        className={[
+          'grid gap-3 p-4',
+          gameType === 'reflection' ? 'sm:grid-cols-1' : 'sm:grid-cols-3',
+        ].join(' ')}
+      >
+        {choices.map((choice, choiceIndex) => {
+          const wasSelected = selectedChoice === choice;
+          const wasAnswered = answered !== undefined;
+          const isCorrectChoice = choice === correctChoice;
+          const faceLabel =
+            gameType === 'reflection'
+              ? 'Next step'
+              : gameType === 'strategy-pick'
+                ? `Tool ${choiceIndex + 1}`
+                : `Card ${choiceIndex + 1}`;
+
+          return (
+            <button
+              key={choice}
+              onClick={() => onAnswer(index, choice)}
+              disabled={wasAnswered}
+              className={[
+                'group min-h-24 rounded-lg border p-3 text-left transition-all duration-200 disabled:cursor-default',
+                wasAnswered && wasSelected && isCorrectChoice
+                  ? 'scale-[1.01] border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm'
+                  : wasAnswered && wasSelected
+                    ? 'border-amber-500 bg-amber-50 text-amber-800'
+                    : 'border-[#e7e8e9] text-[#424750] hover:-translate-y-0.5 hover:border-[#003461] hover:bg-[#f8f9fa] hover:shadow-sm',
+              ].join(' ')}
+            >
+              <span className="flex items-center justify-between gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#727781]">
+                  {faceLabel}
+                </span>
+                {wasAnswered && wasSelected && isCorrectChoice ? (
+                  <Star className="h-4 w-4 fill-emerald-500 text-emerald-500" />
+                ) : null}
+              </span>
+              <span className="mt-3 block text-sm font-semibold">{choice}</span>
+              {gameType === 'choice-card' ? (
+                <span className="mt-3 block h-1.5 rounded-full bg-[#dbe5ef]">
+                  <span
+                    className={[
+                      'block h-full rounded-full transition-all',
+                      wasSelected ? 'w-full bg-[#003461]' : 'w-1/3 bg-[#c9d5df] group-hover:w-2/3',
+                    ].join(' ')}
+                  />
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+
+      {answered !== undefined ? (
+        <div className="mx-4 mb-4 flex items-start gap-2 rounded-md bg-[#f8f9fa] p-3 text-sm text-[#424750]">
+          {answered ? (
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+          ) : (
+            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+          )}
+          <p>
+            {answered
+              ? `${teacherName}: Nice strategy. I saved your XP and mastery signal.`
+              : `${teacherName}: ${item.hint ?? 'Try one scaffold, then answer again next time.'}`}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

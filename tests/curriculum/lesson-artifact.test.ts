@@ -214,6 +214,11 @@ describe('Grade 2 lesson artifact builder', () => {
       classroomId: 'classroom-1',
       classroomUrl: 'https://app.example.com/classroom/classroom-1',
     });
+    expect(nextPayload.quality.openmaic).toMatchObject({
+      status: 'succeeded',
+      scenesGenerated: 3,
+      classroomUrl: 'https://app.example.com/classroom/classroom-1',
+    });
     expect(nextPayload.slides).toHaveLength(3);
   });
 
