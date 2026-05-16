@@ -79,7 +79,7 @@ export async function resolveModel(params: {
     const configuredProviderIds = Object.keys(serverProviders);
     if (configuredProviderIds.length === 0) {
       throw new Error(
-        'No server-configured free model provider is available. Configure SILICONFLOW_API_KEY, GOOGLE_API_KEY, or GROQ_API_KEY in .env.local, then restart the dev server.',
+        'No server-configured free model provider is available. Configure SILICONFLOW_API_KEY, GOOGLE_API_KEY, or GROQ_API_KEY in the server environment. On Vercel, add it under Project Settings > Environment Variables, then redeploy. For local development, add it to .env.local and restart the dev server.',
       );
     }
 
