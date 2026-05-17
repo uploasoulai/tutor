@@ -90,6 +90,16 @@ describe('scene-generator language directive threading (issue #472)', () => {
       );
     });
 
+    it('falls back to deterministic slide content when the model returns an empty slide', async () => {
+      const { aiCall } = makeCapturingAiCall(JSON.stringify({ elements: [] }));
+
+      const content = await generateSceneContent(baseOutline({ type: 'slide' }), aiCall, {
+        languageDirective: DIRECTIVE,
+      });
+
+      expect(content && 'elements' in content ? content.elements.length : 0).toBeGreaterThan(3);
+    });
+
     it('threads languageDirective into quiz content prompt', async () => {
       const { aiCall, lastUser } = makeCapturingAiCall(JSON.stringify([]));
 
@@ -139,6 +149,55 @@ describe('scene-generator language directive threading (issue #472)', () => {
 
       expect(lastUser()).toContain(DIRECTIVE);
       expect(lastUser()).not.toContain('{{languageDirective}}');
+    });
+
+    it('creates multi-step fallback slide narration when action JSON is empty', async () => {
+      const { aiCall } = makeCapturingAiCall('[]');
+      const content: GeneratedSlideContent = {
+        elements: [
+          {
+            id: 'text_1',
+            type: 'text',
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 40,
+            content: '<p>Number concepts</p>',
+            defaultFontName: '',
+            defaultColor: '#000',
+            rotate: 0,
+          },
+          {
+            id: 'shape_1',
+            type: 'shape',
+            left: 20,
+            top: 20,
+            width: 50,
+            height: 50,
+            rotate: 0,
+            viewBox: [1, 1],
+            path: 'M 0 0 L 1 0 L 1 1 L 0 1 Z',
+            fixedRatio: false,
+            fill: '#fff',
+          },
+        ],
+        background: undefined,
+        remark: '',
+      };
+
+      const actions = await generateSceneActions(
+        baseOutline({
+          type: 'slide',
+          title: 'Number concepts',
+          keyPoints: ['Count the model', 'Show tens and ones', 'Try again with a smaller group'],
+        }),
+        content,
+        aiCall,
+        { languageDirective: DIRECTIVE },
+      );
+
+      expect(actions.filter((action) => action.type === 'speech')).toHaveLength(4);
+      expect(actions.some((action) => action.type === 'laser')).toBe(true);
     });
 
     it('threads languageDirective into quiz actions prompt', async () => {

@@ -763,7 +763,12 @@ async function generateSlideContent(
   const response = await aiCall(prompts.system, prompts.user, visionImages);
   const generatedData = parseJsonResponse<GeneratedSlideData>(response);
 
-  if (!generatedData || !generatedData.elements || !Array.isArray(generatedData.elements)) {
+  if (
+    !generatedData ||
+    !generatedData.elements ||
+    !Array.isArray(generatedData.elements) ||
+    generatedData.elements.length === 0
+  ) {
     log.error(`Failed to parse AI response for: ${outline.title}`);
     return generateFallbackSlideContent(outline);
   }
@@ -834,7 +839,7 @@ async function generateSlideContent(
   };
 }
 
-function generateFallbackSlideContent(outline: SceneOutline): GeneratedSlideContent {
+export function generateFallbackSlideContent(outline: SceneOutline): GeneratedSlideContent {
   const keyPoints = (outline.keyPoints || []).slice(0, 3);
   const title = escapeHtml(outline.title || 'Lesson');
   const description = escapeHtml(outline.description || 'Let us look at the idea together.');
@@ -934,7 +939,7 @@ function generateFallbackSlideContent(outline: SceneOutline): GeneratedSlideCont
       width: 490,
       height: 170,
       rotate: 0,
-      content: `<div style="font-size: 22px; line-height: 1.45; color: #243447;">${bulletText}</div>`,
+      content: `<p style="font-size: 24px; font-weight: 700; color: #153243;">Try it</p>${bulletText}`,
       defaultFontName: '',
       defaultColor: '#243447',
       textType: 'content',
@@ -1704,27 +1709,66 @@ function processActions(actions: Action[], elements: PPTElement[], agents?: Agen
  */
 function generateDefaultSlideActions(outline: SceneOutline, elements: PPTElement[]): Action[] {
   const actions: Action[] = [];
-
-  // Add spotlight for text elements
   const textElements = elements.filter((el) => el.type === 'text');
-  if (textElements.length > 0) {
+  const visualElements = elements.filter((el) => el.type === 'shape' || el.type === 'line');
+  const keyPoints = (outline.keyPoints || []).slice(0, 3);
+
+  if (textElements[0]) {
     actions.push({
       id: `action_${nanoid(8)}`,
       type: 'spotlight',
-      title: '聚焦重点',
       elementId: textElements[0].id,
+      title: 'Focus',
     });
   }
-
-  // Add opening speech based on key points
-  const speechText = outline.keyPoints?.length
-    ? outline.keyPoints.join('。') + '。'
-    : outline.description || outline.title;
   actions.push({
     id: `action_${nanoid(8)}`,
     type: 'speech',
-    title: '场景讲解',
-    text: speechText,
+    title: outline.title,
+    text: `Let's look at ${outline.title}. ${outline.description}`,
+  });
+
+  const visualTarget = visualElements[0] ?? textElements[1] ?? textElements[0];
+  if (visualTarget) {
+    actions.push({
+      id: `action_${nanoid(8)}`,
+      type: 'laser',
+      elementId: visualTarget.id,
+      title: 'Notice',
+    });
+  }
+  actions.push({
+    id: `action_${nanoid(8)}`,
+    type: 'speech',
+    title: 'Notice',
+    text:
+      keyPoints[0] ||
+      'First, notice the visual model. The model helps us see the idea before we name the answer.',
+  });
+
+  if (textElements[1]) {
+    actions.push({
+      id: `action_${nanoid(8)}`,
+      type: 'spotlight',
+      elementId: textElements[1].id,
+      title: 'Try',
+    });
+  }
+  actions.push({
+    id: `action_${nanoid(8)}`,
+    type: 'speech',
+    title: 'Try',
+    text:
+      keyPoints[1] ||
+      'Now try one small step. Point to the part that helps you decide what comes next.',
+  });
+  actions.push({
+    id: `action_${nanoid(8)}`,
+    type: 'speech',
+    title: 'Repair',
+    text:
+      keyPoints[2] ||
+      'If the answer feels tricky, use a smaller model first. Then build back up and explain your strategy.',
   });
 
   return actions;
