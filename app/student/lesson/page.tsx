@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import {
   getTeacherPersonaById,
@@ -187,6 +188,21 @@ function LessonContent() {
   );
 
   useEffect(() => {
+    const previewUser = getDevPreviewUser('student');
+    if (previewUser) {
+      setTeacherId(resolveTeacherPersonaPreference(previewUser.user_metadata).id);
+      setUser(previewUser);
+      void buildLessonPayload().then((lessonPayload) => {
+        setSession({
+          id: `local-preview-${Date.now()}`,
+          coastaltutor_lesson_id: null,
+          lesson_payload: lessonPayload,
+        });
+        setLoading(false);
+      });
+      return;
+    }
+
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace('/login');

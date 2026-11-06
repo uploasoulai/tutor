@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { AccountRole } from '@/lib/auth/account-role';
 
-const SIGNUP_ROLES = new Set<AccountRole>(['student', 'teacher', 'parent']);
+const SIGNUP_ROLES = new Set<AccountRole>(['student', 'parent']);
 
 export async function GET(req: NextRequest) {
   const requestUrl = new URL(req.url);

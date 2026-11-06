@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs><linearGradient id="a" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#c1eadb"/><stop offset="1" stop-color="#eef7e9"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#a)"/>
+  <circle cx="83" cy="72" r="30" fill="#fff" opacity=".6"/>
+  <circle cx="575" cy="302" r="93" fill="#fff" opacity=".4"/>
+  <rect x="79" y="47" width="482" height="268" rx="24" fill="#fff" opacity=".95"/>
+  <rect x="102" y="70" width="72" height="222" rx="13" fill="#18223d"/>
+  <circle cx="138" cy="102" r="14" fill="#75d0ac"/>
+  <rect x="122" y="142" width="32" height="7" rx="4" fill="#fff" opacity=".5"/>
+  <rect x="122" y="169" width="32" height="7" rx="4" fill="#fff" opacity=".25"/>
+  <rect x="122" y="196" width="32" height="7" rx="4" fill="#fff" opacity=".25"/>
+  <text x="202" y="102" fill="#18223d" font-size="21" font-family="Arial" font-weight="700">Your learning space</text>
+  <rect x="202" y="127" width="324" height="69" rx="13" fill="#f1f2ff"/>
+  <circle cx="227" cy="151" r="10" fill="#626ed8"/>
+  <rect x="247" y="143" width="129" height="8" rx="4" fill="#7f87aa"/>
+  <rect x="247" y="161" width="231" height="7" rx="4" fill="#c2c6d8"/>
+  <rect x="202" y="212" width="152" height="57" rx="12" fill="#e7f7f1"/>
+  <rect x="371" y="212" width="155" height="57" rx="12" fill="#fff3dd"/>
+  <path d="M227 248c12-22 24-22 36 0 12-30 24-30 36 0 12-15 22-15 31 0" fill="none" stroke="#58aa88" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="410" cy="241" r="12" fill="#f1bd55"/>
+  <path d="m430 246 15-17 14 11 17-20 25 26z" fill="#d88d58"/>
+</svg>

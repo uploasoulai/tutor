@@ -10,6 +10,8 @@ import { I18nProvider } from '@/lib/hooks/use-i18n';
 import { Toaster } from '@/components/ui/sonner';
 import { ServerProvidersInit } from '@/components/server-providers-init';
 import { AccessCodeGuard } from '@/components/access-code-guard';
+import { GlobalNav } from '@/components/global-nav';
+import { DevPreviewToolbar } from '@/components/dev-preview-toolbar';
 
 const inter = localFont({
   src: '../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2',
@@ -30,6 +32,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
         suppressHydrationWarning
@@ -38,6 +48,8 @@ export default function RootLayout({
           <I18nProvider>
             <ServerProvidersInit />
             <AccessCodeGuard>{children}</AccessCodeGuard>
+            <GlobalNav />
+            <DevPreviewToolbar />
             <Toaster position="top-center" />
           </I18nProvider>
         </ThemeProvider>

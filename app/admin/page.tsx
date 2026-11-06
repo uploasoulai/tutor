@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import { cn } from '@/lib/utils';
 import {
   CheckCircle2,
@@ -100,6 +101,14 @@ export default function AdminDashboardPage() {
   const [linkError, setLinkError] = useState('');
 
   useEffect(() => {
+    if (getDevPreviewUser('admin')) {
+      setLoading(false);
+      setStatusLoading(false);
+      setDirectoryLoading(false);
+      setRelationshipLoading(false);
+      return;
+    }
+
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace('/login');
@@ -199,6 +208,10 @@ export default function AdminDashboardPage() {
   }, [loading]);
 
   const handleSignOut = async () => {
+    if (getDevPreviewUser('admin')) {
+      router.replace('/');
+      return;
+    }
     await supabase.auth.signOut();
     router.replace('/login');
   };

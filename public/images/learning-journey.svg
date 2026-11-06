@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420">
+  <rect width="720" height="420" rx="28" fill="#2a3553"/>
+  <circle cx="608" cy="82" r="82" fill="#5c68d8" opacity=".35"/>
+  <circle cx="95" cy="345" r="105" fill="#59b18e" opacity=".22"/>
+  <path d="M78 323c99-110 188-41 258-126 78-95 163-23 293-126" fill="none" stroke="#aab2ff" stroke-width="3" stroke-dasharray="10 12"/>
+  <circle cx="88" cy="312" r="18" fill="#f2c25b"/><circle cx="332" cy="198" r="18" fill="#78d0ad"/><circle cx="624" cy="75" r="18" fill="#f3a985"/>
+  <g fill="#fff">
+    <rect x="105" y="72" width="188" height="106" rx="14" opacity=".96"/>
+    <rect x="414" y="228" width="191" height="112" rx="14" opacity=".96"/>
+  </g>
+  <g fill="#17213b" font-family="Arial">
+    <text x="127" y="106" font-size="12" font-weight="700">START WITH A QUESTION</text>
+    <text x="127" y="137" font-size="21" font-weight="700">Why does it happen?</text>
+    <text x="436" y="263" font-size="12" font-weight="700">BUILD UNDERSTANDING</text>
+    <text x="436" y="295" font-size="21" font-weight="700">Now I can explain it.</text>
+  </g>
+</svg>

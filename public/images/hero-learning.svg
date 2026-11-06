@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 760">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4c9a8"/><stop offset=".5" stop-color="#d8d4ff"/><stop offset="1" stop-color="#a9dccc"/></linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#665ed8"/><stop offset="1" stop-color="#4540aa"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#29315c" flood-opacity=".2"/></filter>
+  </defs>
+  <rect width="720" height="760" rx="42" fill="url(#bg)"/>
+  <circle cx="85" cy="92" r="44" fill="#fff" opacity=".32"/>
+  <circle cx="644" cy="152" r="85" fill="#fff" opacity=".2"/>
+  <path d="M0 590c149-57 247-27 360 16 126 49 229 42 360-6v160H0z" fill="#f9f4eb"/>
+  <g filter="url(#shadow)">
+    <rect x="86" y="107" width="548" height="364" rx="26" fill="#fff"/>
+    <rect x="106" y="127" width="508" height="324" rx="18" fill="#f7f8fc"/>
+    <rect x="126" y="151" width="70" height="276" rx="14" fill="#242c4a"/>
+    <circle cx="161" cy="186" r="13" fill="#f4ca6a"/>
+    <rect x="143" y="230" width="36" height="7" rx="4" fill="#fff" opacity=".45"/>
+    <rect x="143" y="257" width="36" height="7" rx="4" fill="#fff" opacity=".25"/>
+    <rect x="143" y="284" width="36" height="7" rx="4" fill="#fff" opacity=".25"/>
+    <text x="227" y="188" fill="#5968d7" font-family="Arial" font-size="12" font-weight="700" letter-spacing="2">TODAY'S DISCOVERY</text>
+    <text x="227" y="225" fill="#17213b" font-family="Arial" font-size="25" font-weight="700">How do planets move?</text>
+    <ellipse cx="400" cy="326" rx="130" ry="62" fill="none" stroke="#b8bfdf" stroke-width="2" stroke-dasharray="7 7" transform="rotate(-10 400 326)"/>
+    <circle cx="303" cy="327" r="33" fill="#fac85c"/>
+    <circle cx="303" cy="327" r="45" fill="#fac85c" opacity=".18"/>
+    <circle cx="497" cy="299" r="39" fill="#6682d8"/>
+    <path d="M475 283c17-16 25 2 41-1 12 12 4 28-2 35-19 4-31-11-39-34z" fill="#69bc92"/>
+    <rect x="229" y="401" width="274" height="9" rx="5" fill="#dfe3ef"/>
+    <rect x="229" y="419" width="205" height="9" rx="5" fill="#e9ebf2"/>
+  </g>
+  <g>
+    <ellipse cx="378" cy="701" rx="209" ry="27" fill="#313957" opacity=".12"/>
+    <path d="M256 719c12-120 32-202 93-226 51-20 122 12 149 87 12 33 16 88 20 139z" fill="url(#shirt)"/>
+    <path d="M353 502c-25-16-35-53-24-85 13-38 56-57 92-39 35 18 47 67 22 100-20 27-61 39-90 24z" fill="#b56f4e"/>
+    <path d="M327 438c-17-34-2-80 36-94 42-16 86 7 94 49 5 25-5 44-13 55-1-35-22-49-37-57-18 25-52 35-80 47z" fill="#252339"/>
+    <path d="M346 495c24 31 77 30 98-7l-4 57c-26 27-67 25-92-2z" fill="#a66245"/>
+    <path d="M324 562c42 33 106 31 153-7" fill="none" stroke="#8880ed" stroke-width="8" stroke-linecap="round"/>
+    <path d="M246 608c-42-10-76-20-98-49-9-12-30-4-27 12 7 39 52 76 118 96z" fill="#b56f4e"/>
+    <path d="M499 607c47-11 82-32 110-66 11-13 33-3 28 14-12 45-55 82-123 111z" fill="#b56f4e"/>
+    <rect x="239" y="589" width="278" height="151" rx="16" fill="#fff" filter="url(#shadow)"/>
+    <rect x="259" y="611" width="238" height="106" rx="9" fill="#e9ebf7"/>
+    <circle cx="378" cy="664" r="19" fill="#5968d7"/>
+    <path d="m374 655 14 9-14 9z" fill="#fff"/>
+  </g>
+</svg>

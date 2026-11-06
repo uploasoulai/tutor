@@ -1,8 +1,7 @@
-export type SignupRole = 'student' | 'teacher' | 'parent';
+export type SignupRole = 'student' | 'parent';
 
 export function getRoleLandingPath(role: SignupRole) {
   if (role === 'student') return '/onboarding';
-  if (role === 'teacher') return '/teacher';
   return '/parent';
 }
 

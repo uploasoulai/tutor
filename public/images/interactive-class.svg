@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <rect width="640" height="360" fill="#f7d9c9"/>
+  <path d="M0 293c115-39 238-36 355 5 104 36 190 30 285-3v65H0z" fill="#fff4e8"/>
+  <rect x="172" y="35" width="296" height="189" rx="18" fill="#222b49"/>
+  <rect x="193" y="57" width="254" height="145" rx="10" fill="#fff"/>
+  <text x="218" y="87" fill="#d36f4b" font-size="11" font-family="Arial" font-weight="700" letter-spacing="2">LIVE CLASS</text>
+  <text x="218" y="115" fill="#18223d" font-size="20" font-family="Arial" font-weight="700">Inside a volcano</text>
+  <path d="m262 181 55-75 63 75z" fill="#7b7f91"/>
+  <path d="m312 181 9-57 15 57z" fill="#ef7654"/>
+  <circle cx="112" cy="230" r="39" fill="#82533f"/>
+  <path d="M69 226c3-48 58-67 83-29 8 12 9 27 4 40-19-20-52-23-87-11z" fill="#2d2836"/>
+  <path d="M31 360c6-72 35-105 81-106 48-1 79 35 85 106z" fill="#606cd4"/>
+  <circle cx="520" cy="229" r="40" fill="#d79a70"/>
+  <path d="M477 224c2-49 55-69 85-34 13 14 15 34 8 50-21-29-59-25-93-16z" fill="#b96845"/>
+  <path d="M440 360c7-72 34-105 79-106 50-1 82 34 90 106z" fill="#65a98b"/>
+  <path d="M138 259c19 8 28 20 40 41M495 258c-18 10-27 22-39 43" fill="none" stroke="#82533f" stroke-width="13" stroke-linecap="round"/>
+</svg>

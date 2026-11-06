@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import {
   Home,
   BarChart3,
@@ -62,6 +63,15 @@ export default function ParentDashboardPage() {
   const [selectedStudentId, setSelectedStudentId] = useState('');
 
   useEffect(() => {
+    const previewUser = getDevPreviewUser('parent');
+    if (previewUser) {
+      setUser(previewUser);
+      setLoading(false);
+      setStudentsLoading(false);
+      setHistoryLoading(false);
+      return;
+    }
+
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace('/login');
@@ -159,6 +169,10 @@ export default function ParentDashboardPage() {
   }, [selectedStudentId, user]);
 
   const handleSignOut = async () => {
+    if (getDevPreviewUser('parent')) {
+      router.replace('/');
+      return;
+    }
     await supabase.auth.signOut();
     router.replace('/login');
   };

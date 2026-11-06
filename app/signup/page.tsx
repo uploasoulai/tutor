@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, GraduationCap, Loader2, Mail, Presentation, Smartphone, Users } from 'lucide-react';
+import { Check, GraduationCap, Loader2, Mail, Smartphone, Users } from 'lucide-react';
 
 import { LeftPanelBrandAcademicImageryHiddenOnMobile } from '@/components/auth-left-panel';
 import { GoogleMark } from '@/components/google-mark';
@@ -17,7 +17,7 @@ import { buildAuthCallbackUrl, getRoleLandingPath } from '@/lib/auth/redirect';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
-type Role = 'student' | 'teacher' | 'parent';
+type Role = 'student' | 'parent';
 type SignupMethod = 'email' | 'phone';
 
 export default function RegisterPage() {
@@ -191,7 +191,7 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSignup} className="flex flex-col gap-8">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <RoleCard
                 title="Student"
                 selected={selectedRole === 'student'}
@@ -201,19 +201,6 @@ export default function RegisterPage() {
                     className={cn(
                       'w-6 h-6',
                       selectedRole === 'student' ? 'text-[#003461]' : 'text-[#424750]',
-                    )}
-                  />
-                }
-              />
-              <RoleCard
-                title="Teacher"
-                selected={selectedRole === 'teacher'}
-                onClick={() => setSelectedRole('teacher')}
-                icon={
-                  <Presentation
-                    className={cn(
-                      'w-6 h-6',
-                      selectedRole === 'teacher' ? 'text-[#003461]' : 'text-[#424750]',
                     )}
                   />
                 }

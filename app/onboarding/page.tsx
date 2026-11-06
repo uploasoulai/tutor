@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import { cn } from '@/lib/utils';
 import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import { TEACHER_PERSONAS } from '@/lib/curriculum/teacher-personas';
@@ -61,6 +62,14 @@ export default function OnboardingPage() {
   });
 
   useEffect(() => {
+    const previewUser = getDevPreviewUser('student');
+    if (previewUser) {
+      setUserId(previewUser.id);
+      setFirstName('Demo Student');
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
         router.replace('/login');
@@ -102,6 +111,11 @@ export default function OnboardingPage() {
   const saveAndContinue = async () => {
     if (step < 4) {
       setStep((current) => current + 1);
+      return;
+    }
+
+    if (getDevPreviewUser('student')) {
+      router.replace('/student');
       return;
     }
 

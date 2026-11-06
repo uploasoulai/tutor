@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Mail, Smartphone } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mail, Smartphone } from 'lucide-react';
 
-import { LeftPanelBrandAcademicImageryHiddenOnMobile } from '@/components/auth-left-panel';
+import { AnimatedCharacters } from '@/components/auth-animated-characters';
 import { GoogleMark } from '@/components/google-mark';
 import { formatAuthError } from '@/lib/auth/client-errors';
 import {
@@ -25,11 +25,19 @@ export default function LoginPage() {
   const [phoneCountryCode, setPhoneCountryCode] = useState<PhoneCountryCode>('CA');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [resetMessage, setResetMessage] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('account') === 'teacher-inactive') {
+      setError('Teacher accounts are temporarily unavailable in this version.');
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,11 +61,14 @@ export default function LoginPage() {
       if (authError) throw authError;
 
       const response = await fetch('/api/auth/role');
-      const roleData = response.ok ? ((await response.json()) as { role?: string }) : null;
-      const role = roleData?.role ?? data.user?.user_metadata?.role ?? 'student';
+      if (!response.ok) throw new Error('Could not verify your account role.');
+      const roleData = (await response.json()) as { role?: string };
+      const role = roleData.role ?? 'student';
       if (role === 'admin') router.push('/admin');
-      else if (role === 'teacher') router.push('/teacher');
-      else if (role === 'parent') router.push('/parent');
+      else if (role === 'teacher' || data.user?.user_metadata?.role === 'teacher') {
+        await supabase.auth.signOut();
+        setError('Teacher accounts are temporarily unavailable in this version.');
+      } else if (role === 'parent') router.push('/parent');
       else router.push('/student');
     } catch (err: unknown) {
       setError(formatAuthError(err, 'Invalid email, phone, or password.'));
@@ -109,8 +120,32 @@ export default function LoginPage() {
 
   return (
     <div className="flex w-full min-h-screen bg-[#eef6f7]">
-      <div className="hidden lg:flex w-1/2 flex-col">
-        <LeftPanelBrandAcademicImageryHiddenOnMobile />
+      <div className="relative hidden lg:flex w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-[#eaf8f5] via-[#f2f8ff] to-[#f8f1ff] px-12 py-10 text-slate-800">
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#003461] text-lg font-bold text-white shadow-lg shadow-blue-900/15">C</div>
+          <div>
+            <div className="text-lg font-bold tracking-tight">CoastalTutor</div>
+            <div className="text-xs text-slate-500">A brighter way to learn</div>
+          </div>
+        </div>
+        <div className="relative z-10 flex flex-col items-center justify-center py-8">
+          <div className="mb-6 max-w-md text-center">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-teal-700">Welcome to your learning space</p>
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-800">Learning is better together.</h2>
+          </div>
+          <div className="flex h-[390px] w-full items-end justify-center overflow-hidden">
+            <div className="origin-bottom scale-[0.82]">
+              <AnimatedCharacters isTyping={isTyping} showPassword={showPassword} passwordLength={password.length} />
+            </div>
+          </div>
+          <p className="mt-3 text-sm text-slate-500">Little helpers are keeping an eye on your sign in.</p>
+        </div>
+        <div className="relative z-10 flex items-center justify-between text-xs text-slate-500">
+          <span>Curiosity starts here</span>
+          <span>CoastalTutor · Learn at your pace</span>
+        </div>
+        <div className="pointer-events-none absolute -right-28 top-20 h-80 w-80 rounded-full bg-teal-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-20 h-96 w-96 rounded-full bg-violet-200/40 blur-3xl" />
       </div>
       <div
         className="relative w-full lg:w-1/2 flex flex-col justify-center items-center overflow-hidden p-8"
@@ -155,6 +190,8 @@ export default function LoginPage() {
                   inputMode="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setIsTyping(true)}
+                  onBlur={() => setIsTyping(false)}
                   placeholder="student@example.com"
                   className="w-full h-12 bg-[#f8f9fa] border border-[#c2c6d1] rounded-lg px-4 text-[#191c1d] placeholder:text-[#727781] focus:outline-none focus:ring-2 focus:ring-[#003461] transition-all"
                 />
@@ -182,14 +219,21 @@ export default function LoginPage() {
                   {resetLoading ? 'Sending...' : 'Forgot password?'}
                 </button>
               </div>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="w-full h-12 bg-[#f8f9fa] border border-[#c2c6d1] rounded-lg px-4 text-[#191c1d] placeholder:text-[#727781] focus:outline-none focus:ring-2 focus:ring-[#003461] transition-all"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setIsTyping(true)}
+                  onBlur={() => setIsTyping(false)}
+                  placeholder="Password"
+                  className="w-full h-12 bg-[#f8f9fa] border border-[#c2c6d1] rounded-lg px-4 pr-12 text-[#191c1d] placeholder:text-[#727781] focus:outline-none focus:ring-2 focus:ring-[#003461] transition-all"
+                />
+                <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:text-slate-800">
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
             </div>
             {error && (
               <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-100">

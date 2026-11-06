@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
 import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
@@ -90,6 +91,15 @@ export default function StudentDashboard() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
+    const previewUser = getDevPreviewUser('student');
+    if (previewUser) {
+      setUser(previewUser);
+      setSelectedGrade(DEFAULT_GRADE_LABEL);
+      setSelectedSubject(DEFAULT_SUBJECT);
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
         router.replace('/login');
@@ -202,12 +212,17 @@ export default function StudentDashboard() {
   }
 
   const handleSignOut = async () => {
+    if (getDevPreviewUser('student')) {
+      router.replace('/');
+      return;
+    }
     await supabase.auth.signOut();
     router.replace('/login');
   };
 
   const handleSelectGrade = async (grade: string) => {
     setSelectedGrade(grade);
+    if (getDevPreviewUser('student')) return;
     await supabase.auth.updateUser({ data: { grade } });
   };
 
