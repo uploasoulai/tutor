@@ -5,6 +5,7 @@ node_modules/
 # Vendor packages
 packages/pptxgenjs/
 packages/mathml2omml/
+DeepTutor/
 
 # Build output
 .next/

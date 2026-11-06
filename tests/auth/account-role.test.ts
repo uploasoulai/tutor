@@ -21,7 +21,7 @@ vi.mock('@/lib/supabase/admin', () => ({
 const user = (id: string, role?: string) =>
   ({
     id,
-    user_metadata: role ? { role } : {},
+    app_metadata: role ? { role } : {},
   }) as User;
 
 describe('resolveAccountRole', () => {

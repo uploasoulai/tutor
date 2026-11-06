@@ -39,9 +39,7 @@ function readOrigin(value: string | undefined, name: string): string | null {
 }
 
 /** Server-only connection settings; never pass the shared secret to client code. */
-export function getDeepTutorConfig(
-  env: NodeJS.ProcessEnv = process.env,
-): DeepTutorConfig {
+export function getDeepTutorConfig(env: NodeJS.ProcessEnv = process.env): DeepTutorConfig {
   const enabled = readBoolean(env.DEEPTUTOR_ENABLED, 'DEEPTUTOR_ENABLED');
   const publicUrl = readOrigin(env.DEEPTUTOR_PUBLIC_URL, 'DEEPTUTOR_PUBLIC_URL');
   const internalUrl = readOrigin(env.DEEPTUTOR_INTERNAL_URL, 'DEEPTUTOR_INTERNAL_URL');
@@ -54,7 +52,9 @@ export function getDeepTutorConfig(
   }
 
   if (enabled && (!hostSsoSecret || Buffer.byteLength(hostSsoSecret, 'utf8') < 32)) {
-    throw new Error('DEEPTUTOR_HOST_SSO_SECRET must contain at least 32 bytes when DeepTutor is enabled');
+    throw new Error(
+      'DEEPTUTOR_HOST_SSO_SECRET must contain at least 32 bytes when DeepTutor is enabled',
+    );
   }
 
   return { enabled, publicUrl, internalUrl, hostSsoSecret };

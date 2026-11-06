@@ -1,17 +1,31 @@
-import { useState } from "react"
+import { useState } from 'react';
 
 import './marketing-home.css';
 
-type Screen = "home" | "auth" | "role" | "profile" | "ai-choice" | "provider" | "dashboard" | "parent" | "classroom" | "settings"
-
-type Intent = "school" | "tutor" | "classroom" | "general"
+type Intent = 'school' | 'tutor' | 'classroom' | 'general';
 
 function Icon({
   name,
   size = 20,
 }: {
-  name: "school" | "spark" | "class" | "arrow" | "check" | "family" | "shield" | "book" | "clock" | "menu" | "close" | "user" | "settings" | "logout" | "upload" | "play"
-  size?: number
+  name:
+    | 'school'
+    | 'spark'
+    | 'class'
+    | 'arrow'
+    | 'check'
+    | 'family'
+    | 'shield'
+    | 'book'
+    | 'clock'
+    | 'menu'
+    | 'close'
+    | 'user'
+    | 'settings'
+    | 'logout'
+    | 'upload'
+    | 'play';
+  size?: number;
 }) {
   const paths = {
     school: (
@@ -81,7 +95,7 @@ function Icon({
       </>
     ),
     play: <path d="m9 7 8 5-8 5V7Z" />,
-  }
+  };
   return (
     <svg
       width={size}
@@ -96,45 +110,45 @@ function Icon({
     >
       {paths[name]}
     </svg>
-  )
+  );
 }
 
 const entries = [
   {
-    icon: "school" as const,
-    number: "01",
-    title: "School Learning",
-    copy: "Get guided help with school subjects, understand concepts step by step, practise and review what needs more work.",
-    action: "Start School Learning",
-    intent: "school" as Intent,
-    image: "/images/school-study.svg",
-    alt: "Student working through a science lesson at a desk",
+    icon: 'school' as const,
+    number: '01',
+    title: 'School Learning',
+    copy: 'Get guided help with school subjects, understand concepts step by step, practise and review what needs more work.',
+    action: 'Start School Learning',
+    intent: 'school' as Intent,
+    image: '/images/school-study.svg',
+    alt: 'Student working through a science lesson at a desk',
   },
   {
-    icon: "spark" as const,
-    number: "02",
-    title: "Personal AI Tutor",
-    copy: "Ask questions, read and research, organise notes, build a personal knowledge library and keep learning over time.",
-    action: "Open My Learning Space",
-    intent: "tutor" as Intent,
-    image: "/images/ai-tutor.svg",
-    alt: "A personal learning workspace with notes and ideas",
+    icon: 'spark' as const,
+    number: '02',
+    title: 'Personal AI Tutor',
+    copy: 'Ask questions, read and research, organise notes, build a personal knowledge library and keep learning over time.',
+    action: 'Open My Learning Space',
+    intent: 'tutor' as Intent,
+    image: '/images/ai-tutor.svg',
+    alt: 'A personal learning workspace with notes and ideas',
   },
   {
-    icon: "class" as const,
-    number: "03",
-    title: "Interactive Classroom",
-    copy: "Turn a topic or your own material into a participatory lesson with explanations, quizzes and interactive activities.",
-    action: "Create an Interactive Class",
-    intent: "classroom" as Intent,
-    image: "/images/interactive-class.svg",
-    alt: "Students taking part in an interactive classroom",
+    icon: 'class' as const,
+    number: '03',
+    title: 'Interactive Classroom',
+    copy: 'Turn a topic or your own material into a participatory lesson with explanations, quizzes and interactive activities.',
+    action: 'Create an Interactive Class',
+    intent: 'classroom' as Intent,
+    image: '/images/interactive-class.svg',
+    alt: 'Students taking part in an interactive classroom',
   },
-]
+];
 
 function Brand() {
   return (
-    <button className="brand" onClick={() => (window.location.hash = "")}>
+    <button className="brand" onClick={() => (window.location.hash = '')}>
       <span className="brand-mark">
         <i />
         <i />
@@ -142,28 +156,18 @@ function Brand() {
       </span>
       <b>CoastalTutor</b>
     </button>
-  )
+  );
 }
 
-function PublicHeader({
-  start,
-  signIn,
-}: {
-  start: (intent?: Intent) => void
-  signIn: () => void
-}) {
-  const [open, setOpen] = useState(false)
+function PublicHeader({ start, signIn }: { start: (intent?: Intent) => void; signIn: () => void }) {
+  const [open, setOpen] = useState(false);
   return (
     <header className="public-header">
       <Brand />
-      <button
-        className="mobile-menu"
-        onClick={() => setOpen(!open)}
-        aria-label="Open navigation"
-      >
-        <Icon name={open ? "close" : "menu"} />
+      <button className="mobile-menu" onClick={() => setOpen(!open)} aria-label="Open navigation">
+        <Icon name={open ? 'close' : 'menu'} />
       </button>
-      <nav className={open ? "open" : ""}>
+      <nav className={open ? 'open' : ''}>
         <a href="#how">How It Works</a>
         <a href="#learning">Learning</a>
         <a href="#families">For Families</a>
@@ -171,20 +175,17 @@ function PublicHeader({
         <button className="sign-in-link" onClick={signIn}>
           Sign In
         </button>
-        <button className="button small" onClick={() => start("general")}>
+        <button className="button small" onClick={() => start('general')}>
           Get Started
         </button>
       </nav>
     </header>
-  )
+  );
 }
 
 function HeroVisual() {
   return (
-    <div
-      className="hero-visual"
-      aria-label="A connected personal learning space"
-    >
+    <div className="hero-visual" aria-label="A connected personal learning space">
       <span className="hero-doodle hero-doodle-one">IDEA</span>
       <span className="hero-doodle hero-doodle-two">A+</span>
       <div className="hero-image-wrap">
@@ -213,47 +214,41 @@ function HeroVisual() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export function Home({
-  start,
-  signIn,
-}: {
-  start: (intent?: Intent) => void
-  signIn: () => void
-}) {
-  const [faq, setFaq] = useState(0)
+export function Home({ start, signIn }: { start: (intent?: Intent) => void; signIn: () => void }) {
+  const [faq, setFaq] = useState(0);
   const faqs = [
     [
-      "Is this only for K–12 students?",
-      "No. The experience prioritises K–12 learners and families, while the personal learning space also supports independent learners.",
+      'Is this only for K–12 students?',
+      'No. The experience prioritises K–12 learners and families, while the personal learning space also supports independent learners.',
     ],
     [
-      "Do I need an AI account?",
-      "No. Choose Platform AI for a simple setup, or connect a supported provider account if you already have one.",
+      'Do I need an AI account?',
+      'No. Choose Platform AI for a simple setup, or connect a supported provider account if you already have one.',
     ],
     [
-      "Can parents manage more than one learner?",
-      "Yes. A guardian can create or link multiple learner profiles and view only the progress each learner has authorised.",
+      'Can parents manage more than one learner?',
+      'Yes. A guardian can create or link multiple learner profiles and view only the progress each learner has authorised.',
     ],
     [
-      "What happens when my own API key runs out of credits?",
-      "Learning pauses and we show a clear connection notice. You can add credits with your provider, update the key or switch to Platform AI.",
+      'What happens when my own API key runs out of credits?',
+      'Learning pauses and we show a clear connection notice. You can add credits with your provider, update the key or switch to Platform AI.',
     ],
     [
-      "Does every lesson include AI-generated images or videos?",
-      "No. Core lessons use text, diagrams and browser-based interactions. Images, voice and video require separately supported media services.",
+      'Does every lesson include AI-generated images or videos?',
+      'No. Core lessons use text, diagrams and browser-based interactions. Images, voice and video require separately supported media services.',
     ],
     [
-      "Can I use the platform on a phone or tablet?",
-      "Yes. Core student, family and interactive classroom flows are designed for modern phone, tablet and desktop browsers.",
+      'Can I use the platform on a phone or tablet?',
+      'Yes. Core student, family and interactive classroom flows are designed for modern phone, tablet and desktop browsers.',
     ],
     [
-      "How is learner data protected?",
-      "Learner profiles, guardian relationships and report access are permission-based. Privacy, export and deletion controls are available in account settings.",
+      'How is learner data protected?',
+      'Learner profiles, guardian relationships and report access are permission-based. Privacy, export and deletion controls are available in account settings.',
     ],
-  ]
+  ];
   return (
     <div className="public-site">
       <PublicHeader start={start} signIn={signIn} />
@@ -270,11 +265,11 @@ export function Home({
               <em>Explore with curiosity.</em>
             </h1>
             <p>
-              One personal learning space for school subjects, independent study
-              and interactive lessons — built for learners and families.
+              One personal learning space for school subjects, independent study and interactive
+              lessons — built for learners and families.
             </p>
             <div className="hero-actions">
-              <button className="button" onClick={() => start("general")}>
+              <button className="button" onClick={() => start('general')}>
                 Start Learning <Icon name="arrow" size={17} />
               </button>
               <a className="text-button" href="#how">
@@ -304,8 +299,8 @@ export function Home({
             <span className="eyebrow">THREE WAYS TO LEARN</span>
             <h2>One space. Every kind of curiosity.</h2>
             <p>
-              Start with what you need today. Your learner profile stays with
-              you across your personal learning space.
+              Start with what you need today. Your learner profile stays with you across your
+              personal learning space.
             </p>
           </div>
           <div className="entry-grid">
@@ -330,8 +325,7 @@ export function Home({
           </div>
           <p className="shared-note">
             <Icon name="spark" size={15} />
-            School Learning and Personal AI Tutor share one learner profile and
-            learning space.
+            School Learning and Personal AI Tutor share one learner profile and learning space.
           </p>
         </section>
 
@@ -340,14 +334,11 @@ export function Home({
             <span className="eyebrow">A CONTINUOUS LEARNING LOOP</span>
             <h2>From first question to lasting understanding.</h2>
             <p>
-              Move naturally from guided learning to exploration, then return to
-              review what you’ve learned.
+              Move naturally from guided learning to exploration, then return to review what you’ve
+              learned.
             </p>
             <div className="how-image">
-              <img
-                src="/images/learning-journey.svg"
-                alt="Learners building knowledge together"
-              />
+              <img src="/images/learning-journey.svg" alt="Learners building knowledge together" />
               <span>
                 <b>Small steps, real momentum</b>
                 Learning that grows with every question.
@@ -357,24 +348,21 @@ export function Home({
           <ol className="steps">
             {[
               [
-                "Create a Learning Profile",
-                "Set a few essentials now. Add more preferences whenever you’re ready.",
+                'Create a Learning Profile',
+                'Set a few essentials now. Add more preferences whenever you’re ready.',
               ],
               [
-                "Learn with Your AI Tutor",
-                "Ask, practise and get explanations that build understanding — not just answers.",
+                'Learn with Your AI Tutor',
+                'Ask, practise and get explanations that build understanding — not just answers.',
               ],
               [
-                "Explore an Interactive Class",
-                "Turn a topic or source material into a structured, participatory lesson.",
+                'Explore an Interactive Class',
+                'Turn a topic or source material into a structured, participatory lesson.',
               ],
-              [
-                "Review and Keep Learning",
-                "Revisit recent work and choose what to explore next.",
-              ],
+              ['Review and Keep Learning', 'Revisit recent work and choose what to explore next.'],
             ].map(([title, copy], i) => (
               <li key={title}>
-                <span>{String(i + 1).padStart(2, "0")}</span>
+                <span>{String(i + 1).padStart(2, '0')}</span>
                 <div>
                   <h3>{title}</h3>
                   <p>{copy}</p>
@@ -383,8 +371,8 @@ export function Home({
             ))}
           </ol>
           <small className="implementation-note">
-            Available saving and sharing may vary by learning mode. We’ll always
-            show what is saved before you leave.
+            Available saving and sharing may vary by learning mode. We’ll always show what is saved
+            before you leave.
           </small>
         </section>
 
@@ -438,10 +426,7 @@ export function Home({
                 <Icon name="spark" />
                 <span>
                   <b>Learn at your own pace</b>
-                  <small>
-                    Ask again, try another explanation and practise without
-                    pressure.
-                  </small>
+                  <small>Ask again, try another explanation and practise without pressure.</small>
                 </span>
               </div>
               <div>
@@ -449,8 +434,7 @@ export function Home({
                 <span>
                   <b>Build understanding over time</b>
                   <small>
-                    Bring questions, notes and learning material into one
-                    personal space.
+                    Bring questions, notes and learning material into one personal space.
                   </small>
                 </span>
               </div>
@@ -459,8 +443,7 @@ export function Home({
                 <span>
                   <b>Support without overstepping</b>
                   <small>
-                    Guardians see authorised progress reports — not every
-                    private conversation.
+                    Guardians see authorised progress reports — not every private conversation.
                   </small>
                 </span>
               </div>
@@ -469,16 +452,12 @@ export function Home({
                 <span>
                   <b>Simple family management</b>
                   <small>
-                    Manage learner profiles, household access and AI service
-                    choices together.
+                    Manage learner profiles, household access and AI service choices together.
                   </small>
                 </span>
               </div>
             </div>
-            <button
-              className="text-button dark"
-              onClick={() => start("general")}
-            >
+            <button className="text-button dark" onClick={() => start('general')}>
               Explore family learning <Icon name="arrow" size={15} />
             </button>
           </div>
@@ -488,18 +467,15 @@ export function Home({
           <div className="section-heading">
             <span className="eyebrow">AI, YOUR WAY</span>
             <h2>Simple setup. Clear choices.</h2>
-            <p>
-              No model IDs or technical endpoints. Choose the option that fits
-              your family.
-            </p>
+            <p>No model IDs or technical endpoints. Choose the option that fits your family.</p>
           </div>
           <div className="ai-options">
             <article>
               <span className="option-label">FOR AI ACCOUNT HOLDERS</span>
               <h3>Bring Your Own AI Key</h3>
               <p>
-                Connect an account from a supported AI provider. Your provider
-                bills AI usage directly to you.
+                Connect an account from a supported AI provider. Your provider bills AI usage
+                directly to you.
               </p>
               <ul>
                 <li>
@@ -515,7 +491,7 @@ export function Home({
                   Used across your personal learning space
                 </li>
               </ul>
-              <button onClick={() => start("general")}>
+              <button onClick={() => start('general')}>
                 Choose your own key <Icon name="arrow" />
               </button>
             </article>
@@ -523,8 +499,8 @@ export function Home({
               <span className="option-label">EASIEST FOR FAMILIES</span>
               <h3>Platform AI</h3>
               <p>
-                We provide and manage the AI service. Usage and limits are
-                included with the selected membership.
+                We provide and manage the AI service. Usage and limits are included with the
+                selected membership.
               </p>
               <ul>
                 <li>
@@ -540,7 +516,7 @@ export function Home({
                   Simple, visible usage limits
                 </li>
               </ul>
-              <button onClick={() => start("general")}>
+              <button onClick={() => start('general')}>
                 Start with Platform AI <Icon name="arrow" />
               </button>
             </article>
@@ -551,9 +527,7 @@ export function Home({
           <div className="section-heading left">
             <span className="eyebrow">MEMBERSHIP OPTIONS</span>
             <h2>Choose how your AI learning is powered.</h2>
-            <p>
-              Final pricing and usage allowances will be shown before purchase.
-            </p>
+            <p>Final pricing and usage allowances will be shown before purchase.</p>
           </div>
           <div className="plan-grid">
             <article>
@@ -563,13 +537,9 @@ export function Home({
                 9.99 $<small>/ month</small>
               </div>
               <p>
-                Platform membership with learning tools, profiles and
-                interactive classroom access.
+                Platform membership with learning tools, profiles and interactive classroom access.
               </p>
-              <button
-                className="button secondary"
-                onClick={() => start("general")}
-              >
+              <button className="button secondary" onClick={() => start('general')}>
                 Get Started
               </button>
             </article>
@@ -579,11 +549,8 @@ export function Home({
               <div className="price">
                 39.99 $<small>/ month</small>
               </div>
-              <p>
-                Platform membership plus a clearly defined allowance of managed
-                AI usage.
-              </p>
-              <button className="button" onClick={() => start("general")}>
+              <p>Platform membership plus a clearly defined allowance of managed AI usage.</p>
+              <button className="button" onClick={() => start('general')}>
                 Get Started
               </button>
             </article>
@@ -595,16 +562,15 @@ export function Home({
             <span className="eyebrow">COMMON QUESTIONS</span>
             <h2>A few things you might be wondering.</h2>
             <p>
-              Still have a question?{" "}
-              <a href="mailto:hello@example.com">Contact our team</a>.
+              Still have a question? <a href="mailto:hello@example.com">Contact our team</a>.
             </p>
           </div>
           <div className="accordion">
             {faqs.map(([q, a], i) => (
-              <div className={`faq-item ${faq === i ? "open" : ""}`} key={q}>
+              <div className={`faq-item ${faq === i ? 'open' : ''}`} key={q}>
                 <button onClick={() => setFaq(faq === i ? -1 : i)}>
                   <span>{q}</span>
-                  <b>{faq === i ? "−" : "+"}</b>
+                  <b>{faq === i ? '−' : '+'}</b>
                 </button>
                 <p>{a}</p>
               </div>
@@ -615,10 +581,7 @@ export function Home({
       <footer>
         <div>
           <Brand />
-          <p>
-            Personal AI learning for students, independent learners and
-            families.
-          </p>
+          <p>Personal AI learning for students, independent learners and families.</p>
         </div>
         <div>
           <b>Product</b>
@@ -637,11 +600,8 @@ export function Home({
           <button>Privacy</button>
           <button>Open-source notices</button>
         </div>
-        <small>
-          © {new Date().getFullYear()} CoastalTutor. All rights reserved.
-        </small>
+        <small>© {new Date().getFullYear()} CoastalTutor. All rights reserved.</small>
       </footer>
     </div>
-  )
+  );
 }
-

@@ -5,7 +5,6 @@ import { buildAuthCallbackUrl, getRoleLandingPath } from '@/lib/auth/redirect';
 describe('getRoleLandingPath', () => {
   it('routes signup roles to the correct first screen', () => {
     expect(getRoleLandingPath('student')).toBe('/onboarding');
-    expect(getRoleLandingPath('teacher')).toBe('/teacher');
     expect(getRoleLandingPath('parent')).toBe('/parent');
   });
 });

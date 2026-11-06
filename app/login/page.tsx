@@ -122,7 +122,9 @@ export default function LoginPage() {
     <div className="flex w-full min-h-screen bg-[#eef6f7]">
       <div className="relative hidden lg:flex w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-[#eaf8f5] via-[#f2f8ff] to-[#f8f1ff] px-12 py-10 text-slate-800">
         <div className="relative z-10 flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#003461] text-lg font-bold text-white shadow-lg shadow-blue-900/15">C</div>
+          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#003461] text-lg font-bold text-white shadow-lg shadow-blue-900/15">
+            C
+          </div>
           <div>
             <div className="text-lg font-bold tracking-tight">CoastalTutor</div>
             <div className="text-xs text-slate-500">A brighter way to learn</div>
@@ -130,15 +132,25 @@ export default function LoginPage() {
         </div>
         <div className="relative z-10 flex flex-col items-center justify-center py-8">
           <div className="mb-6 max-w-md text-center">
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-teal-700">Welcome to your learning space</p>
-            <h2 className="text-3xl font-semibold tracking-tight text-slate-800">Learning is better together.</h2>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-teal-700">
+              Welcome to your learning space
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-800">
+              Learning is better together.
+            </h2>
           </div>
           <div className="flex h-[390px] w-full items-end justify-center overflow-hidden">
             <div className="origin-bottom scale-[0.82]">
-              <AnimatedCharacters isTyping={isTyping} showPassword={showPassword} passwordLength={password.length} />
+              <AnimatedCharacters
+                isTyping={isTyping}
+                showPassword={showPassword}
+                passwordLength={password.length}
+              />
             </div>
           </div>
-          <p className="mt-3 text-sm text-slate-500">Little helpers are keeping an eye on your sign in.</p>
+          <p className="mt-3 text-sm text-slate-500">
+            Little helpers are keeping an eye on your sign in.
+          </p>
         </div>
         <div className="relative z-10 flex items-center justify-between text-xs text-slate-500">
           <span>Curiosity starts here</span>
@@ -230,7 +242,12 @@ export default function LoginPage() {
                   placeholder="Password"
                   className="w-full h-12 bg-[#f8f9fa] border border-[#c2c6d1] rounded-lg px-4 pr-12 text-[#191c1d] placeholder:text-[#727781] focus:outline-none focus:ring-2 focus:ring-[#003461] transition-all"
                 />
-                <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:text-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:text-slate-800"
+                >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>

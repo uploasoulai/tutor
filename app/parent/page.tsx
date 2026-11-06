@@ -65,10 +65,12 @@ export default function ParentDashboardPage() {
   useEffect(() => {
     const previewUser = getDevPreviewUser('parent');
     if (previewUser) {
-      setUser(previewUser);
-      setLoading(false);
-      setStudentsLoading(false);
-      setHistoryLoading(false);
+      Promise.resolve().then(() => {
+        setUser(previewUser);
+        setLoading(false);
+        setStudentsLoading(false);
+        setHistoryLoading(false);
+      });
       return;
     }
 

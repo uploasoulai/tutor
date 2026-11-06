@@ -32,7 +32,10 @@ export async function readProfileRole(userId: string): Promise<AccountRole | nul
 export async function resolveAccountRole(user: User): Promise<AccountRole> {
   const profileRole = await readProfileRole(user.id);
   const metadataRole = readMetadataRole(user);
-  return profileRole ?? metadataRole ?? 'student';
+  // A freshly created profile may still carry the default `student` role while
+  // trusted app_metadata already records the selected account role.
+  if (profileRole && profileRole !== 'student') return profileRole;
+  return metadataRole ?? profileRole ?? 'student';
 }
 
 export async function hasAccountRole(user: User, expectedRole: AccountRole): Promise<boolean> {

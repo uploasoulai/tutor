@@ -1,16 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useSyncExternalStore } from 'react';
+
+function subscribeToPreviewAvailability() {
+  return () => {};
+}
+
+function isLocalPreviewAvailable() {
+  return (
+    process.env.NODE_ENV === 'development' &&
+    typeof window !== 'undefined' &&
+    ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
+  );
+}
 
 export function DevPreviewToolbar() {
-  const [isLocalPreview, setIsLocalPreview] = useState(false);
-
-  useEffect(() => {
-    setIsLocalPreview(
-      process.env.NODE_ENV === 'development' &&
-        ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname),
-    );
-  }, []);
+  const isLocalPreview = useSyncExternalStore(
+    subscribeToPreviewAvailability,
+    isLocalPreviewAvailable,
+    () => false,
+  );
 
   if (!isLocalPreview) return null;
 
@@ -28,27 +38,48 @@ export function DevPreviewToolbar() {
           选择要预览的角色页面。账户数据、AI 请求、保存操作和 DeepTutor 仍由后端身份验证保护。
         </p>
         <div className="grid grid-cols-2 gap-2">
-          <a className="rounded-lg bg-slate-900 px-3 py-2 text-center text-sm font-medium text-white hover:bg-slate-700" href="/student?preview=student">
+          <Link
+            className="rounded-lg bg-slate-900 px-3 py-2 text-center text-sm font-medium text-white hover:bg-slate-700"
+            href="/student?preview=student"
+          >
             学生主页
-          </a>
-          <a className="rounded-lg bg-indigo-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-indigo-500" href="/student/lesson?preview=student&amp;grade=Grade%204&amp;subject=Math&amp;title=Fractions">
+          </Link>
+          <a
+            className="rounded-lg bg-indigo-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-indigo-500"
+            href="/student/lesson?preview=student&amp;grade=Grade%204&amp;subject=Math&amp;title=Fractions"
+          >
             互动课程
           </a>
-          <a className="rounded-lg bg-teal-700 px-3 py-2 text-center text-sm font-medium text-white hover:bg-teal-600" href="/parent?preview=parent">
+          <a
+            className="rounded-lg bg-teal-700 px-3 py-2 text-center text-sm font-medium text-white hover:bg-teal-600"
+            href="/parent?preview=parent"
+          >
             家长门户
           </a>
-          <a className="rounded-lg bg-amber-700 px-3 py-2 text-center text-sm font-medium text-white hover:bg-amber-600" href="/admin?preview=admin">
+          <a
+            className="rounded-lg bg-amber-700 px-3 py-2 text-center text-sm font-medium text-white hover:bg-amber-600"
+            href="/admin?preview=admin"
+          >
             管理员页面
           </a>
-          <a className="rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-medium hover:bg-slate-50" href="/explore">
+          <a
+            className="rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-medium hover:bg-slate-50"
+            href="/explore"
+          >
             探索 / 互动课堂
           </a>
-          <a className="rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-medium hover:bg-slate-50" href="/generation-preview">
+          <a
+            className="rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-medium hover:bg-slate-50"
+            href="/generation-preview"
+          >
             课程生成
           </a>
-          <a className="col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-medium hover:bg-slate-50" href="/">
+          <Link
+            className="col-span-2 rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-medium hover:bg-slate-50"
+            href="/"
+          >
             返回 CoastalTutor 首页
-          </a>
+          </Link>
         </div>
         <p className="mb-0 mt-3 text-[11px] text-slate-500">
           教师账户本版本休眠；DeepTutor SSO 需要真实账户和已启动服务。
