@@ -2,7 +2,8 @@ name: Supabase Keepalive
 
 on:
   schedule:
-    - cron: '17 */12 * * *'
+    # Make a small database read every six hours to provide regular project activity.
+    - cron: '17 */6 * * *'
   workflow_dispatch:
 
 jobs:

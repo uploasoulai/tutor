@@ -111,7 +111,7 @@ export default function AdminDashboardPage() {
 
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
-        router.replace('/login');
+        window.location.replace('/login');
         return;
       }
 
@@ -213,7 +213,7 @@ export default function AdminDashboardPage() {
       return;
     }
     await supabase.auth.signOut();
-    router.replace('/login');
+    window.location.replace('/login');
   };
 
   const handleRunKeepalive = async () => {

@@ -72,7 +72,7 @@ export default function OnboardingPage() {
 
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
-        router.replace('/login');
+        window.location.replace('/login');
         return;
       }
 

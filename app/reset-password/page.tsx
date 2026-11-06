@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
@@ -10,7 +9,6 @@ import { validateNewPassword } from '@/lib/auth/password';
 import { createClient } from '@/lib/supabase/client';
 
 export default function ResetPasswordPage() {
-  const router = useRouter();
   const supabase = createClient();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -42,7 +40,7 @@ export default function ResetPasswordPage() {
 
       setMessage('Password updated. Redirecting to sign in...');
       await supabase.auth.signOut();
-      window.setTimeout(() => router.replace('/login'), 900);
+      window.setTimeout(() => window.location.replace('/login'), 900);
     } catch (err: unknown) {
       setError(formatAuthError(err, 'Password update failed.'));
     } finally {
@@ -101,7 +99,7 @@ export default function ResetPasswordPage() {
 
           <div className="pt-4 border-t border-[#e7e8e9] text-center">
             <button
-              onClick={() => router.push('/login')}
+              onClick={() => window.location.assign('/login')}
               className="text-[#003461] font-semibold hover:underline"
             >
               Back to sign in

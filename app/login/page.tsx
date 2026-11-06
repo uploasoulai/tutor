@@ -169,6 +169,21 @@ export default function LoginPage() {
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#4285F4_0_25%,#EA4335_25%_50%,#FBBC05_50%_75%,#34A853_75%_100%)] opacity-80" />
         <div className="relative w-full max-w-[400px] flex flex-col gap-8">
+          <div className="relative h-[170px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#eaf8f5] via-[#f2f8ff] to-[#f8f1ff] lg:hidden">
+            <p className="absolute inset-x-0 top-3 z-10 text-center text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">
+              Learning is better together.
+            </p>
+            <div
+              className="absolute left-1/2 top-0"
+              style={{ transform: 'translateX(-50%) scale(0.42)', transformOrigin: 'top center' }}
+            >
+              <AnimatedCharacters
+                isTyping={isTyping}
+                showPassword={showPassword}
+                passwordLength={password.length}
+              />
+            </div>
+          </div>
           <div className="flex flex-col gap-2">
             <h1 className="text-[32px] font-semibold text-[#191c1d] tracking-tight">
               Welcome back

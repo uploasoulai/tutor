@@ -76,7 +76,7 @@ export default function ParentDashboardPage() {
 
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
-        router.replace('/login');
+        window.location.replace('/login');
         return;
       }
 
@@ -176,7 +176,7 @@ export default function ParentDashboardPage() {
       return;
     }
     await supabase.auth.signOut();
-    router.replace('/login');
+    window.location.replace('/login');
   };
 
   if (loading) {

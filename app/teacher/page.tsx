@@ -88,7 +88,7 @@ export default function TeacherDashboardPage() {
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
-        router.replace('/login');
+        window.location.replace('/login');
         return;
       }
 
@@ -206,7 +206,7 @@ export default function TeacherDashboardPage() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.replace('/login');
+    window.location.replace('/login');
   };
 
   const handleResolveAlert = async (alertId: string, studentId?: string) => {

@@ -102,7 +102,7 @@ export default function StudentDashboard() {
 
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
-        router.replace('/login');
+        window.location.replace('/login');
         return;
       }
 
@@ -217,7 +217,7 @@ export default function StudentDashboard() {
       return;
     }
     await supabase.auth.signOut();
-    router.replace('/login');
+    window.location.replace('/login');
   };
 
   const handleSelectGrade = async (grade: string) => {

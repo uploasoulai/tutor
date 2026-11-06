@@ -205,7 +205,7 @@ function LessonContent() {
 
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
-        router.replace('/login');
+        window.location.replace('/login');
         return;
       }
       setTeacherId(resolveTeacherPersonaPreference(data.user.user_metadata).id);
