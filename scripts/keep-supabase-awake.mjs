@@ -1,8 +1,8 @@
-const appUrl = process.env.APP_BASE_URL;
+const appUrl = process.env.APP_BASE_URL ?? 'https://tutor.uploadsoul.com';
 const keepaliveSecret = process.env.KEEPALIVE_SECRET;
 
 if (!appUrl || !keepaliveSecret) {
-  console.error('APP_BASE_URL and KEEPALIVE_SECRET must be configured as GitHub Actions secrets.');
+  console.error('KEEPALIVE_SECRET must be configured as a GitHub Actions secret.');
   process.exit(1);
 }
 
