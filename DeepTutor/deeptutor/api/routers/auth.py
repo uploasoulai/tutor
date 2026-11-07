@@ -362,6 +362,41 @@ class AuthStatusResponse(BaseModel):
     host_sso_only: bool = False
 
 
+def _admin_needs_llm_setup() -> bool:
+    """Send a newly bootstrapped operator to model setup before learning."""
+    try:
+        from deeptutor.multi_user.paths import get_admin_path_service
+        from deeptutor.services.config.model_catalog import ModelCatalogService
+
+        path = get_admin_path_service().get_settings_file("model_catalog")
+        catalog = ModelCatalogService.get_instance(path).load()
+        llm = (catalog.get("services") or {}).get("llm") or {}
+        active_profile_id = llm.get("active_profile_id")
+        active_model_id = llm.get("active_model_id")
+        profile = next(
+            (
+                item
+                for item in llm.get("profiles", [])
+                if isinstance(item, dict)
+                and item.get("id") == active_profile_id
+                and not item.get("provider_only")
+            ),
+            None,
+        )
+        model = next(
+            (
+                item
+                for item in (profile or {}).get("models", [])
+                if isinstance(item, dict) and item.get("id") == active_model_id
+            ),
+            None,
+        )
+        return not bool(profile and profile.get("binding") and model and model.get("model"))
+    except Exception:
+        logger.exception("Could not check whether the platform admin has configured an LLM")
+        return True
+
+
 @router.post("/host-sso/exchange")
 async def exchange_host_sso(ticket: str = Form(...)) -> Response:
     """Exchange a brief host-issued assertion for DeepTutor's normal session."""
@@ -381,6 +416,9 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
             raise ValueError("Expired host assertion")
         source_id = str(claims["sub"])
         role = str(claims["role"])
+        mode = str(claims.get("mode") or "personal")
+        if mode not in {"school", "personal"}:
+            raise ValueError("Invalid learning mode")
         jti = str(claims["jti"])
         if not re.fullmatch(r"[0-9a-fA-F-]{36}", source_id) or not jti or len(jti) > 80:
             raise ValueError("Invalid host identity")
@@ -437,7 +475,10 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
         if not record or record[1].get("disabled"):
             raise HTTPException(status_code=403, detail="This account is unavailable.")
         token = create_token(username, str(record[1].get("role") or "user"), account_id)
-        response = RedirectResponse(url="/", status_code=303)
+        destination = "/learning" if mode == "school" else "/"
+        if role == "admin" and _admin_needs_llm_setup():
+            destination = "/settings/llm"
+        response = RedirectResponse(url=destination, status_code=303)
         response.set_cookie(value=token, max_age=_COOKIE_MAX_AGE, **_cookie_attrs())
         response.headers["Cache-Control"] = "no-store"
         response.headers["Referrer-Policy"] = "no-referrer"

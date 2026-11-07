@@ -1,5 +1,5 @@
 import { createHmac, randomBytes, randomUUID } from 'node:crypto';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { resolveAccountRole } from '@/lib/auth/account-role';
 import { getDeepTutorConfig } from '@/lib/server/deeptutor-config';
@@ -20,7 +20,7 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (character) => entities[character]);
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const config = getDeepTutorConfig();
     if (!config.enabled || !config.publicUrl || !config.hostSsoSecret) {
@@ -31,7 +31,13 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
 
-    const role = await resolveAccountRole(user);
+    const accountRole = await resolveAccountRole(user);
+    const role =
+      accountRole !== 'teacher' &&
+      config.adminEmail &&
+      user.email?.trim().toLowerCase() === config.adminEmail
+        ? 'admin'
+        : accountRole;
     if (role === 'teacher') {
       return NextResponse.json({ error: 'Teacher access is not enabled' }, { status: 403 });
     }
@@ -48,10 +54,12 @@ export async function GET() {
     }
 
     const now = Math.floor(Date.now() / 1000);
+    const requestedMode = request.nextUrl.searchParams.get('mode');
+    const mode = requestedMode === 'school' ? 'school' : 'personal';
     const header = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
     const payload = b64url(JSON.stringify({
       iss: 'coastaltutor', aud: 'deeptutor', sub: user.id, role,
-      learner_ids: learnerIds, iat: now, exp: now + 60, jti: randomUUID(),
+      learner_ids: learnerIds, mode, iat: now, exp: now + 60, jti: randomUUID(),
     }));
     const signingInput = `${header}.${payload}`;
     const signature = createHmac('sha256', config.hostSsoSecret).update(signingInput).digest('base64url');

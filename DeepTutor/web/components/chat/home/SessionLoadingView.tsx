@@ -59,8 +59,8 @@ export default function SessionLoadingView({
       {/* Logo + spinner (or the failure mark) */}
       <div className="flex items-center gap-3">
         <img
-          src="/brand/black-logo.png"
-          alt="DeepTutor"
+          src="/brand/coastaltutor-mark.svg"
+          alt="CoastalTutor"
           width={32}
           height={32}
           className="h-8 w-8 select-none dark:invert"

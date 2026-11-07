@@ -1,0 +1,28 @@
+name: coastaltutor-deeptutor
+
+services:
+  deeptutor:
+    image: coastaltutor/deeptutor:1.7.1-sso1
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8001:8001"
+      - "127.0.0.1:3782:3782"
+    volumes:
+      - ./data:/app/data
+      - ./data/user/workspace:/workspace
+    environment:
+      TZ: America/Vancouver
+      DEEPTUTOR_WORKSPACE_ROOT: /workspace
+      DEEPTUTOR_WORKSPACE_ALLOWED_ROOTS: /workspace
+      DEEPTUTOR_HOST_SSO_ENABLED: ${DEEPTUTOR_HOST_SSO_ENABLED:-true}
+      DEEPTUTOR_HOST_SSO_SECRET: ${DEEPTUTOR_HOST_SSO_SECRET:?Set DEEPTUTOR_HOST_SSO_SECRET in the local .env file}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8001/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

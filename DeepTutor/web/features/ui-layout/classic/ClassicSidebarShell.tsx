@@ -189,12 +189,12 @@ export function ClassicSidebarShell({
           <Link
             href="/"
             prefetch={false}
-            aria-label="DeepTutor"
+            aria-label="CoastalTutor"
             className="flex items-center justify-center transition-opacity duration-150 group-hover/sb:opacity-0"
           >
             <Image
-              src="/brand/color-logo.png"
-              alt="DeepTutor"
+              src="/brand/coastaltutor-mark.svg"
+              alt="CoastalTutor"
               width={22}
               height={22}
               className="h-[22px] w-[22px] rounded-md"
@@ -257,20 +257,13 @@ export function ClassicSidebarShell({
       <div className="flex h-[52px] shrink-0 items-center justify-between px-4">
         <Link href="/" prefetch={false} className="group flex items-center gap-1.5">
           <Image
-            src="/brand/color-logo.png"
-            alt="DeepTutor"
+            src="/brand/coastaltutor-mark.svg"
+            alt="CoastalTutor"
             width={22}
             height={22}
             className="h-[22px] w-[22px] transition-transform duration-200 group-hover:scale-105"
           />
-          <Image
-            src="/brand/color-word.png"
-            alt="DeepTutor"
-            width={1200}
-            height={310}
-            priority
-            className="h-[22px] w-auto transition-transform duration-200 group-hover:scale-105"
-          />
+          <span className="text-sm font-semibold tracking-tight transition-transform duration-200 group-hover:scale-[1.02]">CoastalTutor</span>
         </Link>
         {/* The rail is a desktop affordance; in the drawer the scrim and the
             top-bar toggle already own "make this go away". */}

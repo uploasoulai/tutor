@@ -28,8 +28,8 @@ const fontSerif = Lora({
 export const viewport: Viewport = { interactiveWidget: "resizes-content" };
 
 export const metadata: Metadata = {
-  title: "DeepTutor",
-  description: "Agent-native intelligent learning companion",
+  title: "CoastalTutor Learning",
+  description: "Your learning space",
   icons: {
     icon: [
       { url: "/brand/favicon-16x16.png", sizes: "16x16", type: "image/png" },

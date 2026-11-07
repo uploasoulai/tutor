@@ -5,6 +5,7 @@ export interface DeepTutorConfig {
   publicUrl: string | null;
   internalUrl: string | null;
   hostSsoSecret: string | null;
+  adminEmail: string | null;
 }
 
 function readBoolean(value: string | undefined, name: string): boolean {
@@ -44,6 +45,11 @@ export function getDeepTutorConfig(env: NodeJS.ProcessEnv = process.env): DeepTu
   const publicUrl = readOrigin(env.DEEPTUTOR_PUBLIC_URL, 'DEEPTUTOR_PUBLIC_URL');
   const internalUrl = readOrigin(env.DEEPTUTOR_INTERNAL_URL, 'DEEPTUTOR_INTERNAL_URL');
   const hostSsoSecret = env.DEEPTUTOR_HOST_SSO_SECRET?.trim() || null;
+  const adminEmail = env.DEEPTUTOR_ADMIN_EMAIL?.trim().toLowerCase() || null;
+
+  if (adminEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(adminEmail)) {
+    throw new Error('DEEPTUTOR_ADMIN_EMAIL must be a valid email address');
+  }
 
   if (enabled && (!publicUrl || !internalUrl)) {
     throw new Error(
@@ -57,5 +63,5 @@ export function getDeepTutorConfig(env: NodeJS.ProcessEnv = process.env): DeepTu
     );
   }
 
-  return { enabled, publicUrl, internalUrl, hostSsoSecret };
+  return { enabled, publicUrl, internalUrl, hostSsoSecret, adminEmail };
 }

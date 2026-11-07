@@ -34,6 +34,15 @@ function LoginPageContent() {
   useEffect(() => {
     // If already authenticated, skip login
     fetchAuthStatus().then((status) => {
+      if (status?.host_sso_only) {
+        const portalLogin =
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1"
+            ? "http://localhost:3000/login"
+            : "https://tutor.uploadsoul.com/login";
+        window.location.replace(portalLogin);
+        return;
+      }
       if (status?.authenticated) {
         router.replace(resolvedNext());
         return;
@@ -69,7 +78,7 @@ function LoginPageContent() {
       {/* Logo / Title */}
       <div className="text-center mb-8">
         <h1 className="font-serif text-2xl font-semibold text-[var(--foreground)] tracking-tight">
-          DeepTutor
+          CoastalTutor
         </h1>
         <p className="mt-1 text-sm text-[var(--muted-foreground)]">
           {t("Sign in to your account")}
@@ -166,9 +175,6 @@ function LoginPageContent() {
         </Link>
       </p>
 
-      <p className="mt-3 text-center text-xs text-[var(--muted-foreground)]">
-        {t("DeepTutor · Agent-Native Learning")}
-      </p>
     </div>
   );
 }

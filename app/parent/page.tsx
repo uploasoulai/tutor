@@ -7,10 +7,9 @@ import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import {
   Home,
   BarChart3,
-  Calendar,
+  ChevronRight,
   Settings,
   LogOut,
-  MessageSquare,
   TrendingUp,
   Clock,
   Sparkles,
@@ -219,9 +218,6 @@ export default function ParentDashboardPage() {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'progress', label: 'Progress Reports', icon: BarChart3 },
-    { id: 'messages', label: 'Teacher Messages', icon: MessageSquare },
-    { id: 'schedule', label: 'Schedule', icon: Calendar },
-    { id: 'resources', label: 'Resources', icon: BookOpen },
   ];
 
   return (
@@ -260,10 +256,10 @@ export default function ParentDashboardPage() {
         </nav>
         <div className="px-3 py-4 border-t border-[#e7e8e9] flex flex-col gap-2">
           <button
-            onClick={() => router.push('/coastaltutor')}
+            onClick={() => window.location.assign('/api/deeptutor/launch?mode=personal')}
             className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-[#003461] bg-blue-50 hover:bg-blue-100 transition-all w-full"
           >
-            <Sparkles className="w-4 h-4" /> Explore Mode
+            <Sparkles className="w-4 h-4" /> Family Learning Space
           </button>
           <button
             onClick={handleSignOut}
@@ -302,6 +298,34 @@ export default function ParentDashboardPage() {
         <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
         <div className="p-8">
+          {activeNav === 'dashboard' && (
+            <section className="mb-6 flex flex-col gap-5 rounded-2xl bg-[linear-gradient(120deg,#003461,#0b6c87_58%,#4c8d77)] p-6 text-white shadow-md sm:flex-row sm:items-center sm:justify-between sm:p-8">
+              <div className="max-w-2xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                  Family learning
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                  Follow your learner&apos;s progress
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-white/80">
+                  Open the shared learning space to continue your own study and review reports for
+                  learners linked to this account.
+                </p>
+                {linkedStudents.length === 0 && !studentsLoading && (
+                  <p className="mt-3 text-sm text-white/90">
+                    Link a learner account to see their family reports here.
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => window.location.assign('/api/deeptutor/launch?mode=personal')}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#003461] transition-all hover:bg-[#e8f1fa]"
+              >
+                Open family learning <ChevronRight className="h-4 w-4" />
+              </button>
+            </section>
+          )}
+
           {activeNav === 'progress' ? (
             <ReportHistory reports={reportHistory} loading={historyLoading} />
           ) : (
@@ -311,10 +335,6 @@ export default function ParentDashboardPage() {
               reportLoading={reportLoading}
             />
           )}
-
-          <p className="text-sm text-[#727781] text-center">
-            More features coming soon: detailed reports, teacher chat, weekly summaries.
-          </p>
         </div>
       </main>
     </div>

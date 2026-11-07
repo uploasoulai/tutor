@@ -13,6 +13,7 @@ import { updateRecoveryPrincipal } from "@/lib/recovery-principal";
 export interface AuthStatus {
   enabled: boolean;
   authenticated: boolean;
+  host_sso_only?: boolean;
   user_id?: string;
   username?: string;
   role?: string;

@@ -12,7 +12,6 @@ import {
   BarChart3,
   BookOpen,
   BookMarked,
-  Calendar,
   CheckCircle2,
   ChevronRight,
   GraduationCap,
@@ -67,8 +66,6 @@ const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'learning', label: 'My Learning', icon: BookOpen },
   { id: 'mastery', label: 'Mastery', icon: BarChart3 },
-  { id: 'schedule', label: 'Schedule', icon: Calendar },
-  { id: 'community', label: 'Community', icon: Users },
 ];
 
 export default function StudentDashboard() {
@@ -211,6 +208,10 @@ export default function StudentDashboard() {
     }
   }
 
+  const openLearningSpace = (mode: 'school' | 'personal') => {
+    window.location.assign(`/api/deeptutor/launch?mode=${mode}`);
+  };
+
   const handleSignOut = async () => {
     if (getDevPreviewUser('student')) {
       router.replace('/');
@@ -289,7 +290,7 @@ export default function StudentDashboard() {
             className="flex w-full items-center gap-2 rounded-lg bg-blue-50 px-3 py-2.5 text-sm font-medium text-[#003461] transition-all hover:bg-blue-100"
           >
             <Sparkles className="h-4 w-4" />
-            Free explore
+            Interactive Classroom
           </button>
           <button
             onClick={handleSignOut}
@@ -320,7 +321,7 @@ export default function StudentDashboard() {
             <button
               onClick={() => router.push('/generation-preview')}
               className="rounded-full p-2 text-[#003461] transition-all hover:bg-[#f0f4ff]"
-              aria-label="Free explore"
+              aria-label="Interactive Classroom"
             >
               <Sparkles className="h-4 w-4" />
             </button>
@@ -337,10 +338,16 @@ export default function StudentDashboard() {
         <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-[#e7e8e9] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div>
             <h1 className="text-xl font-semibold text-[#191c1d]">
-              {activeNav === 'mastery' ? 'Mastery map' : "Today's learning path"}
+              {activeNav === 'mastery'
+                ? 'Mastery map'
+                : activeNav === 'learning'
+                  ? 'My Learning'
+                  : 'Your learning space'}
             </h1>
             <p className="text-sm text-[#727781]">
-              Hello, {firstName}. {selectedGrade} - {selectedSubject}
+              {activeNav === 'dashboard'
+                ? `Hello, ${firstName}. Choose where you want to learn today.`
+                : `Hello, ${firstName}. ${selectedGrade} - ${selectedSubject}`}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -375,6 +382,92 @@ export default function StudentDashboard() {
             />
           ) : (
             <>
+              {activeNav === 'dashboard' && (
+                <section aria-label="Learning spaces" className="grid gap-4 xl:grid-cols-3">
+                  <button
+                    onClick={() => openLearningSpace('school')}
+                    className="group relative flex min-h-[230px] flex-col items-start justify-between overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#003461_0%,#075c83_58%,#1b927f_100%)] p-6 text-left text-white shadow-md transition-transform hover:-translate-y-0.5 hover:shadow-lg sm:p-8 xl:col-span-1"
+                  >
+                    <div className="absolute -right-10 -top-12 h-48 w-48 rounded-full border-[24px] border-white/10" />
+                    <div className="relative">
+                      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
+                        <GraduationCap className="h-6 w-6" />
+                      </span>
+                      <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                        Guided school study
+                      </p>
+                      <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                        School Learning
+                      </h2>
+                      <p className="mt-2 max-w-sm text-sm leading-6 text-white/80">
+                        Learn a concept step by step, practise with guidance, and build lasting
+                        mastery.
+                      </p>
+                    </div>
+                    <span className="relative mt-6 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#003461] transition-all group-hover:gap-3">
+                      Start learning <ChevronRight className="h-4 w-4" />
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => openLearningSpace('personal')}
+                    className="group flex min-h-[230px] flex-col items-start justify-between rounded-2xl border border-[#dbe5ef] bg-[linear-gradient(145deg,#fff_0%,#f1f7ff_100%)] p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#a9c8e6] hover:shadow-md sm:p-8"
+                  >
+                    <div>
+                      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#e5efff] text-[#003461]">
+                        <Sparkles className="h-6 w-6" />
+                      </span>
+                      <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[#5b7188]">
+                        Explore at your pace
+                      </p>
+                      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#172b43]">
+                        Personal AI Tutor
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-[#536579]">
+                        Ask questions, explore ideas, read and research in your own learning space.
+                      </p>
+                    </div>
+                    <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#003461] group-hover:gap-3">
+                      Open my learning space <ChevronRight className="h-4 w-4" />
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => router.push('/generation-preview')}
+                    className="group flex min-h-[230px] flex-col items-start justify-between rounded-2xl border border-[#e5e1d6] bg-[linear-gradient(145deg,#fff_0%,#fff9ed_100%)] p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#e9c982] hover:shadow-md sm:p-8"
+                  >
+                    <div>
+                      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff0cb] text-[#845d10]">
+                        <Users className="h-6 w-6" />
+                      </span>
+                      <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[#8b7547]">
+                        Learn together
+                      </p>
+                      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#3b3426]">
+                        Interactive Classroom
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-[#70634c]">
+                        Turn a topic or your materials into a lesson with discussion and activities.
+                      </p>
+                    </div>
+                    <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#75530e] group-hover:gap-3">
+                      Create a class <ChevronRight className="h-4 w-4" />
+                    </span>
+                  </button>
+                </section>
+              )}
+
+              {activeNav === 'dashboard' && (
+                <div className="flex flex-col gap-1 pt-2">
+                  <h2 className="text-lg font-semibold text-[#191c1d]">
+                    Today&apos;s school targets
+                  </h2>
+                  <p className="text-sm text-[#727781]">
+                    Your existing course progress and review plan stay connected to this account.
+                  </p>
+                </div>
+              )}
+
               <section className="grid gap-5 lg:grid-cols-[1fr_320px]">
                 <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
                   <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
