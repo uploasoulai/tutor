@@ -298,7 +298,7 @@ export default function LoginPage() {
             <p className="text-[#424750]">
               Don&apos;t have an account?{' '}
               <button
-                onClick={() => router.push('/signup')}
+                onClick={() => window.location.assign('/signup')}
                 className="text-[#003461] font-semibold hover:underline"
               >
                 Create one here
