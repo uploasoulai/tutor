@@ -560,38 +560,6 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
         raise HTTPException(status_code=401, detail="Platform sign-in ticket is invalid or expired.") from None
 
 
-@router.post("/host-sso/pending-prompt/consume")
-async def consume_host_sso_pending_prompt(
-    response: Response,
-    current: TokenPayload | None = Depends(require_auth),
-    pending_prompt: str | None = Cookie(default=None, alias=_PENDING_PROMPT_COOKIE),
-    handoff_header: str | None = Header(default=None, alias="X-DeepTutor-Handoff"),
-) -> dict:
-    """Return a one-time, short-lived tutoring handoff to its signed-in learner."""
-    response.headers["Cache-Control"] = "no-store, max-age=0"
-    response.headers["Pragma"] = "no-cache"
-    if handoff_header != "consume-v1":
-        raise HTTPException(status_code=403, detail="Invalid tutoring handoff request")
-    response.delete_cookie(
-        key=_PENDING_PROMPT_COOKIE,
-        path="/",
-        httponly=True,
-        secure=_SECURE,
-        samesite=_SAMESITE,
-    )
-    if not pending_prompt or len(pending_prompt) > 7000:
-        return {"prompt": ""}
-    try:
-        payload = json.loads(base64.urlsafe_b64decode(pending_prompt.encode("ascii")).decode("utf-8"))
-        prompt = str(payload.get("prompt") or "")
-        owner_id = str(payload.get("sub") or "")
-    except (ValueError, UnicodeError, AttributeError):
-        return {"prompt": ""}
-    if not current or owner_id != current.user_id:
-        return {"prompt": ""}
-    return {"prompt": prompt[:5000]}
-
-
 class UserInfo(BaseModel):
     """Single user record returned by the GET /users and /profile endpoints."""
 
@@ -744,6 +712,38 @@ async def require_auth(
     _install_current_user(payload)
     _install_request_workspace(request)
     return payload
+
+
+@router.post("/host-sso/pending-prompt/consume")
+async def consume_host_sso_pending_prompt(
+    response: Response,
+    current: TokenPayload | None = Depends(require_auth),
+    pending_prompt: str | None = Cookie(default=None, alias=_PENDING_PROMPT_COOKIE),
+    handoff_header: str | None = Header(default=None, alias="X-DeepTutor-Handoff"),
+) -> dict:
+    """Return a one-time, short-lived tutoring handoff to its signed-in learner."""
+    response.headers["Cache-Control"] = "no-store, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    if handoff_header != "consume-v1":
+        raise HTTPException(status_code=403, detail="Invalid tutoring handoff request")
+    response.delete_cookie(
+        key=_PENDING_PROMPT_COOKIE,
+        path="/",
+        httponly=True,
+        secure=_SECURE,
+        samesite=_SAMESITE,
+    )
+    if not pending_prompt or len(pending_prompt) > 7000:
+        return {"prompt": ""}
+    try:
+        payload = json.loads(base64.urlsafe_b64decode(pending_prompt.encode("ascii")).decode("utf-8"))
+        prompt = str(payload.get("prompt") or "")
+        owner_id = str(payload.get("sub") or "")
+    except (ValueError, UnicodeError, AttributeError):
+        return {"prompt": ""}
+    if not current or owner_id != current.user_id:
+        return {"prompt": ""}
+    return {"prompt": prompt[:5000]}
 
 
 def _install_request_workspace(request) -> None:
