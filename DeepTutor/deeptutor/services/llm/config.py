@@ -56,6 +56,7 @@ class LLMConfigUpdate(TypedDict, total=False):
     max_concurrency: int
     requests_per_minute: int
     traffic_controller: "TrafficController" | None
+    platform_ai: bool
 
 
 logger = logging.getLogger(__name__)
@@ -129,6 +130,7 @@ class LLMConfig:
     max_concurrency: int = 20
     requests_per_minute: int = 600
     traffic_controller: TrafficController | None = None
+    platform_ai: bool = False
 
     def __post_init__(self) -> None:
         if self.effective_url is None:
@@ -229,6 +231,7 @@ def _get_llm_config_from_resolver() -> LLMConfig:
         api_format=resolved.api_format,
         reasoning_effort=resolved.reasoning_effort,
         context_window=resolved.context_window,
+        platform_ai=resolved.platform_ai,
     )
 
 

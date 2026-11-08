@@ -15,6 +15,9 @@ import {
   resolveBaseUrl,
   resolveProxy,
 } from '@/lib/server/provider-config';
+import { createClient } from '@/lib/supabase/server';
+import { getLearnerCredential } from '@/lib/server/byok-vault';
+import { getPlatformAiConfig } from '@/lib/server/platform-ai-config';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import {
   canUseCoastalTutorFreeModelTrial,
@@ -52,7 +55,15 @@ export async function resolveModel(params: {
   generationSessionId?: string;
   trialClientId?: string;
 }): Promise<ResolvedModel> {
-  let modelString = params.modelString || process.env.DEFAULT_MODEL || 'auto:free';
+  const hasUserApiKey = Boolean(params.apiKey || params.baseUrl);
+  const usePlatformAi =
+    !hasUserApiKey &&
+    process.env.PLATFORM_AI_ENABLED !== 'false';
+  const platformAiConfig = usePlatformAi ? getPlatformAiConfig() : undefined;
+  const platformAiModel = platformAiConfig?.modelString;
+  let modelString = usePlatformAi
+    ? platformAiModel!
+    : params.modelString || process.env.DEFAULT_MODEL || 'auto:free';
   let { providerId, modelId } = parseModelString(modelString);
   const isAutoFreeRequest = providerId === 'auto';
   const serverFreeModelsAllowed =
@@ -128,6 +139,13 @@ export async function resolveModel(params: {
   const apiKey = clientBaseUrl
     ? params.apiKey || ''
     : resolveApiKey(providerId, params.apiKey || '');
+  if (usePlatformAi && !apiKey) {
+    const error = new Error(
+      `Platform AI is not configured. An administrator must add ${platformAiConfig?.keyEnvName || 'the active provider API key'} to the server environment.`,
+    );
+    Object.assign(error, { code: 'PLATFORM_AI_NOT_CONFIGURED', status: 503 });
+    throw error;
+  }
   const baseUrl = clientBaseUrl ? clientBaseUrl : resolveBaseUrl(providerId, params.baseUrl);
   const proxy = resolveProxy(providerId);
   const { model, modelInfo } = getModel({
@@ -166,10 +184,36 @@ function getThinkingConfigFromBody(body: unknown): ThinkingConfig | undefined {
  * never from client headers, to prevent auth bypass.
  */
 export async function resolveModelFromHeaders(req: NextRequest): Promise<ResolvedModel> {
+  const explicitApiKey = req.headers.get('x-api-key') || undefined;
+  const explicitBaseUrl = req.headers.get('x-base-url') || undefined;
+  if (!explicitApiKey && !explicitBaseUrl) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const credential = await getLearnerCredential(user.id);
+      const verified = (process.env.BYOK_VERIFIED_PROVIDERS || '').split(',').map((v) => v.trim());
+      if (credential && verified.includes(credential.providerId)) {
+        let defaults: Record<string, string> = {};
+        try {
+          defaults = JSON.parse(process.env.BYOK_DEFAULT_MODELS_JSON || '{}') as Record<string, string>;
+        } catch {
+          throw new Error('BYOK_DEFAULT_MODELS_JSON must be a valid JSON object');
+        }
+        const modelId = defaults[credential.providerId];
+        if (!modelId) throw new Error(`No platform-approved BYOK default model is configured for ${credential.providerId}`);
+        return resolveModel({
+          modelString: `${credential.providerId}:${modelId}`,
+          apiKey: credential.apiKey,
+          generationSessionId: req.headers.get('x-generation-session-id') || undefined,
+          trialClientId: req.headers.get('x-trial-client-id') || undefined,
+        });
+      }
+    }
+  }
   return resolveModel({
     modelString: req.headers.get('x-model') || undefined,
-    apiKey: req.headers.get('x-api-key') || undefined,
-    baseUrl: req.headers.get('x-base-url') || undefined,
+    apiKey: explicitApiKey,
+    baseUrl: explicitBaseUrl,
     providerType: req.headers.get('x-provider-type') || undefined,
     generationSessionId: req.headers.get('x-generation-session-id') || undefined,
     trialClientId: req.headers.get('x-trial-client-id') || undefined,

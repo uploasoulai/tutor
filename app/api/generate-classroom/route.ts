@@ -6,6 +6,8 @@ import { runClassroomGenerationJob } from '@/lib/server/classroom-job-runner';
 import { createClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { buildRequestOrigin } from '@/lib/server/classroom-storage';
 import { createLogger } from '@/lib/logger';
+import { createClient } from '@/lib/supabase/server';
+import { assertPlatformAiWithinLimit } from '@/lib/server/platform-ai-usage';
 
 const log = createLogger('GenerateClassroom API');
 
@@ -14,6 +16,11 @@ export const maxDuration = 30;
 export async function POST(req: NextRequest) {
   let requirementSnippet: string | undefined;
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
+    await assertPlatformAiWithinLimit(user.id);
+
     const rawBody = (await req.json()) as Partial<GenerateClassroomInput>;
     requirementSnippet = rawBody.requirement?.substring(0, 60);
     const body: GenerateClassroomInput = {
@@ -43,7 +50,7 @@ export async function POST(req: NextRequest) {
     const job = await createClassroomGenerationJob(jobId, body);
     const pollUrl = `${baseUrl}/api/generate-classroom/${jobId}`;
 
-    after(() => runClassroomGenerationJob(jobId, body, baseUrl));
+    after(() => runClassroomGenerationJob(jobId, body, baseUrl, { billingUserId: user.id }));
 
     return apiSuccess(
       {
@@ -57,6 +64,12 @@ export async function POST(req: NextRequest) {
       202,
     );
   } catch (error) {
+    if (error instanceof Error && error.message.startsWith('platform_usage_limit_reached:')) {
+      return apiError('PLATFORM_USAGE_LIMIT_REACHED', 402, error.message.replace(/^platform_usage_limit_reached:\s*/, ''));
+    }
+    if (error instanceof Error && error.message.startsWith('PLATFORM_AI_NOT_CONFIGURED:')) {
+      return apiError('PLATFORM_AI_NOT_CONFIGURED', 503, error.message.replace(/^PLATFORM_AI_NOT_CONFIGURED:\s*/, ''));
+    }
     log.error(
       `Classroom generation job creation failed [requirement="${requirementSnippet ?? 'unknown'}..."]:`,
       error,

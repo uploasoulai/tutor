@@ -56,6 +56,7 @@ import { WebSearchSettings } from './web-search-settings';
 import { WEB_SEARCH_PROVIDERS, getWebSearchProviderDisplayName } from '@/lib/web-search/constants';
 import type { WebSearchProviderId } from '@/lib/web-search/types';
 import { GeneralSettings } from './general-settings';
+import { LearnerAiProviderSettings } from './learner-ai-provider';
 import { ModelEditDialog } from './model-edit-dialog';
 import { AddProviderDialog, type NewProviderData } from './add-provider-dialog';
 import { AddAudioProviderDialog, type NewAudioProviderData } from './add-audio-provider-dialog';
@@ -240,7 +241,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
   const setASRProvider = useSettingsStore((state) => state.setASRProvider);
 
   // Navigation
-  const [activeSection, setActiveSection] = useState<SettingsSection>('providers');
+  const [activeSection, setActiveSection] = useState<SettingsSection>('ai-provider');
   const [selectedProviderId, setSelectedProviderId] = useState<ProviderId>(providerId);
   const [selectedPdfProviderId, setSelectedPdfProviderId] = useState<PDFProviderId>(pdfProviderId);
   const [selectedWebSearchProviderId, setSelectedWebSearchProviderId] =
@@ -539,6 +540,8 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
   // Get header content based on section
   const getHeaderContent = () => {
     switch (activeSection) {
+      case 'ai-provider':
+        return <h2 className="text-lg font-semibold">AI Provider Settings</h2>;
       case 'general':
         return <h2 className="text-lg font-semibold">{t('settings.systemSettings')}</h2>;
       case 'providers':
@@ -718,6 +721,16 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
         <div className="flex h-full overflow-hidden">
           {/* Left Sidebar - Navigation */}
           <div className="flex-shrink-0 bg-muted/30 p-3 space-y-1" style={{ width: sidebarWidth }}>
+            <button
+              onClick={() => setActiveSection('ai-provider')}
+              className={cn(
+                'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
+                activeSection === 'ai-provider' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted',
+              )}
+            >
+              <Settings className="h-4 w-4 shrink-0" />
+              <span className="truncate">AI Provider</span>
+            </button>
             <button
               onClick={() => setActiveSection('providers')}
               className={cn(
@@ -1028,6 +1041,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-5">
+              {activeSection === 'ai-provider' && <LearnerAiProviderSettings />}
               {activeSection === 'general' && <GeneralSettings />}
 
               {activeSection === 'providers' && selectedProvider && (
@@ -1069,13 +1083,13 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
 
             {/* Footer */}
             <div className="flex items-center justify-end gap-3 px-5 py-3 border-t bg-muted/30">
-              {saveStatus === 'saved' && (
+              {activeSection !== 'ai-provider' && saveStatus === 'saved' && (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <CheckCircle2 className="h-4 w-4" />
                   <span>{t('settings.saveSuccess')}</span>
                 </div>
               )}
-              {saveStatus === 'error' && (
+              {activeSection !== 'ai-provider' && saveStatus === 'error' && (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <XCircle className="h-4 w-4" />
                   <span>{t('settings.saveFailed')}</span>
@@ -1084,9 +1098,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
               <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
                 {t('settings.close')}
               </Button>
-              <Button size="sm" onClick={handleSave}>
-                {t('settings.save')}
-              </Button>
+              {activeSection !== 'ai-provider' && <Button size="sm" onClick={handleSave}>{t('settings.save')}</Button>}
             </div>
           </div>
         </div>

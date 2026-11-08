@@ -10,6 +10,7 @@ import { callLLM } from '@/lib/ai/llm';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
+import { platformAiErrorResponse, withPlatformAiRequest } from '@/lib/server/platform-ai-usage';
 const log = createLogger('Quiz Grade');
 
 interface GradeRequest {
@@ -64,15 +65,17 @@ ${commentPrompt ? `评分要点：${commentPrompt}\n` : ''}学生答案：${user
 Full marks: ${points} points
 ${commentPrompt ? `Grading guidance: ${commentPrompt}\n` : ''}Student answer: ${userAnswer}`;
 
-    const result = await callLLM(
-      {
-        model: languageModel,
-        system: systemPrompt,
-        prompt: userPrompt,
-      },
-      'quiz-grade',
-      undefined,
-      thinkingConfig,
+    const result = await withPlatformAiRequest(req, () =>
+      callLLM(
+        {
+          model: languageModel,
+          system: systemPrompt,
+          prompt: userPrompt,
+        },
+        'quiz-grade',
+        undefined,
+        thinkingConfig,
+      ),
     );
 
     // Parse the LLM response as JSON
@@ -104,6 +107,8 @@ ${commentPrompt ? `Grading guidance: ${commentPrompt}\n` : ''}Student answer: ${
       `Quiz grading failed [question="${questionSnippet ?? 'unknown'}...", points=${resolvedPoints ?? 'unknown'}]:`,
       error,
     );
+    const platformError = platformAiErrorResponse(error);
+    if (platformError) return platformError;
     return apiError('INTERNAL_ERROR', 500, 'Failed to grade answer');
   }
 }

@@ -1558,6 +1558,8 @@ export default memo(function ChatComposer({
                   value={llmSelection}
                   loading={llmOptionsLoading}
                   error={llmOptionsError}
+                  hideModelDetails
+                  managedLabel="CoastalTutor 智能导师"
                   onChange={onSelectLLM}
                   onRefresh={onRefreshLLMOptions}
                 />

@@ -117,9 +117,9 @@ class CallMeasurement:
                 for tool in getattr(delta, "tool_calls", []) or []:
                     self.delta(getattr(getattr(tool, "function", None), "arguments", None))
 
-    def finish(self, response: Any = None, *, status: str = "completed") -> None:
+    def finish(self, response: Any = None, *, status: str = "completed") -> dict[str, Any] | None:
         if self.finished or not self.enabled:
-            return
+            return None
         self.finished = True
         if response is not None:
             self.usage = getattr(response, "usage", None) or self.usage
@@ -178,10 +178,16 @@ class CallMeasurement:
                 )
             except Exception:
                 logging.getLogger(__name__).exception("Unable to persist LLM usage")
+        return record
 
 
 async def measure_provider_call(call: Any, *, provider: str = "", **kwargs: Any) -> Any:
     """Measure each provider attempt, before callbacks are buffered by the factory."""
+    platform_ai = bool(kwargs.pop("platform_ai", False))
+    if platform_ai:
+        from .platform_usage_bridge import assert_platform_ai_available
+
+        await assert_platform_ai_available()
     meter = CallMeasurement(
         model=kwargs.get("model") or "", provider=provider, messages=kwargs.get("messages")
     )
@@ -200,15 +206,44 @@ async def measure_provider_call(call: Any, *, provider: str = "", **kwargs: Any)
     token = measurement_active.set(True)
     try:
         response = await call(**kwargs)
-        meter.finish(
-            response, status="failed" if response.finish_reason == "error" else "completed"
-        )
-        return response
     except BaseException:
-        meter.finish(status="interrupted")
+        usage_record = meter.finish(status="interrupted")
+        if platform_ai and usage_record:
+            from .platform_usage_bridge import record_platform_ai_usage
+
+            try:
+                await record_platform_ai_usage(
+                    request_id=meter.call_id,
+                    model=meter.model,
+                    provider=meter.provider,
+                    input_tokens=int(usage_record.get("prompt_tokens", 0)),
+                    output_tokens=int(usage_record.get("completion_tokens", 0)),
+                )
+            except Exception:
+                logging.getLogger(__name__).exception("Unable to sync DeepTutor Platform AI usage")
         raise
     finally:
         measurement_active.reset(token)
+
+    usage_record = meter.finish(
+        response, status="failed" if response.finish_reason == "error" else "completed"
+    )
+    if platform_ai and usage_record:
+        from .platform_usage_bridge import record_platform_ai_usage
+
+        try:
+            await record_platform_ai_usage(
+                request_id=meter.call_id,
+                model=meter.model,
+                provider=meter.provider,
+                input_tokens=int(usage_record.get("prompt_tokens", 0)),
+                output_tokens=int(usage_record.get("completion_tokens", 0)),
+            )
+        except Exception:
+            # Keep the completed answer and the per-user local ledger record;
+            # surface the sync failure for operator follow-up.
+            logging.getLogger(__name__).exception("Unable to sync DeepTutor Platform AI usage")
+    return response
 
 
 class MeasuredStream:

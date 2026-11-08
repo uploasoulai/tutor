@@ -11,6 +11,7 @@ import { callLLM } from '@/lib/ai/llm';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
+import { platformAiErrorResponse, withPlatformAiRequest } from '@/lib/server/platform-ai-usage';
 import { AGENT_COLOR_PALETTE } from '@/lib/constants/agent-defaults';
 
 const log = createLogger('Agent Profiles API');
@@ -147,15 +148,17 @@ Return a JSON object with this exact structure:
     log.info(`Generating agent profiles for "${stageInfo.name}" [model=${modelString}]`);
 
     const rawResult = (
-      await callLLM(
-        {
-          model: languageModel,
-          system: systemPrompt,
-          prompt: userPrompt,
-        },
-        'agent-profiles',
-        undefined,
-        thinkingConfig,
+      await withPlatformAiRequest(req, () =>
+        callLLM(
+          {
+            model: languageModel,
+            system: systemPrompt,
+            prompt: userPrompt,
+          },
+          'agent-profiles',
+          undefined,
+          thinkingConfig,
+        ),
       )
     ).text;
 
@@ -232,6 +235,8 @@ Return a JSON object with this exact structure:
       `Agent profiles generation failed [stage="${stageName ?? 'unknown'}", model=${modelString ?? 'unknown'}]:`,
       error,
     );
+    const platformError = platformAiErrorResponse(error);
+    if (platformError) return platformError;
     return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
   }
 }

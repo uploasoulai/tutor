@@ -208,8 +208,16 @@ export default function StudentDashboard() {
     }
   }
 
-  const openLearningSpace = (mode: 'school' | 'personal') => {
+  const openPersonalTutor = () => {
+    window.location.assign('/api/learning/launch?mode=personal');
+  };
+
+  const openTutorSpace = (mode: 'practice' | 'mastery' | 'progress' | 'profile') => {
     window.location.assign(`/api/learning/launch?mode=${mode}`);
+  };
+
+  const openSchoolPlan = () => {
+    router.push('/school-learning');
   };
 
   const handleSignOut = async () => {
@@ -385,7 +393,7 @@ export default function StudentDashboard() {
               {activeNav === 'dashboard' && (
                 <section aria-label="Learning spaces" className="grid gap-4 xl:grid-cols-3">
                   <button
-                    onClick={() => openLearningSpace('school')}
+                    onClick={openSchoolPlan}
                     className="group relative flex min-h-[230px] flex-col items-start justify-between overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#003461_0%,#075c83_58%,#1b927f_100%)] p-6 text-left text-white shadow-md transition-transform hover:-translate-y-0.5 hover:shadow-lg sm:p-8 xl:col-span-1"
                   >
                     <div className="absolute -right-10 -top-12 h-48 w-48 rounded-full border-[24px] border-white/10" />
@@ -394,23 +402,22 @@ export default function StudentDashboard() {
                         <GraduationCap className="h-6 w-6" />
                       </span>
                       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
-                        Guided school study
+                        Learn along your course
                       </p>
                       <h2 className="mt-2 text-2xl font-semibold tracking-tight">
                         School Learning
                       </h2>
                       <p className="mt-2 max-w-sm text-sm leading-6 text-white/80">
-                        Learn a concept step by step, practise with guidance, and build lasting
-                        mastery.
+                        Follow your course plan with virtual lessons, guided practice, and review.
                       </p>
                     </div>
                     <span className="relative mt-6 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#003461] transition-all group-hover:gap-3">
-                      Start learning <ChevronRight className="h-4 w-4" />
+                      See today&apos;s lessons <ChevronRight className="h-4 w-4" />
                     </span>
                   </button>
 
                   <button
-                    onClick={() => openLearningSpace('personal')}
+                    onClick={openPersonalTutor}
                     className="group flex min-h-[230px] flex-col items-start justify-between rounded-2xl border border-[#dbe5ef] bg-[linear-gradient(145deg,#fff_0%,#f1f7ff_100%)] p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#a9c8e6] hover:shadow-md sm:p-8"
                   >
                     <div>
@@ -424,11 +431,12 @@ export default function StudentDashboard() {
                         Personal AI Tutor
                       </h2>
                       <p className="mt-2 text-sm leading-6 text-[#536579]">
-                        Ask questions, explore ideas, read and research in your own learning space.
+                        Bring a question, a tricky problem, or a mistake. Your tutor helps you work
+                        through it at your own pace.
                       </p>
                     </div>
                     <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#003461] group-hover:gap-3">
-                      Open my learning space <ChevronRight className="h-4 w-4" />
+                      Open my tutor <ChevronRight className="h-4 w-4" />
                     </span>
                   </button>
 
@@ -458,7 +466,45 @@ export default function StudentDashboard() {
               )}
 
               {activeNav === 'dashboard' && (
-                <div className="flex flex-col gap-1 pt-2">
+                <section
+                  aria-label="More ways to learn with your tutor"
+                  className="grid gap-3 rounded-2xl border border-[#dbe5ef] bg-white p-5 sm:grid-cols-2 lg:grid-cols-[1fr_repeat(4,auto)] lg:items-center"
+                >
+                  <div className="sm:pr-3">
+                    <h2 className="font-semibold text-[#172b43]">Your tutor learning tools</h2>
+                    <p className="mt-1 text-sm text-[#64758a]">
+                      Review tricky questions, explore a learning path, or check your progress.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => openTutorSpace('practice')}
+                    className="min-h-11 rounded-xl bg-[#edf4ff] px-4 text-sm font-semibold text-[#244d79] hover:bg-[#e2edfc]"
+                  >
+                    Review my mistakes
+                  </button>
+                  <button
+                    onClick={() => openTutorSpace('mastery')}
+                    className="min-h-11 rounded-xl bg-[#edf4ff] px-4 text-sm font-semibold text-[#244d79] hover:bg-[#e2edfc]"
+                  >
+                    My learning paths
+                  </button>
+                  <button
+                    onClick={() => openTutorSpace('progress')}
+                    className="min-h-11 rounded-xl bg-[#edf4ff] px-4 text-sm font-semibold text-[#244d79] hover:bg-[#e2edfc]"
+                  >
+                    My progress
+                  </button>
+                  <button
+                    onClick={() => openTutorSpace('profile')}
+                    className="min-h-11 rounded-xl bg-[#f5f6f8] px-4 text-sm font-semibold text-[#536579] hover:bg-[#eceff3]"
+                  >
+                    Learning profile
+                  </button>
+                </section>
+              )}
+
+              {activeNav === 'dashboard' && (
+                <div id="today-school-targets" className="flex scroll-mt-24 flex-col gap-1 pt-2">
                   <h2 className="text-lg font-semibold text-[#191c1d]">
                     Today&apos;s school targets
                   </h2>

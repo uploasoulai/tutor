@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import ipaddress
 import json
+import os
+import httpx
 from typing import Any
 from urllib.parse import urlparse
 
@@ -680,6 +682,7 @@ class ResolvedLLMConfig:
     context_window: int | None = None
     # The active model's explicit capability overrides (see MODEL_CAPABILITY_KEYS).
     capabilities: dict[str, bool] = field(default_factory=dict)
+    platform_ai: bool = False
 
 
 @dataclass(slots=True)
@@ -989,6 +992,57 @@ def resolve_llm_runtime_config(
     api_key = active_api_key or (mapped.api_key if mapped else "")
     api_base = active_api_base or ((mapped.api_base or "") if mapped else "")
     api_version = active_api_version or ((mapped.api_version or "") if mapped else "")
+    shared_byok = _coastaltutor_learner_credential()
+    if shared_byok:
+        byok_spec = find_by_name(shared_byok["provider_id"])
+        if byok_spec is None:
+            raise RuntimeError("CoastalTutor returned an unsupported learner AI provider")
+        spec = byok_spec
+        resolved_model = shared_byok["model_id"]
+        api_key = shared_byok["api_key"]
+        api_base = ""
+        api_version = ""
+        api_format = api_format_for_provider("auto", spec)
+        wire_api = wire_api_for_provider(wire_api_from_api_format(api_format), spec)
+    platform_ai = False
+    platform_provider = os.environ.get("PLATFORM_AI_PROVIDER", "siliconflow").strip().lower()
+    platform_key_env = {
+        "deepseek": "DEEPSEEK_API_KEY",
+        "siliconflow": "SILICONFLOW_API_KEY",
+    }.get(platform_provider)
+    if platform_key_env is None:
+        raise RuntimeError("PLATFORM_AI_PROVIDER must be deepseek or siliconflow")
+    platform_key = os.environ.get(platform_key_env, "").strip()
+    if (
+        not api_key
+        and not spec.is_local
+        and platform_key
+        and os.environ.get("PLATFORM_AI_ENABLED", "true").lower() != "false"
+    ):
+        platform_spec = find_by_name(platform_provider)
+        if platform_spec is not None:
+            spec = platform_spec
+            api_key = platform_key
+            platform_ai = True
+            provider_base_env = f"{platform_provider.upper()}_BASE_URL"
+            api_base = (
+                os.environ.get(provider_base_env, "").strip()
+                or platform_spec.default_api_base_for("openai")
+            )
+            default_models = {
+                "deepseek": "deepseek-flash",
+                "siliconflow": "deepseek-ai/DeepSeek-V3",
+            }
+            configured_model = os.environ.get("PLATFORM_AI_MODEL", "").strip()
+            if configured_model:
+                model_provider, separator, model_id = configured_model.partition(":")
+                if not separator or canonical_provider_name(model_provider) != platform_spec.name:
+                    raise RuntimeError("PLATFORM_AI_MODEL must use the active PLATFORM_AI_PROVIDER")
+                resolved_model = model_id.strip()
+                if not resolved_model:
+                    raise RuntimeError("PLATFORM_AI_MODEL must include a model ID")
+            else:
+                resolved_model = default_models[platform_provider]
     if not api_base:
         api_base = spec.default_api_base_for(api_format)
     if not api_key and spec.is_local:
@@ -1012,7 +1066,47 @@ def resolve_llm_runtime_config(
         reasoning_effort=reasoning_effort,
         context_window=context_window,
         capabilities=_model_capabilities(model),
+        platform_ai=platform_ai,
     )
+
+
+def _coastaltutor_learner_credential() -> dict[str, str] | None:
+    """Fetch a learner-owned BYOK key from CoastalTutor for this request only.
+
+    The key stays in server memory and is never copied into DeepTutor's model
+    catalog/workspace files. This small adapter uses the existing private SSO
+    token and central encrypted credential vault.
+    """
+    from deeptutor.multi_user.context import get_current_user_or_none
+
+    user = get_current_user_or_none()
+    user_id = str(getattr(user, "id", "") or "")
+    if not user_id.startswith("u_") or len(user_id) != 34:
+        return None
+    base_url = os.environ.get("COASTALTUTOR_PLATFORM_AI_URL", "").strip().rstrip("/")
+    token = os.environ.get("PLATFORM_AI_INTERNAL_TOKEN", "").strip()
+    if not base_url or len(token) < 32:
+        raise RuntimeError("CoastalTutor learner credential bridge is not configured")
+    try:
+        response = httpx.get(
+            f"{base_url}/api/internal/learner-ai-credential",
+            params={"user_id": user_id[2:]},
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=4.0,
+        )
+        if response.status_code != 200:
+            raise RuntimeError("CoastalTutor learner credential service is unavailable")
+        payload = response.json()
+        if not payload.get("configured"):
+            return None
+        provider_id = str(payload.get("provider_id") or "").strip()
+        model_id = str(payload.get("model_id") or "").strip()
+        api_key = str(payload.get("api_key") or "").strip()
+        if not provider_id or not model_id or not api_key:
+            return None
+        return {"provider_id": provider_id, "model_id": model_id, "api_key": api_key}
+    except (httpx.HTTPError, ValueError, TypeError) as exc:
+        raise RuntimeError("CoastalTutor learner credential service is unavailable") from exc
 
 
 def _canonical_embedding_provider_name(name: str | None) -> str | None:

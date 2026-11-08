@@ -1,6 +1,9 @@
 import { createLogger } from '@/lib/logger';
 import { generateClassroom, type GenerateClassroomInput } from '@/lib/server/classroom-generation';
 import {
+  runWithPlatformAiUsage,
+} from '@/lib/server/platform-ai-usage';
+import {
   markClassroomGenerationJobFailed,
   markClassroomGenerationJobRunning,
   markClassroomGenerationJobSucceeded,
@@ -14,6 +17,7 @@ export function runClassroomGenerationJob(
   jobId: string,
   input: GenerateClassroomInput,
   baseUrl: string,
+  options: { billingUserId?: string } = {},
 ): Promise<void> {
   const existing = runningJobs.get(jobId);
   if (existing) {
@@ -24,12 +28,19 @@ export function runClassroomGenerationJob(
     try {
       await markClassroomGenerationJobRunning(jobId);
 
-      const result = await generateClassroom(input, {
-        baseUrl,
-        onProgress: async (progress) => {
-          await updateClassroomGenerationJobProgress(jobId, progress);
-        },
-      });
+      const generate = () =>
+        generateClassroom(input, {
+          baseUrl,
+          onProgress: async (progress) => {
+            await updateClassroomGenerationJobProgress(jobId, progress);
+          },
+        });
+      const result = options.billingUserId
+        ? await runWithPlatformAiUsage(
+            { userId: options.billingUserId, requestId: jobId },
+            generate,
+          )
+        : await generate();
 
       await markClassroomGenerationJobSucceeded(jobId, result);
     } catch (error) {

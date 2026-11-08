@@ -308,8 +308,8 @@ export default function ParentDashboardPage() {
                   Follow your learner&apos;s progress
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-white/80">
-                  Open the shared learning space to continue your own study and review reports for
-                  learners linked to this account.
+                  Manage approved learning materials and tutor access for learners linked to this
+                  account, or continue your own study.
                 </p>
                 {linkedStudents.length === 0 && !studentsLoading && (
                   <p className="mt-3 text-sm text-white/90">
@@ -317,12 +317,21 @@ export default function ParentDashboardPage() {
                   </p>
                 )}
               </div>
-              <button
-                onClick={() => window.location.assign('/api/learning/launch?mode=personal')}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#003461] transition-all hover:bg-[#e8f1fa]"
-              >
-                Open family learning <ChevronRight className="h-4 w-4" />
-              </button>
+              <div className="flex shrink-0 flex-wrap gap-2">
+                <button
+                  onClick={() => window.location.assign('/api/learning/launch?mode=guardian')}
+                  disabled={linkedStudents.length === 0}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#003461] transition-all hover:bg-[#e8f1fa] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Manage learner tutor access <ChevronRight className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => window.location.assign('/api/learning/launch?mode=personal')}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/50 px-5 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10"
+                >
+                  Open my tutor <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
             </section>
           )}
 

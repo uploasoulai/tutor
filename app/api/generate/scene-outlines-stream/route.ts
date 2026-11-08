@@ -38,6 +38,7 @@ import type {
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
+import { platformAiErrorResponse, withPlatformAiRequest } from '@/lib/server/platform-ai-usage';
 const log = createLogger('Outlines Stream');
 
 export const maxDuration = 300;
@@ -290,11 +291,13 @@ export async function POST(req: NextRequest) {
               let fullText = '';
               parsedOutlines = [];
               languageDirective = null;
-              const textStream = streamLLM(
-                streamParams,
-                'scene-outlines-stream',
-                thinkingConfig,
-              ).textStream;
+              const textStream = await withPlatformAiRequest(req, async () =>
+                streamLLM(
+                  streamParams,
+                  'scene-outlines-stream',
+                  thinkingConfig,
+                ).textStream,
+              );
 
               for await (const chunk of textStream) {
                 fullText += chunk;
@@ -376,6 +379,22 @@ export async function POST(req: NextRequest) {
             }
           }
 
+          if (
+            lastError?.startsWith('platform_usage_limit_reached:') ||
+            lastError?.startsWith('PLATFORM_AI_NOT_CONFIGURED:') ||
+            lastError === 'Authentication required for Platform AI'
+          ) {
+            const errorEvent = JSON.stringify({
+              type: 'error',
+              error: lastError.replace(
+                /^(platform_usage_limit_reached:|PLATFORM_AI_NOT_CONFIGURED:)\s*/,
+                '',
+              ),
+            });
+            controller.enqueue(encoder.encode(`data: ${errorEvent}\n\n`));
+            return;
+          }
+
           if (parsedOutlines.length > 0) {
             // Replace sequential gen_img_N/gen_vid_N with globally unique IDs
             const uniquifiedOutlines = uniquifyMediaElementIds(parsedOutlines);
@@ -425,6 +444,8 @@ export async function POST(req: NextRequest) {
       `Outline streaming failed [requirement="${requirementSnippet ?? 'unknown'}...", model=${resolvedModelString ?? 'unknown'}]:`,
       error,
     );
+    const platformError = platformAiErrorResponse(error);
+    if (platformError) return platformError;
     return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
   }
 }

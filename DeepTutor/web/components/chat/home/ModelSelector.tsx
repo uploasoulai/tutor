@@ -118,6 +118,8 @@ export default function ModelSelector({
   pinned = false,
   onChange,
   onRefresh,
+  hideModelDetails = false,
+  managedLabel = "Smart Tutor",
 }: {
   options: LLMOption[];
   activeDefault: LLMSelection | null;
@@ -133,6 +135,9 @@ export default function ModelSelector({
   pinned?: boolean;
   onChange: (selection: LLMSelection | null) => void;
   onRefresh?: () => void;
+  /** Hide provider/model names in a platform-managed learner experience. */
+  hideModelDetails?: boolean;
+  managedLabel?: string;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -179,6 +184,18 @@ export default function ModelSelector({
           t("Select model");
   const menuPlacementClass =
     placement === "bottom" ? "top-full mt-1.5" : "bottom-full mb-1.5";
+
+  if (hideModelDetails) {
+    return (
+      <span
+        aria-label={managedLabel}
+        className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-2 text-[13px] font-medium text-[var(--muted-foreground)]"
+      >
+        <Bot size={15} strokeWidth={1.8} />
+        {managedLabel}
+      </span>
+    );
+  }
 
   return (
     <div ref={rootRef} className="relative">

@@ -26,6 +26,7 @@ import type { SpeechAction } from '@/lib/types/action';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
+import { platformAiErrorResponse, withPlatformAiRequest } from '@/lib/server/platform-ai-usage';
 
 const log = createLogger('Scene Actions API');
 
@@ -98,34 +99,38 @@ export async function POST(req: NextRequest) {
       images?: Array<{ id: string; src: string }>,
     ): Promise<string> => {
       if (images?.length && hasVision) {
-        const result = await callLLM(
+        const result = await withPlatformAiRequest(req, () =>
+          callLLM(
+            {
+              model: languageModel,
+              system: systemPrompt,
+              messages: [
+                {
+                  role: 'user' as const,
+                  content: buildVisionUserContent(userPrompt, images),
+                },
+              ],
+              maxOutputTokens: modelInfo?.outputWindow,
+            },
+            'scene-actions',
+            undefined,
+            thinkingConfig,
+          ),
+        );
+        return result.text;
+      }
+      const result = await withPlatformAiRequest(req, () =>
+        callLLM(
           {
             model: languageModel,
             system: systemPrompt,
-            messages: [
-              {
-                role: 'user' as const,
-                content: buildVisionUserContent(userPrompt, images),
-              },
-            ],
+            prompt: userPrompt,
             maxOutputTokens: modelInfo?.outputWindow,
           },
           'scene-actions',
           undefined,
           thinkingConfig,
-        );
-        return result.text;
-      }
-      const result = await callLLM(
-        {
-          model: languageModel,
-          system: systemPrompt,
-          prompt: userPrompt,
-          maxOutputTokens: modelInfo?.outputWindow,
-        },
-        'scene-actions',
-        undefined,
-        thinkingConfig,
+        ),
       );
       return result.text;
     };
@@ -176,6 +181,8 @@ export async function POST(req: NextRequest) {
       `Scene actions generation failed [scene="${outlineTitle ?? 'unknown'}", model=${resolvedModelString ?? 'unknown'}]:`,
       error,
     );
+    const platformError = platformAiErrorResponse(error);
+    if (platformError) return platformError;
     return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
   }
 }

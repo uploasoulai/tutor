@@ -416,8 +416,19 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
             raise ValueError("Expired host assertion")
         source_id = str(claims["sub"])
         role = str(claims["role"])
+        learner_profile = claims.get("learner_profile")
+        if learner_profile is not None and not isinstance(learner_profile, dict):
+            raise ValueError("Invalid learner profile")
+        raw_learner_profiles = claims.get("learner_profiles", {})
+        if not isinstance(raw_learner_profiles, dict) or len(raw_learner_profiles) > 100:
+            raise ValueError("Invalid learner profiles")
         mode = str(claims.get("mode") or "personal")
-        if mode not in {"school", "personal"}:
+        allowed_modes = {
+            "student": {"personal", "school", "practice", "mastery", "progress", "profile"},
+            "parent": {"personal", "guardian"},
+            "admin": {"personal", "school"},
+        }
+        if role not in allowed_modes or mode not in allowed_modes[role]:
             raise ValueError("Invalid learning mode")
         jti = str(claims["jti"])
         if not re.fullmatch(r"[0-9a-fA-F-]{36}", source_id) or not jti or len(jti) > 80:
@@ -430,6 +441,14 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
         learner_ids = {str(value) for value in raw_learners}
         if any(not re.fullmatch(r"[0-9a-fA-F-]{36}", value) for value in learner_ids):
             raise ValueError("Invalid learner identity")
+        if role != "parent" and raw_learner_profiles:
+            raise ValueError("Unexpected learner profiles")
+        learner_profiles: dict[str, dict] = {}
+        for learner_id, profile in raw_learner_profiles.items():
+            learner_id = str(learner_id)
+            if learner_id not in learner_ids or not isinstance(profile, dict):
+                raise ValueError("Invalid learner profile assignment")
+            learner_profiles[learner_id] = profile
         if role == "student" and learner_ids != {source_id}:
             raise ValueError("Invalid learner assertion")
         if role != "parent" and role != "student" and learner_ids:
@@ -460,14 +479,20 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
         else:
             preset = "learner" if role == "student" else "standard"
             deep_role = "user"
-        ensure_host_user(username, account_id, deep_role, preset)
+        ensure_host_user(username, account_id, deep_role, preset, learner_profile)
 
         if role == "parent":
             child_user_ids: set[str] = set()
             for child_source_id in sorted(learner_ids):
                 child_id = f"u_{child_source_id.replace('-', '').lower()}"
                 child_name = f"ct_{child_source_id.replace('-', '').lower()}"
-                ensure_host_user(child_name, child_id, "user", "learner")
+                ensure_host_user(
+                    child_name,
+                    child_id,
+                    "user",
+                    "learner",
+                    learner_profiles.get(child_source_id),
+                )
                 child_user_ids.add(child_id)
             sync_host_guardians(account_id, child_user_ids)
 
@@ -475,7 +500,16 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
         if not record or record[1].get("disabled"):
             raise HTTPException(status_code=403, detail="This account is unavailable.")
         token = create_token(username, str(record[1].get("role") or "user"), account_id)
-        destination = "/learning" if mode == "school" else "/"
+        destinations = {
+            "personal": "/",
+            "school": "/learning",
+            "practice": "/learning/practice",
+            "mastery": "/learning/mastery",
+            "progress": "/settings/progress",
+            "profile": "/settings#learner-profile",
+            "guardian": "/settings#guardian",
+        }
+        destination = destinations[mode]
         if role == "admin" and _admin_needs_llm_setup():
             destination = "/settings/llm"
         response = RedirectResponse(url=destination, status_code=303)

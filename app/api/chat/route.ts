@@ -19,6 +19,13 @@ import type { StatelessChatRequest, StatelessEvent } from '@/lib/types/chat';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
 import { resolveModel } from '@/lib/server/resolve-model';
+import {
+  assertPlatformAiWithinLimit,
+  platformAiErrorResponse,
+  runWithPlatformAiUsage,
+} from '@/lib/server/platform-ai-usage';
+import { createClient } from '@/lib/supabase/server';
+import { nanoid } from 'nanoid';
 import type { ThinkingConfig } from '@/lib/types/provider';
 const log = createLogger('Chat API');
 
@@ -64,6 +71,18 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: config.agentIds');
     }
 
+    const isByok = Boolean(
+      body.apiKey || body.baseUrl || req.headers.get('x-api-key') || req.headers.get('x-base-url'),
+    );
+    let platformUserId: string | null = null;
+    if (!isByok) {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
+      platformUserId = user.id;
+      await assertPlatformAiWithinLimit(user.id);
+    }
+
     const {
       model: languageModel,
       apiKey: resolvedApiKey,
@@ -91,11 +110,9 @@ export async function POST(req: NextRequest) {
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
 
-    // Stream generation in background with heartbeat to prevent connection timeout
+    // Stream generation in background with heartbeat to prevent connection timeout.
     const HEARTBEAT_INTERVAL_MS = 15_000;
-    (async () => {
-      // Heartbeat: periodically send SSE comments to keep the connection alive.
-      // Proxies / browsers may close idle SSE connections after 30-120s of silence.
+    void (async () => {
       let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
       const startHeartbeat = () => {
         stopHeartbeat();
@@ -114,68 +131,75 @@ export async function POST(req: NextRequest) {
         }
       };
 
-      try {
-        startHeartbeat();
+      const processStream = async () => {
+        try {
+          startHeartbeat();
 
-        // Default: thinking disabled for low-latency chat. UI requests send
-        // `thinkingConfig`; eval harnesses can still opt in via `thinking`.
-        const thinkingConfig: ThinkingConfig = body.thinkingConfig ??
-          body.thinking ?? { mode: 'disabled', enabled: false };
+          const thinkingConfig: ThinkingConfig =
+            body.thinkingConfig ?? body.thinking ?? { mode: 'disabled', enabled: false };
 
-        const generator = statelessGenerate(
-          {
-            ...body,
-            apiKey: resolvedApiKey,
-          },
-          signal,
-          languageModel,
-          thinkingConfig,
-        );
+          const generator = statelessGenerate(
+            {
+              ...body,
+              apiKey: resolvedApiKey,
+            },
+            signal,
+            languageModel,
+            thinkingConfig,
+          );
 
-        for await (const event of generator) {
-          if (signal.aborted) {
-            log.info('Request was aborted');
-            break;
+          for await (const event of generator) {
+            if (signal.aborted) {
+              log.info('Request was aborted');
+              break;
+            }
+
+            const data = `data: ${JSON.stringify(event)}\n\n`;
+            await writer.write(encoder.encode(data));
           }
 
-          const data = `data: ${JSON.stringify(event)}\n\n`;
-          await writer.write(encoder.encode(data));
-        }
+          stopHeartbeat();
+          await writer.close();
+        } catch (error) {
+          stopHeartbeat();
 
-        stopHeartbeat();
-        await writer.close();
-      } catch (error) {
-        stopHeartbeat();
+          if (signal.aborted) {
+            log.info('Request aborted during streaming');
+            try {
+              await writer.close();
+            } catch {
+              /* already closed */
+            }
+            return;
+          }
 
-        // If aborted, just close the writer silently
-        if (signal.aborted) {
-          log.info('Request aborted during streaming');
+          log.error(
+            `Chat stream error [model=${body.model ?? 'unknown'}, agents=${body.config?.agentIds?.length ?? 0}, messages=${body.messages?.length ?? 0}]:`,
+            error,
+          );
+
           try {
+            const message = error instanceof Error ? error.message : String(error);
+            const errorEvent: StatelessEvent = {
+              type: 'error',
+              data: {
+                message: message.replace(/^platform_usage_limit_reached:\s*/, ''),
+              },
+            };
+            await writer.write(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`));
             await writer.close();
           } catch {
-            /* already closed */
+            // Writer may already be closed.
           }
-          return;
         }
-
-        log.error(
-          `Chat stream error [model=${body.model ?? 'unknown'}, agents=${body.config?.agentIds?.length ?? 0}, messages=${body.messages?.length ?? 0}]:`,
-          error,
+      };
+      if (platformUserId) {
+        await runWithPlatformAiUsage(
+          { userId: platformUserId, requestId: nanoid(12) },
+          processStream,
         );
-
-        // Try to send error event
-        try {
-          const errorEvent: StatelessEvent = {
-            type: 'error',
-            data: {
-              message: error instanceof Error ? error.message : String(error),
-            },
-          };
-          await writer.write(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`));
-          await writer.close();
-        } catch {
-          // Writer may already be closed
-        }
+      } else {
+        await processStream();
       }
     })();
 
@@ -191,6 +215,8 @@ export async function POST(req: NextRequest) {
       `Chat request failed [model=${chatModel ?? 'unknown'}, messages=${chatMessageCount ?? 0}]:`,
       error,
     );
+    const platformError = platformAiErrorResponse(error);
+    if (platformError) return platformError;
     return apiError(
       'INTERNAL_ERROR',
       500,

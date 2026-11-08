@@ -155,6 +155,7 @@ def _build_runtime_provider(
         max_tokens=llm_config.max_tokens,
         reasoning_effort=llm_config.reasoning_effort,
     )
+    provider.platform_ai = llm_config.platform_ai
     return provider
 
 

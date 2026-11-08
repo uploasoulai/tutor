@@ -14,6 +14,7 @@ import { buildRequestOrigin } from '@/lib/server/classroom-storage';
 import { resolveLessonEngineMediaFlags } from '@/lib/server/lesson-engine-media-flags';
 import { createClient } from '@/lib/supabase/server';
 import { resolveTeacherPersonaPreference } from '@/lib/curriculum/teacher-personas';
+import { assertPlatformAiWithinLimit } from '@/lib/server/platform-ai-usage';
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,6 +26,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return apiError('INVALID_REQUEST', 401, 'Authentication required');
     }
+    await assertPlatformAiWithinLimit(user.id);
 
     const body = (await req.json()) as {
       grade?: string;
@@ -83,7 +85,9 @@ export async function POST(req: NextRequest) {
         payload,
       };
 
-      after(() => runClassroomGenerationJob(jobId, generationInput, baseUrl));
+      after(() =>
+        runClassroomGenerationJob(jobId, generationInput, baseUrl, { billingUserId: user.id }),
+      );
     } else {
       const synced = await syncLessonEngineJob({
         studentId: user.id,
@@ -102,6 +106,12 @@ export async function POST(req: NextRequest) {
     return apiSuccess(artifact);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Lesson generation failed';
+    if (message.startsWith('platform_usage_limit_reached:')) {
+      return apiError('PLATFORM_USAGE_LIMIT_REACHED', 402, message.replace(/^platform_usage_limit_reached:\s*/, ''));
+    }
+    if (message.startsWith('PLATFORM_AI_NOT_CONFIGURED:')) {
+      return apiError('PLATFORM_AI_NOT_CONFIGURED', 503, message.replace(/^PLATFORM_AI_NOT_CONFIGURED:\s*/, ''));
+    }
     if (message.includes('VOYAGE_API_KEY')) {
       return apiError('MISSING_API_KEY', 400, message);
     }

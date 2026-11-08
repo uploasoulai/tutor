@@ -18,6 +18,18 @@ export interface StudentSessionListItem {
 export function mapStudentSession(row: Record<string, unknown>): StudentSessionListItem {
   const status = String(row.status ?? 'planned');
   const reuseKey = typeof row.reuse_key === 'string' && row.reuse_key ? row.reuse_key : null;
+  const payload =
+    row.lesson_payload && typeof row.lesson_payload === 'object'
+      ? (row.lesson_payload as {
+          curriculumTrack?: string;
+          curriculumTopicId?: string;
+          curriculumEditionId?: string;
+        })
+      : null;
+  const openPath =
+    payload?.curriculumTrack === 'china'
+      ? `/school-learning/china${payload.curriculumTopicId ? `?topicId=${encodeURIComponent(payload.curriculumTopicId)}${payload.curriculumEditionId && payload.curriculumEditionId !== 'pep' ? `&edition=${encodeURIComponent(payload.curriculumEditionId)}` : ''}` : ''}`
+      : `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`;
 
   return {
     id: String(row.id),
@@ -31,7 +43,7 @@ export function mapStudentSession(row: Record<string, unknown>): StudentSessionL
     lessonEngineQualityScore: readLessonEngineQualityScore(row.lesson_payload),
     reuseKey,
     canReuse: !!reuseKey && ['planned', 'generated', 'started', 'completed'].includes(status),
-    openPath: `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`,
+    openPath,
   };
 }
 

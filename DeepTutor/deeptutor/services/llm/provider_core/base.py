@@ -360,6 +360,7 @@ class LLMProvider(ABC):
             return await measure_provider_call(
                 raw_call,
                 provider=getattr(self, "provider_name", self.__class__.__name__),
+                platform_ai=bool(getattr(self, "platform_ai", False)),
                 **call_kwargs,
             )
 

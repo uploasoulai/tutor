@@ -10,6 +10,11 @@ import { createLogger } from '@/lib/logger';
 import { PROVIDERS } from './providers';
 import { thinkingContext } from './thinking-context';
 import { getModelMetadataKey } from './model-metadata';
+import {
+  assertPlatformAiWithinLimit,
+  getPlatformAiUsageContext,
+  recordPlatformAiUsage,
+} from '@/lib/server/platform-ai-usage';
 import type { ThinkingCapability, ThinkingConfig } from '@/lib/types/provider';
 import {
   getThinkingMode,
@@ -260,6 +265,10 @@ export async function callLLM<T extends GenerateTextParams>(
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
+      const usageContext = getPlatformAiUsageContext();
+      if (usageContext) {
+        await assertPlatformAiWithinLimit(usageContext.userId);
+      }
       // Resolve effective thinking config: per-call > global env > undefined
       const effectiveThinking = thinking ?? getGlobalThinkingConfig();
       const injectedParams = injectProviderOptions(params, effectiveThinking);
@@ -270,6 +279,18 @@ export async function callLLM<T extends GenerateTextParams>(
       const result = await thinkingContext.run(effectiveThinking, () =>
         generateText(injectedParams),
       );
+
+      const modelId = getModelId(params);
+      const providerId = getModelProviderId(params);
+      if (usageContext && providerId) {
+        await recordPlatformAiUsage(usageContext.userId, usageContext.requestId, {
+          source,
+          inputTokens: Number(result.usage.inputTokens ?? 0),
+          outputTokens: Number(result.usage.outputTokens ?? 0),
+          providerId,
+          modelId,
+        });
+      }
 
       // Validate result (only when retries are configured)
       if (validate && !validate(result.text)) {
@@ -311,10 +332,27 @@ export function streamLLM<T extends StreamTextParams>(
   thinking?: ThinkingConfig,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): StreamTextResult<any, any> {
+  const usageContext = getPlatformAiUsageContext();
+  const modelId = getModelId(params);
+  const providerId = getModelProviderId(params);
   // Resolve effective thinking config and wrap in thinkingContext
   const effectiveThinking = thinking ?? getGlobalThinkingConfig();
   const injectedParams = injectProviderOptions(params, effectiveThinking);
   const result = thinkingContext.run(effectiveThinking, () => streamText(injectedParams));
+
+  if (usageContext && providerId) {
+    void Promise.resolve(result.usage)
+      .then((usage) =>
+        recordPlatformAiUsage(usageContext.userId, usageContext.requestId, {
+          source,
+          inputTokens: Number(usage.inputTokens ?? 0),
+          outputTokens: Number(usage.outputTokens ?? 0),
+          providerId,
+          modelId,
+        }),
+      )
+      .catch((error) => log.error(`[${source}] Failed to record Platform AI usage:`, error));
+  }
 
   return result;
 }

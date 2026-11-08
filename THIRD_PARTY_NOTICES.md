@@ -1,19 +1,18 @@
-# Third-Party Notices
+# Third-party notices
 
-CoastalTutor retains the required copyright and license notices for third-party software. Product screens use CoastalTutor branding; source attribution remains available here and in each upstream `LICENSE` file.
+## Chinese curriculum graph and questions
+
+CoastalTutor's China School Learning route includes adapted data from **cn-math-taxonomy** by xiaoyang111222:
+
+- Source repository: <https://github.com/xiaoyang111222/cn-math-taxonomy>
+- Snapshot: repository archive at commit `b17bbe759fb38245e86483b1915fce89d79c6662`, downloaded 2026-11-07
+- Included material: topic nodes, prerequisite relationships, diagnostic/practice questions, curriculum-standard mappings, and ID aliases under `curriculum_data/china/`
+- License declared by the source repository: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0). The complete license text is in `public/curriculum/china/LICENSE-CC-BY-NC-4.0.txt`.
+- Changes: files are organized as CoastalTutor curriculum data and consumed by a separately implemented CoastalTutor interface and API. Source topic identifiers and cross-references are preserved.
+- Product attribution: the student-facing route uses CoastalTutor product naming; this notice and the in-product “数据来源与许可” link provide the source attribution. The included raw data is outside `public/` and is served only through authenticated curriculum APIs.
+
+The repository's curriculum-standard file records its own source notes and review limits. Third-party standards and textbook sources may have terms separate from the dataset license; check those source records before redistribution or commercial use. This snapshot is for the current development and testing phase. Obtain appropriate permission before any use the applicable license does not grant.
 
 ## DeepTutor
 
-- Upstream: [HKUDS/DeepTutor](https://github.com/HKUDS/DeepTutor)
-- Version: `v1.7.1` (`f7aed0744c36c5afef16a4261c31ebee1208cac2`)
-- License: Apache-2.0; full text: [`DeepTutor/LICENSE`](DeepTutor/LICENSE)
-- Local modifications: CoastalTutor host single sign-on, stable host-user provisioning, family relationship synchronization, first-admin model setup, CoastalTutor interface branding, and Docker integration. Upstream code and copyright notices are retained.
-
-## Thinking Orbs
-
-- Included under `DeepTutor/web/vendor/thinking-orbs`.
-- License and copyright notice: [`DeepTutor/web/vendor/thinking-orbs/LICENSE`](DeepTutor/web/vendor/thinking-orbs/LICENSE)
-
-## Remaining dependencies and legacy classroom
-
-Dependency licenses are recorded in the package lockfiles and their package manifests. The CoastalTutor Interactive Classroom remains in its existing code and keeps its own product entry. This notice does not assert an OpenMAIC version or upstream code import that is not present in this repository's tracked source.
+The integrated DeepTutor source tree remains under its upstream Apache-2.0 license and retains its upstream `LICENSE` and `THIRD_PARTY_NOTICES.md`. See [DeepTutor/UPSTREAM_VERSION.md](DeepTutor/UPSTREAM_VERSION.md) for the pinned release.

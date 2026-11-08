@@ -13,6 +13,10 @@ import { ChatResult } from '@langchain/core/outputs';
 import type { LanguageModel } from 'ai';
 
 import { callLLM, streamLLM } from '@/lib/ai/llm';
+import {
+  assertPlatformAiWithinLimit,
+  getCurrentPlatformAiUserId,
+} from '@/lib/server/platform-ai-usage';
 import type { ThinkingConfig } from '@/lib/types/provider';
 import { createLogger } from '@/lib/logger';
 
@@ -130,6 +134,8 @@ export class AISdkLangGraphAdapter extends BaseChatModel {
     options?: { tools?: Record<string, unknown>; signal?: AbortSignal },
   ): AsyncGenerator<StreamChunk> {
     const aiMessages = this.convertMessages(messages);
+    const platformUserId = getCurrentPlatformAiUserId();
+    if (platformUserId) await assertPlatformAiWithinLimit(platformUserId);
 
     const result = streamLLM(
       {

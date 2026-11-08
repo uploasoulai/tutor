@@ -62,7 +62,11 @@ class TypeScriptProvider(LLMProvider):
         from deeptutor.services.llm.metrics import measure_provider_call
 
         return await measure_provider_call(
-            call, provider=self.provider_name, _retry_delays=retry_delays, **kwargs
+            call,
+            provider=self.provider_name,
+            platform_ai=bool(getattr(self.config, "platform_ai", False)),
+            _retry_delays=retry_delays,
+            **kwargs,
         )
 
     async def chat(

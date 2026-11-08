@@ -11,6 +11,7 @@ import type { PBLAgent, PBLIssue } from '@/lib/pbl/types';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { resolveModelFromRequest } from '@/lib/server/resolve-model';
+import { platformAiErrorResponse, withPlatformAiRequest } from '@/lib/server/platform-ai-usage';
 const log = createLogger('PBL Chat');
 
 interface PBLChatRequest {
@@ -61,15 +62,17 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = `${agent.system_prompt}${issueContext}${recentContext}${userRole ? `\n\nThe student's role is: ${userRole}` : ''}`;
 
-    const result = await callLLM(
-      {
-        model,
-        system: systemPrompt,
-        prompt: message,
-      },
-      'pbl-chat',
-      undefined,
-      thinkingConfig,
+    const result = await withPlatformAiRequest(req, () =>
+      callLLM(
+        {
+          model,
+          system: systemPrompt,
+          prompt: message,
+        },
+        'pbl-chat',
+        undefined,
+        thinkingConfig,
+      ),
     );
 
     return apiSuccess({ message: result.text, agentName: agent.name });
@@ -78,6 +81,8 @@ export async function POST(req: NextRequest) {
       `PBL chat failed [agent="${agentName ?? 'unknown'}", type=${resolvedAgentType ?? 'question'}]:`,
       error,
     );
+    const platformError = platformAiErrorResponse(error);
+    if (platformError) return platformError;
     return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
   }
 }

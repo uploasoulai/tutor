@@ -301,6 +301,7 @@ def ensure_host_user(
     user_id: str,
     role: Role,
     preset: AccountPreset,
+    learner_profile: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Provision or synchronize an account owned by the trusted host SSO."""
     if role not in VALID_ROLES or preset not in {"standard", "learner", "custom"}:
@@ -328,6 +329,14 @@ def ensure_host_user(
             "created_at": str(record.get("created_at") or utc_now()),
             "disabled": bool(record.get("disabled", False)),
         })
+        # The host owns canonical school context such as grade. Keep that
+        # context current while retaining DeepTutor-only adaptive preferences.
+        incoming_profile = normalize_profile(learner_profile) or {}
+        existing_profile = normalize_profile(record.get("learner_profile")) or {}
+        for field in ("grade_level", "curriculum", "language"):
+            if field in incoming_profile:
+                existing_profile[field] = incoming_profile[field]
+        record["learner_profile"] = normalize_profile(existing_profile)
         users[username] = record
         _write_users(users)
     return record
