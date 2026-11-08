@@ -194,9 +194,7 @@ export default function RegisterPage() {
               <AnimatedCharacters isTyping={isTyping} passwordLength={password.length} />
             </div>
           </div>
-          <p className="mt-3 text-sm text-slate-500">
-            Little helpers are ready to welcome you.
-          </p>
+          <p className="mt-3 text-sm text-slate-500">Little helpers are ready to welcome you.</p>
         </div>
         <div className="relative z-10 flex items-center justify-between text-xs text-slate-500">
           <span>Curiosity starts here</span>
