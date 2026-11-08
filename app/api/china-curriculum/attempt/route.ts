@@ -43,6 +43,12 @@ export async function POST(request: NextRequest) {
         'topicId, questionId, and response are required',
       );
     }
+    if (body.response.length > 2000) {
+      return apiError('INVALID_REQUEST', 413, 'Answer is too long');
+    }
+    if (!body.response.trim()) {
+      return apiError('INVALID_REQUEST', 400, 'Answer cannot be empty');
+    }
 
     const details = await getChinaTopicDetails(body.topicId);
     const question = details?.questions.find((candidate) => candidate.id === body.questionId);
@@ -88,14 +94,16 @@ export async function POST(request: NextRequest) {
       p_is_correct: correct,
       p_response_latency_ms:
         typeof body.responseLatencyMs === 'number' && Number.isFinite(body.responseLatencyMs)
-          ? Math.max(0, Math.round(body.responseLatencyMs))
+          ? Math.min(300_000, Math.max(0, Math.round(body.responseLatencyMs)))
           : null,
     });
     if (error) throw error;
 
     return apiSuccess({
       correct,
-      explanation: question.explanation ?? null,
+      // Keep the answer explanation out of the response when incorrect; the
+      // learner can continue the guided remediation in their DeepTutor workspace.
+      explanation: correct ? (question.explanation ?? null) : null,
       mastery: Number(mastery?.mastery_level ?? 0),
       attempts: Number(mastery?.attempts ?? 0),
       correctAttempts: Number(mastery?.correct_attempts ?? 0),

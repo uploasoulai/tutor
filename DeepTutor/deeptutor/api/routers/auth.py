@@ -1,9 +1,11 @@
 """Auth router — login, logout, status, registration, profile, and user-management endpoints."""
 
-from contextvars import Token as _CtxToken
+import base64
 import csv
+from contextvars import Token as _CtxToken
 import hashlib
 import hmac
+import json
 import sqlite3
 from datetime import datetime, timedelta, timezone
 import io
@@ -104,6 +106,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 _COOKIE_NAME = "dt_token"
+_PENDING_PROMPT_COOKIE = "dt_pending_prompt"
 AUTH_COOKIE_NAME = _COOKIE_NAME
 _COOKIE_MAX_AGE = TOKEN_EXPIRE_HOURS * 3600
 _USER_IMPORT_MAX_BYTES = 2 * 1024 * 1024
@@ -430,6 +433,15 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
         }
         if role not in allowed_modes or mode not in allowed_modes[role]:
             raise ValueError("Invalid learning mode")
+        handoff_prompt = claims.get("handoff_prompt")
+        if handoff_prompt is not None and (
+            role != "student"
+            or mode != "personal"
+            or not isinstance(handoff_prompt, str)
+            or not handoff_prompt.strip()
+            or len(handoff_prompt) > 5000
+        ):
+            raise ValueError("Invalid tutoring handoff")
         jti = str(claims["jti"])
         if not re.fullmatch(r"[0-9a-fA-F-]{36}", source_id) or not jti or len(jti) > 80:
             raise ValueError("Invalid host identity")
@@ -514,6 +526,30 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
             destination = "/settings/llm"
         response = RedirectResponse(url=destination, status_code=303)
         response.set_cookie(value=token, max_age=_COOKIE_MAX_AGE, **_cookie_attrs())
+        if handoff_prompt is not None:
+            handoff = json.dumps(
+                {"sub": account_id, "prompt": handoff_prompt},
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ).encode("utf-8")
+            encoded_prompt = base64.urlsafe_b64encode(handoff).decode("ascii")
+            response.set_cookie(
+                key=_PENDING_PROMPT_COOKIE,
+                value=encoded_prompt,
+                max_age=120,
+                path="/",
+                httponly=True,
+                secure=_SECURE,
+                samesite=_SAMESITE,
+            )
+        else:
+            response.delete_cookie(
+                key=_PENDING_PROMPT_COOKIE,
+                path="/",
+                httponly=True,
+                secure=_SECURE,
+                samesite=_SAMESITE,
+            )
         response.headers["Cache-Control"] = "no-store"
         response.headers["Referrer-Policy"] = "no-referrer"
         return response
@@ -522,6 +558,38 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
     except Exception:
         # Includes signature, replay, schema, and account binding failures.
         raise HTTPException(status_code=401, detail="Platform sign-in ticket is invalid or expired.") from None
+
+
+@router.post("/host-sso/pending-prompt/consume")
+async def consume_host_sso_pending_prompt(
+    response: Response,
+    current: TokenPayload | None = Depends(require_auth),
+    pending_prompt: str | None = Cookie(default=None, alias=_PENDING_PROMPT_COOKIE),
+    handoff_header: str | None = Header(default=None, alias="X-DeepTutor-Handoff"),
+) -> dict:
+    """Return a one-time, short-lived tutoring handoff to its signed-in learner."""
+    response.headers["Cache-Control"] = "no-store, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    if handoff_header != "consume-v1":
+        raise HTTPException(status_code=403, detail="Invalid tutoring handoff request")
+    response.delete_cookie(
+        key=_PENDING_PROMPT_COOKIE,
+        path="/",
+        httponly=True,
+        secure=_SECURE,
+        samesite=_SAMESITE,
+    )
+    if not pending_prompt or len(pending_prompt) > 7000:
+        return {"prompt": ""}
+    try:
+        payload = json.loads(base64.urlsafe_b64decode(pending_prompt.encode("ascii")).decode("utf-8"))
+        prompt = str(payload.get("prompt") or "")
+        owner_id = str(payload.get("sub") or "")
+    except (ValueError, UnicodeError, AttributeError):
+        return {"prompt": ""}
+    if not current or owner_id != current.user_id:
+        return {"prompt": ""}
+    return {"prompt": prompt[:5000]}
 
 
 class UserInfo(BaseModel):

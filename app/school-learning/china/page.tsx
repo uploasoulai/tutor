@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -116,6 +116,7 @@ export default function ChinaSchoolLearningPage() {
   const [edition, setEdition] = useState('pep');
   const [semester, setSemester] = useState('全部');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selected, setSelected] = useState<TopicDetails | null>(null);
@@ -135,6 +136,15 @@ export default function ChinaSchoolLearningPage() {
   const [classOpened, setClassOpened] = useState(false);
   const [completingLesson, setCompletingLesson] = useState(false);
   const [completedLesson, setCompletedLesson] = useState(false);
+  const catalogRequestId = useRef(0);
+  const detailRequestId = useRef(0);
+  const answerRequestId = useRef(0);
+  const classroomRequestId = useRef(0);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 250);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -145,7 +155,7 @@ export default function ChinaSchoolLearningPage() {
       }
       const savedGrade = String(data.user.user_metadata?.grade ?? '').trim();
       const gradeMatch = savedGrade.match(/(?:grade|年级)\s*(\d+)/i);
-      const savedGradeNumber = gradeMatch ? Number(gradeMatch[1]) : 0;
+      const savedGradeNumber = gradeMatch ? Number(gradeMatch[1]) : Number(savedGrade);
       if (/^(?:k|kindergarten|幼儿园)$/i.test(savedGrade)) {
         setGrade(1);
       } else if (
@@ -160,6 +170,7 @@ export default function ChinaSchoolLearningPage() {
   }, []);
 
   const loadCatalog = useCallback(async () => {
+    const requestId = ++catalogRequestId.current;
     setLoading(true);
     setError('');
     const params = new URLSearchParams({
@@ -169,18 +180,21 @@ export default function ChinaSchoolLearningPage() {
     });
     if (edition !== 'pep') params.set('edition', edition);
     if (semester !== '全部') params.set('semester', semester);
-    if (search.trim()) params.set('q', search.trim());
+    if (debouncedSearch) params.set('q', debouncedSearch);
     try {
       const response = await fetch(`/api/china-curriculum?${params.toString()}`);
       const body = (await response.json()) as Catalog & { success?: boolean; error?: string };
       if (!response.ok || !body.success) throw new Error(body.error || '课程内容暂时无法加载');
+      if (requestId !== catalogRequestId.current) return;
       setCatalog(body);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : '课程内容暂时无法加载');
+      if (requestId === catalogRequestId.current) {
+        setError(loadError instanceof Error ? loadError.message : '课程内容暂时无法加载');
+      }
     } finally {
-      setLoading(false);
+      if (requestId === catalogRequestId.current) setLoading(false);
     }
-  }, [edition, grade, search, semester, subject]);
+  }, [debouncedSearch, edition, grade, semester, subject]);
 
   useEffect(() => {
     if (!authLoading) void loadCatalog();
@@ -205,26 +219,58 @@ export default function ChinaSchoolLearningPage() {
   }, [catalog?.textbooks, edition]);
 
   const openTopic = async (topicId: string, editionId = edition) => {
+    answerRequestId.current += 1;
+    classroomRequestId.current += 1;
+    const requestId = ++detailRequestId.current;
     setDetailLoading(true);
+    setAnswerLoading(false);
+    setError('');
     setAnswer('');
     setAnswerResult(null);
     setQuestionIndex(0);
     setGeneration(null);
     setClassOpened(false);
     setCompletedLesson(false);
+    setCompletingLesson(false);
     try {
       const params = new URLSearchParams({ topicId });
       if (editionId !== 'pep') params.set('edition', editionId);
       const response = await fetch(`/api/china-curriculum?${params.toString()}`);
       const body = (await response.json()) as TopicDetails & { success?: boolean; error?: string };
       if (!response.ok || !body.success) throw new Error(body.error || '知识点暂时无法打开');
+      if (requestId !== detailRequestId.current) return;
       setSelected(body);
     } catch (detailError) {
-      setError(detailError instanceof Error ? detailError.message : '知识点暂时无法打开');
+      if (requestId === detailRequestId.current) {
+        setError(detailError instanceof Error ? detailError.message : '知识点暂时无法打开');
+      }
     } finally {
-      setDetailLoading(false);
+      if (requestId === detailRequestId.current) setDetailLoading(false);
     }
   };
+
+  const closeTopic = useCallback(() => {
+    answerRequestId.current += 1;
+    classroomRequestId.current += 1;
+    detailRequestId.current += 1;
+    setDetailLoading(false);
+    setAnswerLoading(false);
+    setSelected(null);
+  }, []);
+
+  useEffect(() => {
+    if (!selected) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeTopic();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [closeTopic, selected]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -263,6 +309,7 @@ export default function ChinaSchoolLearningPage() {
 
   const submitAnswer = async (responseValue = answer) => {
     if (!selected || !activeQuestion || !responseValue.trim()) return;
+    const requestId = ++answerRequestId.current;
     setAnswerLoading(true);
     try {
       const response = await fetch('/api/china-curriculum/attempt', {
@@ -276,17 +323,54 @@ export default function ChinaSchoolLearningPage() {
       });
       const body = (await response.json()) as AnswerResult & { success?: boolean; error?: string };
       if (!response.ok || !body.success) throw new Error(body.error || '答案暂时没有保存');
+      if (requestId !== answerRequestId.current) return;
       setAnswerResult(body);
       void loadCatalog();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : '答案暂时没有保存');
+      if (requestId === answerRequestId.current) {
+        setError(submitError instanceof Error ? submitError.message : '答案暂时没有保存');
+      }
     } finally {
-      setAnswerLoading(false);
+      if (requestId === answerRequestId.current) setAnswerLoading(false);
     }
+  };
+
+  const askDeepTutorAboutMistake = () => {
+    if (!selected || !activeQuestion || !answerResult || answerResult.correct) return;
+    const learnerAnswer =
+      activeQuestion.choices?.find((choice) => choice.key === answer)?.text ?? answer;
+    const choices = activeQuestion.choices?.length
+      ? `\n选项：\n${activeQuestion.choices.map((choice) => `${choice.key}. ${choice.text}`).join('\n')}`
+      : '';
+    const prompt = [
+      `我正在学习${selected.topic.gradeLabel ?? `第${selected.topic.grade}年级`}的${SUBJECT_NAMES[selected.subject] ?? selected.subject}，知识点是“${selected.topic.name}”。`,
+      `题目：${activeQuestion.prompt}${choices}`,
+      `我的回答：${learnerAnswer}`,
+      '请按你的学习辅导方式帮我弄懂这道错题：先问我一个小问题，听完我的想法后再给下一步提示，不要一开始直接告诉我答案；用适合小学生的短句，一次只问一个问题。等我理解后，再给一道相似题检查我是否学会。请把这道错题和我的回答记录到我的错题本，供之后复习。',
+    ].join('\n\n');
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/api/deeptutor/launch';
+    form.target = '_blank';
+    form.setAttribute('rel', 'noopener');
+    for (const [name, value] of [
+      ['mode', 'personal'],
+      ['prompt', prompt],
+    ]) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.append(input);
+    }
+    document.body.append(form);
+    form.submit();
+    window.setTimeout(() => form.remove(), 1000);
   };
 
   const startClassroom = async () => {
     if (!selected) return;
+    const requestId = ++classroomRequestId.current;
     setGeneration({ sessionId: '', pollUrl: '', status: 'starting', message: '正在准备课堂内容…' });
     try {
       const response = await fetch('/api/china-curriculum/lesson', {
@@ -303,6 +387,7 @@ export default function ChinaSchoolLearningPage() {
       if (!response.ok || !body.success || !body.sessionId || !body.pollUrl) {
         throw new Error(body.error || '课堂暂时无法开始');
       }
+      if (requestId !== classroomRequestId.current) return;
       setGeneration({
         sessionId: body.sessionId,
         pollUrl: body.pollUrl,
@@ -311,6 +396,7 @@ export default function ChinaSchoolLearningPage() {
       });
       void loadCatalog();
     } catch (generationError) {
+      if (requestId !== classroomRequestId.current) return;
       setGeneration({
         sessionId: '',
         pollUrl: '',
@@ -374,19 +460,24 @@ export default function ChinaSchoolLearningPage() {
 
   const completeClassroom = async () => {
     if (!generation?.sessionId) return;
+    const sessionId = generation.sessionId;
+    const topicRequestId = detailRequestId.current;
     setCompletingLesson(true);
     try {
       const response = await fetch('/api/china-curriculum/session/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: generation.sessionId }),
+        body: JSON.stringify({ sessionId }),
       });
       const body = (await response.json()) as { success?: boolean; error?: string };
       if (!response.ok || !body.success) throw new Error(body.error || '学习记录暂时无法保存');
+      if (topicRequestId !== detailRequestId.current || generation?.sessionId !== sessionId) return;
       setCompletedLesson(true);
       void loadCatalog();
     } catch (completeError) {
-      setError(completeError instanceof Error ? completeError.message : '学习记录暂时无法保存');
+      if (topicRequestId === detailRequestId.current) {
+        setError(completeError instanceof Error ? completeError.message : '学习记录暂时无法保存');
+      }
     } finally {
       setCompletingLesson(false);
     }
@@ -429,7 +520,7 @@ export default function ChinaSchoolLearningPage() {
             <div className="rounded-2xl bg-[#f4f7fb] px-4 py-3 text-sm text-[#596c82]">
               {catalog?.progressAvailable
                 ? '学习进度已同步到你的学习档案'
-                : '课程可浏览；首次保存答题进度前需要完成数据库更新'}
+                : '课程可以浏览；学习进度服务暂未连接'}
             </div>
           </div>
 
@@ -619,7 +710,17 @@ export default function ChinaSchoolLearningPage() {
             ))
           ) : (
             <div className="rounded-3xl bg-white/90 px-6 py-14 text-center text-[#718197]">
-              这个筛选条件下暂时没有知识点，试试换个年级或搜索词。
+              <p>这个筛选条件下暂时没有知识点，试试换个年级或搜索词。</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('');
+                  setSemester('全部');
+                }}
+                className="mt-4 min-h-11 rounded-xl bg-[#345f91] px-4 font-bold text-white hover:bg-[#274e7c]"
+              >
+                清除搜索和册别筛选
+              </button>
             </div>
           )}
           {catalog?.truncated && (
@@ -653,7 +754,7 @@ export default function ChinaSchoolLearningPage() {
         <div
           className="fixed inset-0 z-40 flex justify-end bg-[#14253a]/40"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setSelected(null);
+            if (event.target === event.currentTarget) closeTopic();
           }}
         >
           <aside
@@ -676,7 +777,7 @@ export default function ChinaSchoolLearningPage() {
                 </p>
               </div>
               <button
-                onClick={() => setSelected(null)}
+                onClick={closeTopic}
                 aria-label="关闭"
                 className="flex h-11 w-11 items-center justify-center rounded-full text-[#677b91] hover:bg-[#f0f4f8]"
               >
@@ -866,8 +967,29 @@ export default function ChinaSchoolLearningPage() {
                             ? '答对了！'
                             : '再看看题目中的条件，找找是哪一步卡住了。'}
                         </p>
-                        {answerResult.explanation && (
+                        {answerResult.correct && answerResult.explanation && (
                           <p className="mt-2 text-sm leading-6">{answerResult.explanation}</p>
+                        )}
+                        {!answerResult.correct && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAnswer('');
+                                setAnswerResult(null);
+                              }}
+                              className="min-h-10 rounded-xl bg-white/80 px-3 text-sm font-bold"
+                            >
+                              再想一想，再试一次
+                            </button>
+                            <button
+                              type="button"
+                              onClick={askDeepTutorAboutMistake}
+                              className="min-h-10 rounded-xl bg-white/80 px-3 text-sm font-bold"
+                            >
+                              请 AI 导师陪我找原因
+                            </button>
+                          </div>
                         )}
                         <p className="mt-2 text-xs opacity-75">
                           已记录到你的学习进度：掌握度 {Math.round(answerResult.mastery * 100)}%
@@ -875,7 +997,9 @@ export default function ChinaSchoolLearningPage() {
                         <div className="mt-3 flex flex-wrap gap-2">
                           <button
                             onClick={advanceQuestion}
-                            disabled={questionIndex >= practiceQuestions.length - 1}
+                            disabled={
+                              !answerResult.correct || questionIndex >= practiceQuestions.length - 1
+                            }
                             className="min-h-10 rounded-xl bg-white/80 px-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {questionIndex >= practiceQuestions.length - 1

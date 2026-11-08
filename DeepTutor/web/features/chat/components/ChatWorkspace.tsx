@@ -626,6 +626,43 @@ export default function ChatWorkspace() {
     return () => clearTimeout(timer);
   }, [handlePrefillComposer]);
 
+  // CoastalTutor sends a mistake tutoring request through the signed host SSO
+  // ticket. DeepTutor consumes the short-lived HttpOnly cookie once, then the
+  // learner reviews the prefilled prompt and decides whether to send it.
+  useEffect(() => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    void fetch("/api/auth/host-sso/pending-prompt/consume", {
+      method: "POST",
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { "X-DeepTutor-Handoff": "consume-v1" },
+    })
+      .then(async (response) => {
+        if (!response.ok) return "";
+        const body = (await response.json()) as { prompt?: unknown };
+        return typeof body.prompt === "string" ? body.prompt : "";
+      })
+      .then((prompt) => {
+        if (!prompt || cancelled) return;
+        let attempts = 0;
+        const prefill = () => {
+          if (cancelled) return;
+          if (prefillInputRef.current) {
+            handlePrefillComposer(prompt);
+            return;
+          }
+          if (attempts++ < 20) timer = setTimeout(prefill, 100);
+        };
+        timer = setTimeout(prefill, 0);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [handlePrefillComposer]);
+
   // A clickable node inside an inlined visualization SVG (data-prompt) — and the
   // html widget's sendPrompt bridge — dispatch this window event; mirror it into
   // the composer as a prefilled follow-up (user confirms before sending).

@@ -42,6 +42,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (session.status === 'completed' && payload.completedAt) {
+      return apiSuccess({
+        sessionId: session.id,
+        status: 'completed',
+        completedAt: payload.completedAt,
+      });
+    }
+
     const completedAt = new Date().toISOString();
     const { error: updateError } = await admin
       .from('learning_sessions')
@@ -54,7 +62,7 @@ export async function POST(request: NextRequest) {
       .eq('student_id', user.id);
     if (updateError) throw updateError;
 
-    return apiSuccess({ sessionId: session.id, status: 'completed' });
+    return apiSuccess({ sessionId: session.id, status: 'completed', completedAt });
   } catch (error) {
     return apiError(
       'INTERNAL_ERROR',

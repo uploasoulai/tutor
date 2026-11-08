@@ -26,6 +26,7 @@ import json
 from typing import Any
 
 from deeptutor.modules.catalog import module_enabled
+from deeptutor.multi_user.context import get_current_user
 from deeptutor.tools.builtin import (
     BUILTIN_TOOL_NAMES,
     CONFIGURABLE_BUILTIN_TOOL_NAMES,
@@ -391,6 +392,19 @@ def partner_can_record_questions() -> bool:
         return False
 
 
+def learner_can_record_questions() -> bool:
+    """Keep the first-mistake save action available in learner chat.
+
+    The bank may be empty precisely because this is the learner's first saved
+    mistake. Hiding the tool until an entry exists made the native record flow
+    impossible to start from a fresh CoastalTutor-linked learner workspace.
+    """
+    try:
+        return get_current_user().role == "user"
+    except Exception:
+        return False
+
+
 __all__ = [
     "AUTO_MOUNTED_TOOLS",
     "ToolMountFlags",
@@ -398,6 +412,7 @@ __all__ = [
     "admin_enabled_optional_tools",
     "compose_enabled_tools",
     "default_optional_tools",
+    "learner_can_record_questions",
     "partner_can_record_questions",
     "user_has_mastery_topics",
     "user_has_memory",

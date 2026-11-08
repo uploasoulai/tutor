@@ -39,7 +39,11 @@ function learnerProfileFromMetadata(metadata: unknown): Record<string, string> {
   return profile;
 }
 
-export async function GET(request: NextRequest) {
+async function createLaunchResponse(
+  request: NextRequest,
+  mode: string,
+  handoffPrompt?: string,
+) {
   try {
     const config = getDeepTutorConfig();
     if (!config.enabled || !config.publicUrl || !config.hostSsoSecret) {
@@ -87,18 +91,19 @@ export async function GET(request: NextRequest) {
     }
 
     const now = Math.floor(Date.now() / 1000);
-    const requestedMode = request.nextUrl.searchParams.get('mode');
     const allowedModes: Record<string, string[]> = {
       student: ['personal', 'school', 'practice', 'mastery', 'progress', 'profile'],
       parent: ['personal', 'guardian'],
       admin: ['personal', 'school'],
     };
-    const mode = requestedMode || 'personal';
     if (!allowedModes[role]?.includes(mode)) {
       return NextResponse.json(
         { error: 'This learning space is unavailable for your account' },
         { status: 403 },
       );
+    }
+    if (handoffPrompt && (role !== 'student' || mode !== 'personal')) {
+      return NextResponse.json({ error: 'Mistake tutoring is available for learners only' }, { status: 403 });
     }
     const learnerProfile = role === 'student' ? learnerProfileFromMetadata(user.user_metadata) : {};
     const header = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
@@ -107,6 +112,7 @@ export async function GET(request: NextRequest) {
       learner_ids: learnerIds,
       ...(Object.keys(learnerProfile).length ? { learner_profile: learnerProfile } : {}),
       ...(Object.keys(learnerProfiles).length ? { learner_profiles: learnerProfiles } : {}),
+      ...(handoffPrompt ? { handoff_prompt: handoffPrompt } : {}),
       mode, iat: now, exp: now + 60, jti: randomUUID(),
     }));
     const signingInput = `${header}.${payload}`;
@@ -128,5 +134,27 @@ export async function GET(request: NextRequest) {
     });
   } catch {
     return NextResponse.json({ error: 'Unable to start a learning session' }, { status: 503 });
+  }
+}
+
+export async function GET(request: NextRequest) {
+  return createLaunchResponse(request, request.nextUrl.searchParams.get('mode') || 'personal');
+}
+
+export async function POST(request: NextRequest) {
+  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  if (contentLength > 30_000) {
+    return NextResponse.json({ error: 'Tutoring request is too long' }, { status: 413 });
+  }
+  try {
+    const form = await request.formData();
+    const mode = String(form.get('mode') || 'personal');
+    const prompt = String(form.get('prompt') || '');
+    if (!prompt.trim() || prompt.length > 5000) {
+      return NextResponse.json({ error: 'Invalid tutoring request' }, { status: 400 });
+    }
+    return createLaunchResponse(request, mode, prompt.trim());
+  } catch {
+    return NextResponse.json({ error: 'Invalid tutoring request' }, { status: 400 });
   }
 }
