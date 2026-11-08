@@ -209,7 +209,7 @@ export default function StudentDashboard() {
   }
 
   const openLearningSpace = (mode: 'school' | 'personal') => {
-    window.location.assign(`/api/deeptutor/launch?mode=${mode}`);
+    window.location.assign(`/api/learning/launch?mode=${mode}`);
   };
 
   const handleSignOut = async () => {

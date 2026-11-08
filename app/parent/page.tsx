@@ -256,7 +256,7 @@ export default function ParentDashboardPage() {
         </nav>
         <div className="px-3 py-4 border-t border-[#e7e8e9] flex flex-col gap-2">
           <button
-            onClick={() => window.location.assign('/api/deeptutor/launch?mode=personal')}
+            onClick={() => window.location.assign('/api/learning/launch?mode=personal')}
             className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-[#003461] bg-blue-50 hover:bg-blue-100 transition-all w-full"
           >
             <Sparkles className="w-4 h-4" /> Family Learning Space
@@ -318,7 +318,7 @@ export default function ParentDashboardPage() {
                 )}
               </div>
               <button
-                onClick={() => window.location.assign('/api/deeptutor/launch?mode=personal')}
+                onClick={() => window.location.assign('/api/learning/launch?mode=personal')}
                 className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#003461] transition-all hover:bg-[#e8f1fa]"
               >
                 Open family learning <ChevronRight className="h-4 w-4" />

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, GraduationCap, Loader2, Mail, Smartphone, Users } from 'lucide-react';
 
-import { LeftPanelBrandAcademicImageryHiddenOnMobile } from '@/components/auth-left-panel';
+import { AnimatedCharacters } from '@/components/auth-animated-characters';
 import { GoogleMark } from '@/components/google-mark';
 import { formatAuthError } from '@/lib/auth/client-errors';
 import {
@@ -32,6 +32,7 @@ export default function RegisterPage() {
   const [phoneCountryCode, setPhoneCountryCode] = useState<PhoneCountryCode>('CA');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [phoneCode, setPhoneCode] = useState('');
   const [pendingPhone, setPendingPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -169,12 +170,44 @@ export default function RegisterPage() {
 
   return (
     <div className="flex w-full min-h-screen bg-[#eef6f7]">
-      <div className="hidden lg:flex w-1/2 flex-col">
-        <LeftPanelBrandAcademicImageryHiddenOnMobile />
+      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-[#eaf8f5] via-[#f2f8ff] to-[#f8f1ff] px-12 py-10 text-slate-800 lg:flex">
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#003461] text-lg font-bold text-white shadow-lg shadow-blue-900/15">
+            C
+          </div>
+          <div>
+            <div className="text-lg font-bold tracking-tight">CoastalTutor</div>
+            <div className="text-xs text-slate-500">A brighter way to learn</div>
+          </div>
+        </div>
+        <div className="relative z-10 flex flex-col items-center justify-center py-8">
+          <div className="mb-6 max-w-md text-center">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-teal-700">
+              Welcome to your learning space
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-800">
+              Learning is better together.
+            </h2>
+          </div>
+          <div className="flex h-[390px] w-full items-end justify-center overflow-hidden">
+            <div className="origin-bottom scale-[0.82]">
+              <AnimatedCharacters isTyping={isTyping} passwordLength={password.length} />
+            </div>
+          </div>
+          <p className="mt-3 text-sm text-slate-500">
+            Little helpers are ready to welcome you.
+          </p>
+        </div>
+        <div className="relative z-10 flex items-center justify-between text-xs text-slate-500">
+          <span>Curiosity starts here</span>
+          <span>CoastalTutor · Learn at your pace</span>
+        </div>
+        <div className="pointer-events-none absolute -right-28 top-20 h-80 w-80 rounded-full bg-teal-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-20 h-96 w-96 rounded-full bg-violet-200/40 blur-3xl" />
       </div>
 
       <div
-        className="relative w-full lg:w-1/2 flex flex-col justify-center items-center overflow-y-auto overflow-x-hidden p-8"
+        className="relative flex w-full flex-col items-center justify-center overflow-y-auto overflow-x-hidden p-8 lg:w-1/2"
         style={{
           backgroundColor: '#f8fbfb',
           backgroundImage:
@@ -182,7 +215,18 @@ export default function RegisterPage() {
         }}
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#4285F4_0_25%,#EA4335_25%_50%,#FBBC05_50%_75%,#34A853_75%_100%)] opacity-80" />
-        <div className="relative w-full max-w-[500px] flex flex-col gap-10">
+        <div className="relative flex w-full max-w-[500px] flex-col gap-10">
+          <div className="relative h-[170px] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[#eaf8f5] via-[#f2f8ff] to-[#f8f1ff] lg:hidden">
+            <p className="absolute inset-x-0 top-3 z-10 text-center text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">
+              Learning is better together.
+            </p>
+            <div
+              className="absolute left-1/2 top-0"
+              style={{ transform: 'translateX(-50%) scale(0.42)', transformOrigin: 'top center' }}
+            >
+              <AnimatedCharacters isTyping={isTyping} passwordLength={password.length} />
+            </div>
+          </div>
           <div className="flex flex-col gap-2">
             <h1 className="text-[32px] font-semibold text-[#191c1d] tracking-tight">
               Create your account
@@ -278,6 +322,8 @@ export default function RegisterPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setIsTyping(true)}
+                  onBlur={() => setIsTyping(false)}
                   placeholder="Password"
                 />
                 <p className="text-xs text-[#424750]">Must be at least 8 characters long.</p>
@@ -487,6 +533,8 @@ function InputField({
   inputMode,
   value,
   onChange,
+  onFocus,
+  onBlur,
   placeholder,
 }: {
   label: string;
@@ -495,6 +543,8 @@ function InputField({
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   placeholder?: string;
 }) {
   return (
@@ -508,6 +558,8 @@ function InputField({
         inputMode={inputMode}
         value={value}
         onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
         placeholder={placeholder}
         className="w-full h-12 bg-[#f8f9fa] border border-[#c2c6d1] rounded-lg px-4 text-[#191c1d] placeholder:text-[#727781] focus:outline-none focus:ring-2 focus:ring-[#003461] focus:border-transparent transition-all"
       />

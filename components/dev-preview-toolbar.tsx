@@ -35,7 +35,7 @@ export function DevPreviewToolbar() {
       </summary>
       <div className="border-t border-slate-200 px-4 pb-4 pt-3">
         <p className="mb-3 text-xs leading-5 text-slate-600">
-          选择要预览的角色页面。账户数据、AI 请求、保存操作和 DeepTutor 仍由后端身份验证保护。
+          选择要预览的角色页面。账户数据、AI 请求、保存操作和学习空间仍由后端身份验证保护。
         </p>
         <div className="grid grid-cols-2 gap-2">
           <Link
@@ -82,7 +82,7 @@ export function DevPreviewToolbar() {
           </Link>
         </div>
         <p className="mb-0 mt-3 text-[11px] text-slate-500">
-          教师账户本版本休眠；DeepTutor SSO 需要真实账户和已启动服务。
+          教师账户本版本休眠；学习空间需要真实账户和已启动服务。
         </p>
       </div>
     </details>
