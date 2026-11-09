@@ -150,16 +150,22 @@ function Brand() {
   return (
     <button className="brand" onClick={() => (window.location.hash = '')}>
       <span className="brand-mark">
-        <i />
-        <i />
-        <i />
+        <CoastalMark className="h-6 w-6 text-white" />
       </span>
       <b>CoastalTutor</b>
     </button>
   );
 }
 
-function PublicHeader({ start, signIn }: { start: (intent?: Intent) => void; signIn: () => void }) {
+function PublicHeader({
+  start,
+  signIn,
+  isAuthenticated,
+}: {
+  start: (intent?: Intent) => void;
+  signIn: () => void;
+  isAuthenticated: boolean;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <header className="public-header">
@@ -173,10 +179,10 @@ function PublicHeader({ start, signIn }: { start: (intent?: Intent) => void; sig
         <a href="#families">For Families</a>
         <a href="#plans">Plans</a>
         <button className="sign-in-link" onClick={signIn}>
-          Sign In
+          {isAuthenticated ? 'Learning Space' : 'Sign In'}
         </button>
         <button className="button small" onClick={() => start('general')}>
-          Get Started
+          {isAuthenticated ? 'Open Learning Space' : 'Get Started'}
         </button>
       </nav>
     </header>
@@ -220,10 +226,17 @@ function HeroVisual() {
 export function Home({
   start = () => window.location.assign('/signup'),
   signIn = () => window.location.assign('/login'),
+  isAuthenticated = false,
+  dashboardHref = '/student',
 }: {
   start?: (intent?: Intent) => void;
   signIn?: () => void;
+  isAuthenticated?: boolean;
+  dashboardHref?: string;
 }) {
+  const handleStart = (intent?: Intent) =>
+    isAuthenticated ? window.location.assign(dashboardHref) : start(intent);
+  const handleSignIn = () => (isAuthenticated ? window.location.assign(dashboardHref) : signIn());
   const [faq, setFaq] = useState(0);
   const faqs = [
     [
@@ -257,7 +270,7 @@ export function Home({
   ];
   return (
     <div className="public-site">
-      <PublicHeader start={start} signIn={signIn} />
+      <PublicHeader start={handleStart} signIn={handleSignIn} isAuthenticated={isAuthenticated} />
       <main>
         <section className="hero">
           <div className="hero-copy">
@@ -276,7 +289,7 @@ export function Home({
               for children and families.
             </p>
             <div className="hero-actions">
-              <button className="button" onClick={() => start('general')}>
+              <button className="button" onClick={() => handleStart('general')}>
                 Start Learning <Icon name="arrow" size={17} />
               </button>
               <a className="text-button" href="#how">
@@ -324,7 +337,7 @@ export function Home({
                 </div>
                 <h3>{entry.title}</h3>
                 <p>{entry.copy}</p>
-                <button onClick={() => start(entry.intent)}>
+                <button onClick={() => handleStart(entry.intent)}>
                   {entry.action} <Icon name="arrow" size={15} />
                 </button>
               </article>
@@ -468,7 +481,7 @@ export function Home({
                 </span>
               </div>
             </div>
-            <button className="text-button dark" onClick={() => start('general')}>
+            <button className="text-button dark" onClick={() => handleStart('general')}>
               Explore family learning <Icon name="arrow" size={15} />
             </button>
           </div>
@@ -502,7 +515,7 @@ export function Home({
                   Used across your personal learning space
                 </li>
               </ul>
-              <button onClick={() => start('general')}>
+              <button onClick={() => handleStart('general')}>
                 Choose your own key <Icon name="arrow" />
               </button>
             </article>
@@ -527,7 +540,7 @@ export function Home({
                   Simple, visible usage limits
                 </li>
               </ul>
-              <button onClick={() => start('general')}>
+              <button onClick={() => handleStart('general')}>
                 Start with Platform AI <Icon name="arrow" />
               </button>
             </article>
@@ -550,7 +563,7 @@ export function Home({
               <p>
                 Platform membership with learning tools, profiles and interactive classroom access.
               </p>
-              <button className="button secondary" onClick={() => start('general')}>
+              <button className="button secondary" onClick={() => handleStart('general')}>
                 Get Started
               </button>
             </article>
@@ -561,7 +574,7 @@ export function Home({
                 39.99 $<small>/ month</small>
               </div>
               <p>Platform membership plus a clearly defined allowance of managed AI usage.</p>
-              <button className="button" onClick={() => start('general')}>
+              <button className="button" onClick={() => handleStart('general')}>
                 Get Started
               </button>
             </article>

@@ -5,7 +5,6 @@ import {
   Sun,
   Moon,
   Monitor,
-  ArrowLeft,
   Loader2,
   Download,
   FileDown,
@@ -16,7 +15,8 @@ import { useI18n } from '@/lib/hooks/use-i18n';
 import { useTheme } from '@/lib/hooks/use-theme';
 import { LanguageSwitcher } from './language-switcher';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { CoastalMark } from '@/components/coastal-mark';
 import { SettingsDialog } from './settings';
 import { cn } from '@/lib/utils';
 import { useStageStore } from '@/lib/store/stage';
@@ -31,7 +31,6 @@ interface HeaderProps {
 export function Header({ currentSceneTitle }: HeaderProps) {
   const { t } = useI18n();
   const { theme, setTheme } = useTheme();
-  const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
 
@@ -77,13 +76,17 @@ export function Header({ currentSceneTitle }: HeaderProps) {
     <>
       <header className="h-20 px-8 flex items-center justify-between z-10 bg-transparent gap-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <button
-            onClick={() => router.push('/student')}
-            className="shrink-0 p-2 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-            title={t('generation.backToHome')}
+          <Link
+            href="/home"
+            aria-label="CoastalTutor home"
+            title="CoastalTutor home"
+            className="shrink-0 inline-flex items-center gap-2 rounded-lg px-1.5 py-1 text-slate-800 transition-colors hover:bg-gray-100 dark:text-slate-100 dark:hover:bg-gray-800"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+            <CoastalMark className="h-7 w-7 text-[#0c5b7a] dark:text-[#8ce0d0]" />
+            <span className="hidden text-sm font-semibold tracking-tight sm:inline">
+              CoastalTutor
+            </span>
+          </Link>
           <div className="flex flex-col min-w-0">
             <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400 dark:text-gray-500 mb-0.5">
               {t('stage.currentScene')}

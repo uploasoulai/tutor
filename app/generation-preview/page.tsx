@@ -986,7 +986,7 @@ function GenerationPreviewContent() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-4 left-4 z-20"
+        className="absolute top-4 right-4 z-20"
       >
         <Button variant="ghost" size="sm" onClick={goBackToHome}>
           <ArrowLeft className="size-4 mr-2" />

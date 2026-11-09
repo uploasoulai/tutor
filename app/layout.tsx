@@ -11,6 +11,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { ServerProvidersInit } from '@/components/server-providers-init';
 import { AccessCodeGuard } from '@/components/access-code-guard';
 import { GlobalNav } from '@/components/global-nav';
+import { ModuleBrandLink } from '@/components/module-brand-link';
 import { DevPreviewToolbar } from '@/components/dev-preview-toolbar';
 
 const inter = localFont({
@@ -48,6 +49,7 @@ export default function RootLayout({
           <I18nProvider>
             <ServerProvidersInit />
             <AccessCodeGuard>{children}</AccessCodeGuard>
+            <ModuleBrandLink />
             <GlobalNav />
             <DevPreviewToolbar />
             <Toaster position="top-center" />

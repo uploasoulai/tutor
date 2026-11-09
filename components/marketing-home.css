@@ -31,27 +31,10 @@
   height: 34px;
   border-radius: 10px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding-bottom: 8px;
+  padding: 0;
   background: var(--ink);
-  transform: rotate(-2deg);
-}
-.public-site .brand-mark i {
-  width: 4px;
-  border-radius: 3px;
-  background: white;
-  transform: rotate(18deg);
-}
-.public-site .brand-mark i:nth-child(1) {
-  height: 9px;
-}
-.public-site .brand-mark i:nth-child(2) {
-  height: 15px;
-}
-.public-site .brand-mark i:nth-child(3) {
-  height: 20px;
 }
 .public-site .public-header nav {
   display: flex;
