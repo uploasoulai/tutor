@@ -6,8 +6,8 @@ This short file is the working index. **The latest user-approved decisions in ch
 
 - **School Learning / China K–12:** CoastalTutor course path and knowledge graph drive sequential learning; generate interactive classroom lessons through the integrated OpenMAIC classroom engine. China is the first delivery priority.
 - **School Learning / BC:** BC course targets and progress live in the dedicated BC course board, separate from the three-entry learner home. The board is available from School Learning → BC Courses.
-- **Personal AI Tutor:** integrated DeepTutor, with CoastalTutor identity and the same platform learner/workspace identity as School Learning.
-- **Interactive Classroom:** integrated OpenMAIC. It shares platform identity and is an auxiliary classroom module.
+- **Personal AI Tutor:** integrated DeepTutor, with CoastalTutor branding and the same platform learner/workspace identity as School Learning. Preserve its full native learner-facing tutoring, learning-path, practice, mistake-review, profile, and memory capabilities; do not constrain it to the School Learning lesson format.
+- **Interactive Classroom:** integrated OpenMAIC with CoastalTutor branding and shared platform identity. Preserve its full native classroom creation and interaction capabilities; School Learning's curriculum lesson contract applies only to School Learning.
 - Moodle is deferred. Revisit only when a school needs LMS roster, gradebook, or LTI interoperability.
 
 ## AI and billing decisions
