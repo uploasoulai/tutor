@@ -85,7 +85,10 @@ function isValidArtifact(value: unknown): value is CurriculumLessonArtifact {
         typeof scene === 'object' &&
         typeof scene.id === 'string' &&
         Array.isArray(scene.actions) &&
-        scene.actions.length > 0,
+        scene.actions.length > 0 &&
+        (scene.type !== 'interactive' ||
+          (scene.content?.type === 'interactive' &&
+            (typeof scene.content.html === 'string' || typeof scene.content.url === 'string'))),
     ) &&
     typeof artifact.createdAt === 'string'
   );
@@ -166,15 +169,12 @@ export async function saveCurriculumLessonArtifact(
 ): Promise<boolean> {
   if (!usesPersistentClassroomStore() || !isValidArtifact(artifact)) return false;
 
-  const existing = await findReadyArtifactByKey(descriptor.cacheKey);
-  if (existing && (await readArtifactAtPath(existing.storage_path, existing.artifact_sha256))) {
-    return true;
-  }
-
   const encoded = JSON.stringify(artifact);
   const bytes = gzipSync(Buffer.from(encoded, 'utf8'), { level: 6 });
   const checksum = createHash('sha256').update(bytes).digest('hex');
-  const storagePath = `${descriptor.cacheKey.slice(0, 2)}/${descriptor.cacheKey}.json.gz`;
+  // Upload a complete new version before switching the index, so regeneration
+  // never leaves the shared cache pointing at a partially replaced object.
+  const storagePath = `${descriptor.cacheKey.slice(0, 2)}/${descriptor.cacheKey}/${checksum}.json.gz`;
   const supabase = createSupabaseAdminClient();
   const { error: uploadError } = await supabase.storage.from(BUCKET).upload(storagePath, bytes, {
     contentType: 'application/gzip',

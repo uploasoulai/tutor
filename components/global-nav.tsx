@@ -22,7 +22,7 @@ export function GlobalNav() {
           {locale === 'zh-CN' ? 'EN' : '中'}
         </span>
       </button>
-      <Link href="/">
+      <Link href="/student">
         <button
           title={locale === 'zh-CN' ? '返回主页' : 'Return to Home'}
           className="flex items-center justify-center w-12 h-12 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] bg-[#003461] hover:bg-[#00284d] text-white transition-all hover:scale-105 active:scale-95"

@@ -70,6 +70,7 @@ function makeClassroomRequirement(
 - 先用小问题引导学生思考，不要一开始直接给最终答案；答错时指出可能卡住的步骤，再用更小的例子提示。
 - 适配 ${grade} 儿童的中文表达与注意力时长，句子短、一次只讲一个新概念。
 - 使用浏览器可运行的 SVG、HTML、CSS 或 Canvas 做图表、卡片、数轴、几何或其他适合本知识点的交互演示。
+- 如果要求学生点击、拖动、连线、摆放物品或操作模拟器，必须在该场景里实际生成可见、可操作的控件；没有对应控件时，改写为口头思考或选择题，不得只在讲解文字里声称“拖动/点击”。
 - 至少安排两次学生主动操作或作答，并在答错时给温和、具体的反馈。
 - 课堂内容必须围绕本课知识点和列出的掌握目标；可以复习前置知识，不要跳到更高年级内容。
 - 不调用图片、视频、语音等额外付费生成服务；优先使用浏览器原生图形和文字。
@@ -92,7 +93,11 @@ export async function POST(request: NextRequest) {
       return apiError('INVALID_REQUEST', 403, 'Only a learner can start this lesson');
     }
     failedStage = 'request_validation';
-    const body = (await request.json()) as { topicId?: string; editionId?: string };
+    const body = (await request.json()) as {
+      topicId?: string;
+      editionId?: string;
+      forceRegenerate?: boolean;
+    };
     if (!body.topicId) return apiError('MISSING_REQUIRED_FIELD', 400, 'topicId is required');
     const details = await getChinaTopicDetails(
       body.topicId,
@@ -125,7 +130,9 @@ export async function POST(request: NextRequest) {
     await ensureStudentRecord(user);
 
     failedStage = 'curriculum_lesson_cache';
-    const reusableLesson = await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey);
+    const reusableLesson = body.forceRegenerate
+      ? null
+      : await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey);
     if (!reusableLesson) {
       failedStage = 'platform_ai_check';
       await assertPlatformAiWithinLimit(user.id);

@@ -368,15 +368,21 @@ export default function ChinaSchoolLearningPage() {
     window.setTimeout(() => form.remove(), 1000);
   };
 
-  const startClassroom = async () => {
+  const startClassroom = async (forceRegenerate = false) => {
     if (!selected) return;
     const requestId = ++classroomRequestId.current;
+    setClassOpened(false);
+    setCompletedLesson(false);
     setGeneration({ sessionId: '', pollUrl: '', status: 'starting', message: '正在准备课堂内容…' });
     try {
       const response = await fetch('/api/china-curriculum/lesson', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topicId: selected.topic.id, editionId: edition }),
+        body: JSON.stringify({
+          topicId: selected.topic.id,
+          editionId: edition,
+          ...(forceRegenerate ? { forceRegenerate: true } : {}),
+        }),
       });
       const body = (await response.json()) as {
         success?: boolean;
@@ -1086,6 +1092,12 @@ export default function ChinaSchoolLearningPage() {
                     >
                       进入互动课堂 <ExternalLink className="h-4 w-4" />
                     </a>
+                    <button
+                      onClick={() => void startClassroom(true)}
+                      className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/35 px-4 text-sm font-semibold text-white hover:bg-white/10"
+                    >
+                      重新生成这节课
+                    </button>
                     {classOpened && !completedLesson && (
                       <button
                         onClick={() => void completeClassroom()}

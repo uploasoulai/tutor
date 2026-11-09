@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Loader2, Mail, Smartphone } from 'lucide-react';
 
@@ -19,7 +19,7 @@ type LoginMethod = 'email' | 'phone';
 
 export default function LoginPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [method, setMethod] = useState<LoginMethod>('email');
   const [email, setEmail] = useState('');
   const [phoneCountryCode, setPhoneCountryCode] = useState<PhoneCountryCode>('CA');
@@ -36,8 +36,21 @@ export default function LoginPage() {
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('account') === 'teacher-inactive') {
       setError('Teacher accounts are temporarily unavailable in this version.');
+      return;
     }
-  }, []);
+    let cancelled = false;
+    void supabase.auth.getUser().then(async ({ data }) => {
+      if (cancelled || !data.user) return;
+      const response = await fetch('/api/auth/role');
+      if (cancelled || !response.ok) return;
+      const roleData = (await response.json()) as { role?: string };
+      const role = roleData.role ?? 'student';
+      router.replace(role === 'admin' ? '/admin' : role === 'parent' ? '/parent' : '/student');
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [router, supabase]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,12 +77,12 @@ export default function LoginPage() {
       if (!response.ok) throw new Error('Could not verify your account role.');
       const roleData = (await response.json()) as { role?: string };
       const role = roleData.role ?? 'student';
-      if (role === 'admin') router.push('/admin');
+      if (role === 'admin') router.replace('/admin');
       else if (role === 'teacher' || data.user?.user_metadata?.role === 'teacher') {
         await supabase.auth.signOut();
         setError('Teacher accounts are temporarily unavailable in this version.');
-      } else if (role === 'parent') router.push('/parent');
-      else router.push('/student');
+      } else if (role === 'parent') router.replace('/parent');
+      else router.replace('/student');
     } catch (err: unknown) {
       setError(formatAuthError(err, 'Invalid email, phone, or password.'));
     } finally {

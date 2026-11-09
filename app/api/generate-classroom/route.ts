@@ -11,7 +11,7 @@ import { assertPlatformAiWithinLimit } from '@/lib/server/platform-ai-usage';
 
 const log = createLogger('GenerateClassroom API');
 
-export const maxDuration = 30;
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   let requirementSnippet: string | undefined;

@@ -118,7 +118,7 @@ const entries = [
     icon: 'school' as const,
     number: '01',
     title: 'School Learning',
-    copy: 'Get guided help with school subjects, understand concepts step by step, practise and review what needs more work.',
+    copy: 'Follow your grade and curriculum through virtual lessons. Practise each idea, get gentle help with mistakes, and keep a record of progress to revisit.',
     action: 'Start School Learning',
     intent: 'school' as Intent,
     image: '/images/school-study.svg',
@@ -128,7 +128,7 @@ const entries = [
     icon: 'spark' as const,
     number: '02',
     title: 'Personal AI Tutor',
-    copy: 'Ask questions, read and research, organise notes, build a personal knowledge library and keep learning over time.',
+    copy: 'A 24/7 personal AI tutor, ready whenever a question comes up. Get patient explanations, explore ideas, organise notes and continue learning at your own pace.',
     action: 'Open My Learning Space',
     intent: 'tutor' as Intent,
     image: '/images/ai-tutor.svg',
@@ -138,7 +138,7 @@ const entries = [
     icon: 'class' as const,
     number: '03',
     title: 'Interactive Classroom',
-    copy: 'Turn a topic or your own material into a participatory lesson with explanations, quizzes and interactive activities.',
+    copy: 'Turn a topic or your own material into a distinctive virtual class with clear explanations, hands-on activities, simulations and quick checks for understanding.',
     action: 'Create an Interactive Class',
     intent: 'classroom' as Intent,
     image: '/images/interactive-class.svg',
@@ -217,7 +217,13 @@ function HeroVisual() {
   );
 }
 
-export function Home({ start, signIn }: { start: (intent?: Intent) => void; signIn: () => void }) {
+export function Home({
+  start = () => window.location.assign('/signup'),
+  signIn = () => window.location.assign('/login'),
+}: {
+  start?: (intent?: Intent) => void;
+  signIn?: () => void;
+}) {
   const [faq, setFaq] = useState(0);
   const faqs = [
     [
@@ -265,8 +271,9 @@ export function Home({ start, signIn }: { start: (intent?: Intent) => void; sign
               <em>Explore with curiosity.</em>
             </h1>
             <p>
-              One personal learning space for school subjects, independent study and interactive
-              lessons — built for learners and families.
+              Curriculum-guided virtual lessons, learning progress and mistake review, an on-demand
+              personal AI tutor, and memorable interactive classes — together in one learning space
+              for children and families.
             </p>
             <div className="hero-actions">
               <button className="button" onClick={() => start('general')}>
@@ -332,10 +339,11 @@ export function Home({ start, signIn }: { start: (intent?: Intent) => void; sign
         <section className="how section" id="how">
           <div className="how-intro">
             <span className="eyebrow">A CONTINUOUS LEARNING LOOP</span>
-            <h2>From first question to lasting understanding.</h2>
+            <h2>Learn in class. Get help. See progress.</h2>
             <p>
-              Move naturally from guided learning to exploration, then return to review what you’ve
-              learned.
+              Follow a learning route, work through questions at your own pace, and come back to the
+              ideas that need another look. Learners keep one profile across School Learning and
+              Personal AI Tutor.
             </p>
             <div className="how-image">
               <img src="/images/learning-journey.svg" alt="Learners building knowledge together" />
@@ -348,18 +356,21 @@ export function Home({ start, signIn }: { start: (intent?: Intent) => void; sign
           <ol className="steps">
             {[
               [
-                'Create a Learning Profile',
-                'Set a few essentials now. Add more preferences whenever you’re ready.',
+                'Follow a Learning Route',
+                'Study school topics through curriculum-guided virtual lessons and interactive practice.',
               ],
               [
-                'Learn with Your AI Tutor',
-                'Ask, practise and get explanations that build understanding — not just answers.',
+                'Work Through Questions',
+                'Get step-by-step hints, revisit mistakes and review progress as you learn.',
               ],
               [
-                'Explore an Interactive Class',
-                'Turn a topic or source material into a structured, participatory lesson.',
+                'Ask Your Personal AI Tutor',
+                'Get patient explanations whenever a question comes up, then keep exploring independently.',
               ],
-              ['Review and Keep Learning', 'Revisit recent work and choose what to explore next.'],
+              [
+                'Explore a Special Interactive Class',
+                'Turn a topic or your own material into a virtual lesson with activities, quizzes and simulations.',
+              ],
             ].map(([title, copy], i) => (
               <li key={title}>
                 <span>{String(i + 1).padStart(2, '0')}</span>

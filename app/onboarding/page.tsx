@@ -196,7 +196,7 @@ export default function OnboardingPage() {
             </div>
           </div>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/student')}
             className="rounded-md px-3 py-2 text-sm font-medium text-[#424750] hover:bg-[#f0f4ff]"
           >
             Save & exit
