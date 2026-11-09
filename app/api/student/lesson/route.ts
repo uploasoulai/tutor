@@ -60,20 +60,24 @@ export async function POST(req: NextRequest) {
       const baseUrl = buildRequestOrigin(req);
       const jobId = nanoid(10);
       const requirement = buildLessonEngineRequirement(artifact.payload);
-      const curriculumLessonCache = describeCurriculumLesson({
-        track: 'bc',
-        canonicalId: `${artifact.payload.bc_context.grade}:${artifact.payload.bc_context.subject}:${artifact.payload.bc_context.outcome_code || artifact.payload.bc_context.knowledge_point}`,
-        requirement,
-      });
-      const reusableLesson = await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey);
-      if (!reusableLesson) await assertPlatformAiWithinLimit(user.id);
       const mediaFlags = resolveLessonEngineMediaFlags({
         userId: user.id,
         email: user.email,
       });
+      const curriculumLessonCache = Object.values(mediaFlags).some(Boolean)
+        ? undefined
+        : describeCurriculumLesson({
+            track: 'bc',
+            canonicalId: `${artifact.payload.bc_context.grade}:${artifact.payload.bc_context.subject}:${artifact.payload.bc_context.outcome_code || artifact.payload.bc_context.knowledge_point}`,
+            requirement,
+          });
+      const reusableLesson = curriculumLessonCache
+        ? await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey)
+        : null;
+      if (!reusableLesson) await assertPlatformAiWithinLimit(user.id);
       const generationInput = {
         requirement,
-        curriculumLessonCache,
+        ...(curriculumLessonCache ? { curriculumLessonCache } : {}),
         ...mediaFlags,
         agentMode: 'default' as const,
       };

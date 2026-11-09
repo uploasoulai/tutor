@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { gunzipSync, gzipSync } from 'node:zlib';
 import type { Scene, Stage } from '@/lib/types/stage';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
@@ -118,13 +119,14 @@ async function readArtifactAtPath(
   }
 
   try {
-    const encoded = await data.text();
+    const compressed = Buffer.from(await data.arrayBuffer());
     if (
       expectedSha256 &&
-      createHash('sha256').update(Buffer.from(encoded, 'utf8')).digest('hex') !== expectedSha256
+      createHash('sha256').update(compressed).digest('hex') !== expectedSha256
     ) {
       return null;
     }
+    const encoded = gunzipSync(compressed).toString('utf8');
     const parsed = JSON.parse(encoded) as unknown;
     return isValidArtifact(parsed) ? parsed : null;
   } catch {
@@ -170,12 +172,12 @@ export async function saveCurriculumLessonArtifact(
   }
 
   const encoded = JSON.stringify(artifact);
-  const bytes = Buffer.from(encoded, 'utf8');
+  const bytes = gzipSync(Buffer.from(encoded, 'utf8'), { level: 6 });
   const checksum = createHash('sha256').update(bytes).digest('hex');
-  const storagePath = `${descriptor.cacheKey.slice(0, 2)}/${descriptor.cacheKey}.json`;
+  const storagePath = `${descriptor.cacheKey.slice(0, 2)}/${descriptor.cacheKey}.json.gz`;
   const supabase = createSupabaseAdminClient();
   const { error: uploadError } = await supabase.storage.from(BUCKET).upload(storagePath, bytes, {
-    contentType: 'application/json',
+    contentType: 'application/gzip',
     upsert: true,
     cacheControl: '31536000',
   });

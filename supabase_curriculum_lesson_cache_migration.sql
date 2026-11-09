@@ -7,7 +7,7 @@ VALUES (
   'curriculum-lessons',
   false,
   52428800,
-  ARRAY['application/json']
+  ARRAY['application/json', 'application/gzip']
 )
 ON CONFLICT (id) DO UPDATE
 SET public = false,
