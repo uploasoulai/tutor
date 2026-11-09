@@ -4,7 +4,7 @@ import type { Scene, Stage } from '@/lib/types/stage';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 const BUCKET = 'curriculum-lessons';
-const CACHE_SCHEMA_VERSION = 1;
+const CACHE_SCHEMA_VERSION = 2;
 
 function usesPersistentClassroomStore() {
   return (

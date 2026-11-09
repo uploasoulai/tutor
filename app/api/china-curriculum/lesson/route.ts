@@ -110,7 +110,9 @@ export async function POST(request: NextRequest) {
       requirement,
       curriculumLessonCache,
       maxScenes: 3,
+      // Keep one concise built-in interaction, while bounding each model response.
       maxInteractiveScenes: 1,
+      maxOutputTokens: 4096,
       agentMode: 'default',
       enableWebSearch: false,
       enableImageGeneration: false,

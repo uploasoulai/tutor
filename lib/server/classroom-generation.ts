@@ -43,6 +43,8 @@ export interface GenerateClassroomInput {
   maxScenes?: number;
   /** Bound expensive interactive widget generation for serverless lessons. */
   maxInteractiveScenes?: number;
+  /** Cap lesson-specific response size so curriculum builds finish predictably. */
+  maxOutputTokens?: number;
   pdfContent?: { text: string; images: string[] };
   enableWebSearch?: boolean;
   webSearchProviderId?: WebSearchProviderId;
@@ -209,7 +211,9 @@ export async function generateClassroom(
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        maxOutputTokens: modelInfo?.outputWindow,
+        maxOutputTokens: input.maxOutputTokens
+          ? Math.min(input.maxOutputTokens, modelInfo?.outputWindow ?? input.maxOutputTokens)
+          : modelInfo?.outputWindow,
       },
       'generate-classroom',
     );

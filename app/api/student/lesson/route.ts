@@ -78,6 +78,9 @@ export async function POST(req: NextRequest) {
       const generationInput = {
         requirement,
         ...(curriculumLessonCache ? { curriculumLessonCache } : {}),
+        ...(curriculumLessonCache
+          ? { maxScenes: 3, maxInteractiveScenes: 1, maxOutputTokens: 4096 }
+          : {}),
         ...mediaFlags,
         agentMode: 'default' as const,
       };
