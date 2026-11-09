@@ -2,6 +2,7 @@ import { after, NextRequest } from 'next/server';
 import { nanoid } from 'nanoid';
 
 import { resolveAccountRole } from '@/lib/auth/account-role';
+import { ensureStudentRecord } from '@/lib/auth/ensure-student-record';
 import { assertPlatformAiWithinLimit } from '@/lib/server/platform-ai-usage';
 import {
   CHINA_SUBJECTS,
@@ -107,6 +108,9 @@ export async function POST(request: NextRequest) {
     };
     const origin = buildRequestOrigin(request);
     const jobId = nanoid(12);
+    failedStage = 'learner_profile_storage';
+    await ensureStudentRecord(user);
+
     failedStage = 'classroom_job_storage';
     const job = await createClassroomGenerationJob(jobId, input, user.id);
 
