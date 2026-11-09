@@ -926,7 +926,7 @@ function GenerationPreviewContent() {
   const goBackToHome = () => {
     abortControllerRef.current?.abort();
     sessionStorage.removeItem('generationSession');
-    router.push('/');
+    router.push('/explore');
   };
 
   // Still loading session from sessionStorage

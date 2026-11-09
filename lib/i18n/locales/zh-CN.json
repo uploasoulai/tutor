@@ -6,7 +6,7 @@
     "loading": "加载中..."
   },
   "home": {
-    "slogan": "Generative Learning in Multi-Agent Interactive Classroom",
+    "slogan": "带上你的好奇心，我们一起把它变成可以探索的课堂。",
     "greetingWithName": "嗨，{{name}}"
   },
   "toolbar": {
@@ -314,7 +314,7 @@
   "upload": {
     "pdfSizeLimit": "支持最大50MB的PDF文件",
     "generateFailed": "生成课堂失败，请重试",
-    "requirementPlaceholder": "输入你想学的任何内容，例如：\n「从零学 Python，30 分钟写出第一个程序」\n「用白板给我讲解傅里叶变换」\n「阿瓦隆桌游怎么玩」",
+    "requirementPlaceholder": "你想探索什么？试着输入：\n「月亮为什么每天看起来不一样？」\n「用披萨活动帮我理解分数」\n「为三年级制作一节关于动物栖息地的互动课」",
     "requirementRequired": "请输入课程需求",
     "fileTooLarge": "文件过大，请选择小于50MB的PDF文件"
   },
@@ -345,7 +345,7 @@
     "sessionNotFoundDesc": "请先填写课程需求开始生成流程。",
     "goBackAndRetry": "返回重试",
     "classroomReady": "你的个性化AI学习环境已成功生成。",
-    "aiWorking": "AI智能体工作中...",
+    "aiWorking": "正在为你准备互动课堂……",
     "textTruncated": "文档文本较长，已截取前 {{n}} 字符用于生成",
     "imageTruncated": "文档含 {{total}} 张图片，超出上限 {{max}} 张，多余图片将仅以文字描述传递",
     "agentGeneration": "生成课堂角色",

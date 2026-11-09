@@ -300,7 +300,7 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
 
           <div className="flex flex-col gap-2 border-t border-[#e7e8e9] px-3 py-4">
             <button
-              onClick={() => router.push('/generation-preview')}
+              onClick={() => router.push('/explore')}
               className="flex w-full items-center gap-2 rounded-lg bg-blue-50 px-3 py-2.5 text-sm font-medium text-[#003461] transition-all hover:bg-blue-100"
             >
               <Sparkles className="h-4 w-4" />
@@ -335,7 +335,7 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
             </div>
             <div className="flex items-center gap-1">
               <button
-                onClick={() => router.push('/generation-preview')}
+                onClick={() => router.push('/explore')}
                 className="rounded-full p-2 text-[#003461] transition-all hover:bg-[#f0f4ff]"
                 aria-label="Interactive Classroom"
               >
@@ -574,23 +574,23 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
                         <Sparkles className="h-6 w-6" />
                       </span>
                       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[#5b7188]">
-                        Explore at your pace
+                        Here whenever you need help
                       </p>
                       <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#172b43]">
                         Personal AI Tutor
                       </h2>
                       <p className="mt-2 text-sm leading-6 text-[#536579]">
-                        Bring a question, a tricky problem, or a mistake. Your tutor helps you work
-                        through it at your own pace.
+                        Your 24/7 private tutor. Ask about homework, a confusing idea, or a mistake
+                        and get patient, step-by-step help that remembers what you are learning.
                       </p>
                     </div>
                     <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#003461] group-hover:gap-3">
-                      Open my tutor <ChevronRight className="h-4 w-4" />
+                      Ask my tutor <ChevronRight className="h-4 w-4" />
                     </span>
                   </button>
 
                   <button
-                    onClick={() => router.push('/generation-preview')}
+                    onClick={() => router.push('/explore')}
                     className="group flex min-h-[230px] flex-col items-start justify-between rounded-2xl border border-[#e5e1d6] bg-[linear-gradient(145deg,#fff_0%,#fff9ed_100%)] p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#e9c982] hover:shadow-md sm:p-8"
                   >
                     <div>
@@ -598,17 +598,18 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
                         <Users className="h-6 w-6" />
                       </span>
                       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[#8b7547]">
-                        Learn together
+                        Make learning hands-on
                       </p>
                       <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#3b3426]">
                         Interactive Classroom
                       </h2>
                       <p className="mt-2 text-sm leading-6 text-[#70634c]">
-                        Turn a topic or your materials into a lesson with discussion and activities.
+                        Turn a topic, question, or lesson file into an interactive class with clear
+                        explanations, activities, and quick checks for understanding.
                       </p>
                     </div>
                     <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#75530e] group-hover:gap-3">
-                      Create a class <ChevronRight className="h-4 w-4" />
+                      Build my class <ChevronRight className="h-4 w-4" />
                     </span>
                   </button>
                 </section>

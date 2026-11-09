@@ -6,7 +6,7 @@
     "loading": "Loading..."
   },
   "home": {
-    "slogan": "Generative Learning in Multi-Agent Interactive Classroom",
+    "slogan": "Bring your curiosity. We’ll turn it into a class you can explore.",
     "greetingWithName": "Hi, {{name}}"
   },
   "toolbar": {
@@ -314,7 +314,7 @@
   "upload": {
     "pdfSizeLimit": "Supports PDF files up to 50MB",
     "generateFailed": "Failed to generate classroom, please try again",
-    "requirementPlaceholder": "Tell me anything you want to learn, e.g.\n\"Teach me Python from scratch in 30 minutes\"\n\"Explain Fourier Transform on the whiteboard\"\n\"How to play the board game Avalon\"",
+    "requirementPlaceholder": "What would you like to explore? Try:\n\"Show me why the Moon changes shape\"\n\"Help me understand fractions with a pizza activity\"\n\"Make an interactive class about habitats for Grade 3\"",
     "requirementRequired": "Please enter course requirements",
     "fileTooLarge": "File too large. Please select a PDF file smaller than 50MB"
   },
@@ -345,7 +345,7 @@
     "sessionNotFoundDesc": "Please fill in course requirements to start the generation process.",
     "goBackAndRetry": "Go Back and Retry",
     "classroomReady": "Your personalized AI learning environment has been generated successfully.",
-    "aiWorking": "AI Agents Working...",
+    "aiWorking": "Preparing your interactive class...",
     "textTruncated": "Document text is long, using first {{n}} characters for generation",
     "imageTruncated": "{{total}} images found, exceeding the {{max}} image limit. Extra images will use text descriptions only",
     "agentGeneration": "Generating Classroom Roles",
