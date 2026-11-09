@@ -135,7 +135,11 @@ export default function SchoolLearningPage() {
                     disabled={!available}
                     onClick={() =>
                       router.push(
-                        id === 'china' ? '/school-learning/china' : '/student#today-school-targets',
+                        id === 'china'
+                          ? '/school-learning/china'
+                          : id === 'bc'
+                            ? '/school-learning/bc'
+                            : '/student',
                       )
                     }
                     className="mt-auto inline-flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-left text-sm font-bold shadow-sm transition hover:-translate-y-0.5 hover:shadow disabled:cursor-not-allowed disabled:shadow-none"

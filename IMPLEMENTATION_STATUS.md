@@ -5,7 +5,7 @@ This short file is the working index. **The latest user-approved decisions in ch
 ## Product map
 
 - **School Learning / China K–12:** CoastalTutor course path and knowledge graph drive sequential learning; generate interactive classroom lessons through the integrated OpenMAIC classroom engine. China is the first delivery priority.
-- **School Learning / BC:** keep the existing route, improve after the China flow has been tried with learners.
+- **School Learning / BC:** BC course targets and progress live in the dedicated BC course board, separate from the three-entry learner home. The board is available from School Learning → BC Courses.
 - **Personal AI Tutor:** integrated DeepTutor, with CoastalTutor identity and the same platform learner/workspace identity as School Learning.
 - **Interactive Classroom:** integrated OpenMAIC. It shares platform identity and is an auxiliary classroom module.
 - Moodle is deferred. Revisit only when a school needs LMS roster, gradebook, or LTI interoperability.
@@ -30,6 +30,7 @@ This short file is the working index. **The latest user-approved decisions in ch
 
 - China graph catalog, topic detail, practice, mastery/session endpoints, and lesson-generation flow are in the app.
 - The China course route now starts at the learner's saved grade from their shared platform profile; students can still choose another grade.
+- **BC course board placement:** the signed-in learner home now presents its three product entries without BC course targets mixed into the page. The existing adaptive goals, grade/subject selection, and mastery overview are available at `/school-learning/bc`; the School Learning route selector opens that board directly. BC course plans are fetched only inside that board.
 - China lessons use the shared classroom generator. Requests without a learner key use the configured platform provider/model (currently SiliconFlow for testing); requests with their own key retain their requested model.
 - DeepSeek's current `deepseek-flash` identifier is present in the provider catalog.
 - CoastalTutor chat, quiz grading, PBL chat, OpenMAIC scene generation, and classroom jobs can use the configured platform provider. Cost-rate checks and monthly caps are deliberately non-blocking while `PLATFORM_AI_ENFORCE_USAGE_LIMITS=false`; missing rates no longer break lesson generation.
