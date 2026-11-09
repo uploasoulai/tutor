@@ -21,7 +21,7 @@ export function ModuleBrandLink() {
 
   return (
     <Link
-      href="/home"
+      href="/"
       aria-label="CoastalTutor home"
       title="CoastalTutor home"
       className="fixed left-4 top-3 z-[100] inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200/70 bg-white/90 px-2.5 text-slate-800 shadow-sm backdrop-blur transition-colors hover:bg-white dark:border-slate-700/70 dark:bg-slate-900/90 dark:text-slate-100 dark:hover:bg-slate-900"

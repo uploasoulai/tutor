@@ -126,7 +126,7 @@ export function SceneSidebar({
         {/* Logo Header */}
         <div className="h-10 flex items-center justify-between shrink-0 relative mt-3 mb-1 px-3">
           <Link
-            href="/home"
+            href="/"
             aria-label="CoastalTutor home"
             className="flex items-center gap-2 rounded-lg px-1.5 -mx-1.5 py-1 -my-1 transition-all duration-150 hover:bg-gray-100/80 dark:hover:bg-gray-800/60"
             title="CoastalTutor home"

@@ -77,7 +77,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
       <header className="h-20 px-8 flex items-center justify-between z-10 bg-transparent gap-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <Link
-            href="/home"
+            href="/"
             aria-label="CoastalTutor home"
             title="CoastalTutor home"
             className="shrink-0 inline-flex items-center gap-2 rounded-lg px-1.5 py-1 text-slate-800 transition-colors hover:bg-gray-100 dark:text-slate-100 dark:hover:bg-gray-800"
