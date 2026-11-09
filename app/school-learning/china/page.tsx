@@ -335,7 +335,7 @@ export default function ChinaSchoolLearningPage() {
     }
   };
 
-  const askDeepTutorAboutMistake = () => {
+  const askPersonalTutorAboutMistake = () => {
     if (!selected || !activeQuestion || !answerResult || answerResult.correct) return;
     const learnerAnswer =
       activeQuestion.choices?.find((choice) => choice.key === answer)?.text ?? answer;
@@ -984,7 +984,7 @@ export default function ChinaSchoolLearningPage() {
                             </button>
                             <button
                               type="button"
-                              onClick={askDeepTutorAboutMistake}
+                              onClick={askPersonalTutorAboutMistake}
                               className="min-h-10 rounded-xl bg-white/80 px-3 text-sm font-bold"
                             >
                               请 AI 导师陪我找原因

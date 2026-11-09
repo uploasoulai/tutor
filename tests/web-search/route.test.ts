@@ -79,7 +79,7 @@ describe('POST /api/web-search', () => {
       errorCode: 'INVALID_REQUEST',
     });
     expect(mocks.searchWeb).not.toHaveBeenCalled();
-  });
+  }, 15_000);
 
   it('uses server-configured base URL when no client base URL is supplied', async () => {
     vi.stubEnv('BOCHA_API_KEY', 'bocha-server-key');

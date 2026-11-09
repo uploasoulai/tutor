@@ -15,4 +15,4 @@ The repository's curriculum-standard file records its own source notes and revie
 
 ## DeepTutor
 
-The integrated DeepTutor source tree remains under its upstream Apache-2.0 license and retains its upstream `LICENSE` and `THIRD_PARTY_NOTICES.md`. See [DeepTutor/UPSTREAM_VERSION.md](DeepTutor/UPSTREAM_VERSION.md) for the pinned release.
+The integrated DeepTutor source tree remains under its upstream Apache-2.0 license and retains its upstream `LICENSE` and `THIRD_PARTY_NOTICES.md`. See [third_party/personal-ai-tutor-runtime/UPSTREAM_VERSION.md](third_party/personal-ai-tutor-runtime/UPSTREAM_VERSION.md) for the pinned release.

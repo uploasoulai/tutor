@@ -5,10 +5,11 @@ node_modules/
 # Vendor packages
 packages/pptxgenjs/
 packages/mathml2omml/
-DeepTutor/
+third_party/personal-ai-tutor-runtime/
 
 # Build output
 .next/
+.next-e2e/
 out/
 
 # Generated files

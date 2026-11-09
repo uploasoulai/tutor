@@ -1,7 +1,8 @@
 # Phase 0 审计报告
 
 审计日期：2026-11-04（America/Vancouver）  
-范围：`C:\CoastalTutor`、新增的 `C:\CoastalTutor\DeepTutor`、独立工作树 `C:\OpenMAIC-legacy`、本机找到的课程文档 `C:\CoastalTutor UI\K-9`，以及 DeepTutor 官方 `v1.7.1` 发布资料。  
+说明：本文保留为 Phase 0 历史审计快照；当前实现状态以 `IMPLEMENTATION_STATUS.md` 为准。
+范围：`C:\CoastalTutor`、新增的 `C:\CoastalTutor\third_party\personal-ai-tutor-runtime`、独立工作树 `C:\OpenMAIC-legacy`、本机找到的课程文档 `C:\CoastalTutor UI\K-9`，以及 DeepTutor 官方 `v1.7.1` 发布资料。
 Phase 0 完成后，项目负责人指示继续；Phase 1 的本地备份、版本锁和服务端配置基础已完成。未改生产数据库、未部署服务、未测试任何真实供应商 API。
 
 ## 结论摘要
@@ -10,7 +11,7 @@ Phase 0 完成后，项目负责人指示继续；Phase 1 的本地备份、版�
 2. **`C:\OpenMAIC-legacy` 是刚才单独检出的原始初始提交，不是那份已二次开发的平台。** 它是 detached HEAD `0d20abf`，`openmaic@0.1.0`，当前干净；该目录没有 Supabase schema、教育门户、Vercel 配置或 Docker 文件。不要把后续整合直接做在这个初始快照上。
 3. 主仓库已有 Next.js/Vercel 配置、Supabase Auth 集成、学生/家长/教师/管理员路由、BC 课程检索与学习记录设计；**没有发现 Stripe 支付代码**。Vercel 配置证明项目适配 Vercel，但没有本地 Vercel 项目绑定或可核实的线上部署元数据，因此无法确认生产项目、域名或当前部署 commit。
 4. 本机找到四份 BC K–9 DOCX 源文件，但它们在 `C:\CoastalTutor UI\K-9`，不在 Git 仓库中。seed 脚本预期写入 Supabase。数据库表的远程只读查询失败（Supabase 请求返回 `fetch failed`），因此**已导入年级、科目和主题数量仍待数据库连通后核实**。
-5. 当前 OpenMAIC/CoastalTutor BYOK 设置主要在浏览器 `localStorage`，不是用户隔离的服务器端密钥库。它不能直接安全共享给 DeepTutor。DeepTutor 源码已合入 `C:\CoastalTutor\DeepTutor`，版本 `1.7.1`，与官方 commit `f7aed0744c36c5afef16a4261c31ebee1208cac2` 逐文件比较后内容一致（仅行尾不同）；源码目录本身没有 Git 元数据。官方材料显示多用户隔离工作区、Admin/Learner 和显式 Guardian 授权，但没有 Teacher 角色。它原生提供 per-user model/profile 能力，但需审计其 API Key 保存、加密和 owner 隔离后才能判断能否作 BYOK adapter。
+5. 当前 OpenMAIC/CoastalTutor BYOK 设置主要在浏览器 `localStorage`，不是用户隔离的服务器端密钥库。它不能直接安全共享给 DeepTutor。DeepTutor 源码已合入 `C:\CoastalTutor\third_party\personal-ai-tutor-runtime`，版本 `1.7.1`，与官方 commit `f7aed0744c36c5afef16a4261c31ebee1208cac2` 逐文件比较后内容一致（仅行尾不同）；源码目录本身没有 Git 元数据。官方材料显示多用户隔离工作区、Admin/Learner 和显式 Guardian 授权，但没有 Teacher 角色。它原生提供 per-user model/profile 能力，但需审计其 API Key 保存、加密和 owner 隔离后才能判断能否作 BYOK adapter。
 6. **当前没有可批准给用户的共同 Provider 白名单。** 两边存在一批可静态映射的候选供应商，但实际请求、流式、工具调用和结构化输出均未对固定 DeepTutor 版本完成验证。兼容表按候选而非已验证白名单记录。
 
 ## 仓库、版本和本地状态
@@ -18,7 +19,7 @@ Phase 0 完成后，项目负责人指示继续；Phase 1 的本地备份、版�
 | 目录 | 状态 | 识别结果 |
 |---|---|---|
 | `C:\CoastalTutor` | `main`，HEAD `322d824`；`main...tutor/main`；远程 `origin`、`tutor` 均指向用户 GitHub `tutor` 仓库 | 当前主要二次开发项目；`package.json` 名称/版本 `coastaltutor@0.2.1`；依赖 Next.js `16.1.2`、Node `22.x`；有 OpenMAIC 上游代码历史和大量本地教育平台提交 |
-| `C:\CoastalTutor\DeepTutor` | 作为 CoastalTutor 内未跟踪源目录；无独立 `.git` | DeepTutor 官方 `v1.7.1`，文件集和内容与官方 tag 一致（行尾归一化后）；含 Apache LICENSE 和 `THIRD_PARTY_NOTICES.md`；已加入本地 pin 文档 |
+| `C:\CoastalTutor\third_party\personal-ai-tutor-runtime` | 已纳入 CoastalTutor 主仓库；无独立 `.git` 或子模块；本地运行数据单独保留且不提交 | 固定上游版本及改动边界记录在 `UPSTREAM_VERSION.md`；保留 Apache LICENSE 和 `THIRD_PARTY_NOTICES.md` |
 | `C:\OpenMAIC-legacy` | detached HEAD `0d20abf`；无工作区改动 | 原始 `openmaic@0.1.0` 初始快照，不包含 CoastalTutor 后续教育平台功能 |
 | `C:\CoastalTutor UI\K-9` | 普通数据目录，不是 Git 仓库 | 四份课程 DOCX，详见课程清单 |
 
@@ -48,7 +49,7 @@ Phase 0 完成后，项目负责人指示继续；Phase 1 的本地备份、版�
 ## DeepTutor 固定版本审计
 
 - 官方发布页截至审计日显示稳定版 `v1.7.1`，发布日期 2026-10-31，标记 commit `f7aed07`。许可证为 Apache-2.0。官方发布材料支持 Docker `ghcr.io/hkuds/deeptutor:1.7.1` 及长期运行服务；它不是 Vercel serverless 函数包。
-- `C:\CoastalTutor\DeepTutor` 的源树版本为 `1.7.1`。用 `git ls-remote` 核对官方 `v1.7.1` tag 后，commit 完整 SHA 为 `f7aed0744c36c5afef16a4261c31ebee1208cac2`；与本地及临时官方 tag checkout 比较 4,471 个文件，路径大小写归一化且行尾归一化后内容相同。本地目录没有 `.git`，所以由 [UPSTREAM_VERSION.md](DeepTutor/UPSTREAM_VERSION.md) 记录来源和锁定版本；Compose 的 GHCR image 已固定到 `1.7.1`。未启动服务或写入 runtime data。
+- `C:\CoastalTutor\third_party\personal-ai-tutor-runtime` 的源树版本为 `1.7.1`。用 `git ls-remote` 核对官方 `v1.7.1` tag 后，commit 完整 SHA 为 `f7aed0744c36c5afef16a4261c31ebee1208cac2`；与本地及临时官方 tag checkout 比较 4,471 个文件，路径大小写归一化且行尾归一化后内容相同。本地目录没有 `.git`，所以由 [UPSTREAM_VERSION.md](third_party/personal-ai-tutor-runtime/UPSTREAM_VERSION.md) 记录来源和锁定版本；Compose 的 GHCR image 已固定到 `1.7.1`。未启动服务或写入 runtime data。
 - `v1.7.1` 多用户模式为可选认证、服务端多用户工作区：Admin 管理 Provider/model catalog、凭据、用户和 grant；Learner 类型锁定学习权限并有 adaptive profile/device credentials；授权 Guardian 能查看报告、批准资料、重置凭据。用户工作区按 UID 隔离。Admin 创建用户时有 Standard/Learner/Custom 等类别。
 - 官方文档没有 Teacher role 或班级教师管理能力。Guardian 相关功能不等于独立家长登录/家庭关系体系；需要结合版本源代码确认 Guardian 的账号身份、关联创建/撤销和报告范围，不能与 Supabase parent 表直接视作兼容。
 - Provider 文档中配置的是连接和模型 profile；多用户管理采用管理员维护共享凭据及 grants，同时 v1.7.1 代码存在 owner-bound personal LLM profile 能力。尚未验证其通用 API Key 的密文保存位置、默认格式和跨服务 adapter 接口，因此不能据此宣称已满足平台统一 BYOK。
@@ -58,7 +59,7 @@ Phase 0 完成后，项目负责人指示继续；Phase 1 的本地备份、版�
 - 回滚分支：`codex/phase1-backup-20261104`，指向原 HEAD `322d824f4945f57776dffff62bd47dac6196d9f1`。
 - 当前工作分支：`codex/phase1-foundations-20261104`。分支均为本地分支，未推送。
 - 恢复包：`C:\CoastalTutor-phase1-backup-20261104`，包括 `CoastalTutor.bundle` 和工作区快照；明确排除了 `.env.local` 等运行时密钥文件。Bundle 已验证完整。
-- DeepTutor upstream pin：新增 `DeepTutor/UPSTREAM_VERSION.md`，锁定 tag/commit；集成用 Compose 从固定源码构建本地镜像，另一个 GHCR compose 继续固定 `1.7.1`。
+- DeepTutor upstream pin：新增 `third_party/personal-ai-tutor-runtime/UPSTREAM_VERSION.md`，锁定 tag/commit；集成用 Compose 从固定源码构建本地镜像，另一个 GHCR compose 继续固定 `1.7.1`。
 - 功能/连接配置：新增 server-only `lib/server/deeptutor-config.ts` 和 `.env.example` 变量 `DEEPTUTOR_ENABLED`、`DEEPTUTOR_PUBLIC_URL`、`DEEPTUTOR_INTERNAL_URL`、`DEEPTUTOR_HOST_SSO_SECRET`。功能默认关闭；服务端校验密钥最小长度。
 - 生产 Supabase、Vercel 与任何运行中 DeepTutor 数据未改。
 

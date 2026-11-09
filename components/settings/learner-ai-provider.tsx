@@ -128,7 +128,7 @@ export function LearnerAiProviderSettings() {
         </>
       ) : (
         <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
-          当前没有完成 DeepTutor 与 Interactive Classroom 双端验证的 Provider，因此个人 Key
+          当前没有完成 Personal AI Tutor 与 Interactive Classroom 双端验证的 Provider，因此个人 Key
           设置暂未开放。验证完成后，此处只需选择 Provider、粘贴 Key
           并测试连接。你仍可按账户方案使用平台 AI。
         </div>

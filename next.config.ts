@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Keep Playwright's local server isolated from a developer's active `.next` dev server.
+  distDir: process.env.COASTALTUTOR_NEXT_DIST_DIR || '.next',
   output: process.env.VERCEL ? undefined : 'standalone',
   transpilePackages: ['mathml2omml', 'pptxgenjs'],
   serverExternalPackages: [],

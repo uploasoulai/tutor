@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -15,6 +15,10 @@ import {
 
 import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import { createClient } from '@/lib/supabase/client';
+
+const subscribeToNoChanges = () => () => {};
+const getStudentPreviewSnapshot = () => Boolean(getDevPreviewUser('student'));
+const getServerStudentPreviewSnapshot = (): boolean | null => null;
 
 const tracks = [
   {
@@ -51,13 +55,15 @@ const tracks = [
 
 export default function SchoolLearningPage() {
   const router = useRouter();
+  const isDevPreview = useSyncExternalStore(
+    subscribeToNoChanges,
+    getStudentPreviewSnapshot,
+    getServerStudentPreviewSnapshot,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (getDevPreviewUser('student')) {
-      setLoading(false);
-      return;
-    }
+    if (isDevPreview !== false) return;
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
@@ -66,9 +72,9 @@ export default function SchoolLearningPage() {
       }
       setLoading(false);
     });
-  }, []);
+  }, [isDevPreview]);
 
-  if (loading) {
+  if (loading && isDevPreview !== true) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#f8f9fa]">
         <Loader2 className="h-8 w-8 animate-spin text-[#174c70]" />

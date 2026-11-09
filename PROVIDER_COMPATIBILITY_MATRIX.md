@@ -3,7 +3,7 @@
 ## 判定范围
 
 - CoastalTutor Provider registry：`lib/ai/providers.ts`。代码注册 OpenAI、Anthropic、Google、GLM、Qwen、DeepSeek、Kimi、MiniMax、SiliconFlow、Doubao、OpenRouter、Grok、Xiaomi、Ollama、Lemonade、Groq，以及 auto route。模型定义中包含流式和 tools capability 声明；这只说明应用代码的预期能力，不等于真实供应商账号验证。
-- DeepTutor 候选固定版：本机 `C:\CoastalTutor\DeepTutor` 的官方 `v1.7.1` 源码，commit `f7aed0744c36c5afef16a4261c31ebee1208cac2`；以 `deeptutor/services/provider_registry.py` 和服务实现为准。
+- DeepTutor 候选固定版：本机 `C:\CoastalTutor\third_party\personal-ai-tutor-runtime` 的官方 `v1.7.1` 源码，commit `f7aed0744c36c5afef16a4261c31ebee1208cac2`；以 `deeptutor/services/provider_registry.py` 和服务实现为准。
 - 两个代码注册表可静态映射出 16 个供应商候选（含不同 binding 名称）。“代码级候选”不等于规格要求的“通过真实请求验证”。未使用任何 API Key 发请求，未测试流式、tool/function calling 或 JSON/structured output。当前正式可用白名单：**无（未认证）**。
 
 ## 候选对照

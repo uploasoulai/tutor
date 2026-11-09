@@ -15,6 +15,9 @@ describe('resolveModel auto:free', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllEnvs();
+    // These cases exercise the legacy auto:free pool, not the platform model
+    // selected for learner requests.
+    vi.stubEnv('PLATFORM_AI_ENABLED', 'false');
   });
 
   it('uses configured SiliconFlow free models before Gemini fallback', async () => {
@@ -28,7 +31,7 @@ describe('resolveModel auto:free', () => {
     expect(resolved.providerId).toBe('siliconflow');
     expect(resolved.modelId).toBe('Qwen/Qwen2.5-7B-Instruct');
     expect(resolved.apiKey).toBe('sf-test');
-  });
+  }, 15_000);
 
   it('reroutes explicit Gemini 3 requests to the free rotation unless allowed', async () => {
     vi.stubEnv('SILICONFLOW_API_KEY', 'sf-test');

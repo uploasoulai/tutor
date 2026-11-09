@@ -7,7 +7,7 @@ CoastalTutor 是面向学生与家庭的学习门户。School Learning 按课程
 先在 Docker Desktop 启动后端与网页：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\start-deeptutor.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\start-personal-ai-tutor.ps1
 ```
 
 DeepTutor 地址为 <http://localhost:3782>。主站在另一个终端启动：

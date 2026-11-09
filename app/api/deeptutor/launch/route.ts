@@ -15,7 +15,11 @@ function b64url(value: string | Buffer) {
 
 function escapeHtml(value: string) {
   const entities: Record<string, string> = {
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
   };
   return value.replace(/[&<>"']/g, (character) => entities[character]);
 }
@@ -39,11 +43,7 @@ function learnerProfileFromMetadata(metadata: unknown): Record<string, string> {
   return profile;
 }
 
-async function createLaunchResponse(
-  request: NextRequest,
-  mode: string,
-  handoffPrompt?: string,
-) {
+async function createLaunchResponse(request: NextRequest, mode: string, handoffPrompt?: string) {
   try {
     const config = getDeepTutorConfig();
     if (!config.enabled || !config.publicUrl || !config.hostSsoSecret) {
@@ -51,7 +51,9 @@ async function createLaunchResponse(
     }
 
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
 
     const accountRole = await resolveAccountRole(user);
@@ -103,20 +105,33 @@ async function createLaunchResponse(
       );
     }
     if (handoffPrompt && (role !== 'student' || mode !== 'personal')) {
-      return NextResponse.json({ error: 'Mistake tutoring is available for learners only' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Mistake tutoring is available for learners only' },
+        { status: 403 },
+      );
     }
     const learnerProfile = role === 'student' ? learnerProfileFromMetadata(user.user_metadata) : {};
     const header = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = b64url(JSON.stringify({
-      iss: 'coastaltutor', aud: 'deeptutor', sub: user.id, role,
-      learner_ids: learnerIds,
-      ...(Object.keys(learnerProfile).length ? { learner_profile: learnerProfile } : {}),
-      ...(Object.keys(learnerProfiles).length ? { learner_profiles: learnerProfiles } : {}),
-      ...(handoffPrompt ? { handoff_prompt: handoffPrompt } : {}),
-      mode, iat: now, exp: now + 60, jti: randomUUID(),
-    }));
+    const payload = b64url(
+      JSON.stringify({
+        iss: 'coastaltutor',
+        aud: 'deeptutor',
+        sub: user.id,
+        role,
+        learner_ids: learnerIds,
+        ...(Object.keys(learnerProfile).length ? { learner_profile: learnerProfile } : {}),
+        ...(Object.keys(learnerProfiles).length ? { learner_profiles: learnerProfiles } : {}),
+        ...(handoffPrompt ? { handoff_prompt: handoffPrompt } : {}),
+        mode,
+        iat: now,
+        exp: now + 60,
+        jti: randomUUID(),
+      }),
+    );
     const signingInput = `${header}.${payload}`;
-    const signature = createHmac('sha256', config.hostSsoSecret).update(signingInput).digest('base64url');
+    const signature = createHmac('sha256', config.hostSsoSecret)
+      .update(signingInput)
+      .digest('base64url');
     const ticket = `${signingInput}.${signature}`;
 
     const nonce = randomBytes(18).toString('base64');
@@ -126,7 +141,7 @@ async function createLaunchResponse(
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'no-store, max-age=0',
-        'Pragma': 'no-cache',
+        Pragma: 'no-cache',
         'Referrer-Policy': 'no-referrer',
         'X-Content-Type-Options': 'nosniff',
         'Content-Security-Policy': `default-src 'none'; script-src 'nonce-${nonce}'; form-action ${config.publicUrl}; base-uri 'none'; frame-ancestors 'none'`,

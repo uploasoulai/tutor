@@ -1,9 +1,9 @@
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$deepTutorRoot = Join-Path $repoRoot 'DeepTutor'
-$envFile = Join-Path $deepTutorRoot '.env'
-$composeFile = Join-Path $deepTutorRoot 'compose.coastaltutor.yaml'
+$personalAiTutorRoot = Join-Path $repoRoot 'third_party/personal-ai-tutor-runtime'
+$envFile = Join-Path $personalAiTutorRoot '.env'
+$composeFile = Join-Path $personalAiTutorRoot 'compose.coastaltutor.yaml'
 
 $appEnvFile = Join-Path $repoRoot '.env.local'
 $ssoLine = Get-Content -LiteralPath $appEnvFile -ErrorAction SilentlyContinue |
@@ -13,15 +13,23 @@ if (-not $ssoLine) {
   throw 'DEEPTUTOR_HOST_SSO_SECRET is missing from the local app environment.'
 }
 
+$preservedSettings = @()
+if (Test-Path -LiteralPath $envFile) {
+  $preservedSettings = @(
+    Get-Content -LiteralPath $envFile |
+      Where-Object { $_ -notmatch '^\s*(DEEPTUTOR_HOST_SSO_ENABLED|DEEPTUTOR_HOST_SSO_SECRET)\s*=' }
+  )
+}
 $settings = @(
-  'DEEPTUTOR_HOST_SSO_ENABLED=true',
+  $preservedSettings
+  'DEEPTUTOR_HOST_SSO_ENABLED=true'
   $ssoLine
 ) -join "`r`n"
 [IO.File]::WriteAllText($envFile, "$settings`r`n", [Text.UTF8Encoding]::new($false))
 
 $desktopPath = 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 if (-not (Test-Path -LiteralPath $desktopPath)) {
-  throw 'Docker Desktop is required to run the local DeepTutor service.'
+  throw 'Docker Desktop is required to run the local Personal AI Tutor service.'
 }
 
 if (-not (Get-Process -Name 'Docker Desktop' -ErrorAction SilentlyContinue)) {
@@ -42,11 +50,11 @@ if (-not $dockerReady) {
   throw 'Docker Desktop did not become ready within three minutes.'
 }
 
-Push-Location $deepTutorRoot
+Push-Location $personalAiTutorRoot
 try {
   & docker compose -f $composeFile up -d --build
   if ($LASTEXITCODE -ne 0) {
-    throw 'DeepTutor failed to start. Check Docker Desktop and the local image build.'
+    throw 'Personal AI Tutor failed to start. Check Docker Desktop and the local image build.'
   }
 } finally {
   Pop-Location
@@ -68,7 +76,7 @@ for ($attempt = 0; $attempt -lt 90; $attempt += 1) {
 }
 
 if (-not $serviceReady) {
-  throw 'DeepTutor started but did not pass its readiness check within three minutes.'
+  throw 'Personal AI Tutor started but did not pass its readiness check within three minutes.'
 }
 
-Write-Host 'DeepTutor is ready at http://localhost:3782.'
+Write-Host 'Personal AI Tutor is ready at http://localhost:3782.'

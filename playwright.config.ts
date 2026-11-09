@@ -5,7 +5,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Keep the browser suite stable on the 2-core local and CI environments.
+  workers: 1,
   reporter: process.env.CI ? 'html' : 'list',
   use: {
     baseURL: 'http://localhost:3002',
@@ -25,6 +26,7 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       PORT: '3002',
+      COASTALTUTOR_NEXT_DIST_DIR: '.next-e2e',
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321',
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
         process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??

@@ -9,12 +9,13 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     '.next/**',
+    '.next-e2e/**',
     'out/**',
     'build/**',
     'next-env.d.ts',
     // Vendored/generated code:
     'packages/**',
-    'DeepTutor/**',
+    'third_party/personal-ai-tutor-runtime/**',
     // Claude Code local files:
     '.claude/**',
     '.superpowers/**',

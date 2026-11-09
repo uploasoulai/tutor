@@ -2,7 +2,7 @@
 
 | 旧组件/数据 | 当前状态 | 处理方式 | 目标位置 | 风险/验证 |
 |---|---|---|---|---|
-| DeepTutor v1.7.1 源码 | 已放在 `C:\CoastalTutor\DeepTutor`，官方 tag 内容对比一致；源码目录无独立 `.git`，运行时 `data/` 未创建 | **KEEP / PIN** 为主学习平台核心；继续维护 `UPSTREAM_VERSION.md` | School Learning 与 Personal AI Tutor | Apache-2.0；需确保 source tree 路径与 Linux import 大小写一致、保留 LICENSE/NOTICE；账号桥和 BYOK 尚未实现 |
+| Personal AI Tutor runtime source | 已归档于 `C:\CoastalTutor\third_party\personal-ai-tutor-runtime`，固定上游版本及本地改动记录在 `UPSTREAM_VERSION.md`；运行时数据独立保留且不提交 | **KEEP / PIN**；保留上游许可及通知 | Personal AI Tutor | Apache-2.0；账号桥和 BYOK 已进入实现，持续维护时需按固定版本审查上游变更 |
 | Supabase Auth 与 Next.js 登录/注册/重置密码 | 已有 `/login`、`/signup`、`/reset-password`、callback；server/client Supabase helpers | **KEEP / ADAPT** | 平台唯一公开身份入口 | 检查线上 Supabase project、JWT claim、角色来源和账号恢复；不要另建 Auth 项目 |
 | `profiles`, `students`, `parents`, `teachers` | SQL schema 已定义；远端记录数未知 | **KEEP / MIGRATE 后映射** | Supabase 主身份和外部 module identity map | 现有角色和 DeepTutor 用户类别不同；要先做稳定 UID 映射、重复账号处理及家长授权审计 |
 | `parent_student_links`, `teacher_student_links` | SQL 和 API/服务层均存在 | **ADAPT / DEFER** | 家庭授权沿用 Supabase；教师 Phase 1 隐藏 | 部分 API 使用 service role；逐端点验证关系过滤、撤销和 IDOR |
