@@ -7,6 +7,15 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 export const CLASSROOMS_DIR = path.join(process.cwd(), 'data', 'classrooms');
 export const CLASSROOM_JOBS_DIR = path.join(process.cwd(), 'data', 'classroom-jobs');
 
+export function usesPersistentClassroomStore(): boolean {
+  return (
+    process.env.VERCEL === '1' ||
+    process.env.VERCEL_ENV === 'production' ||
+    process.env.VERCEL_ENV === 'preview' ||
+    Boolean(process.env.VERCEL_URL)
+  );
+}
+
 async function ensureDir(dir: string) {
   await fs.mkdir(dir, { recursive: true });
 }
@@ -47,7 +56,7 @@ export function isValidClassroomId(id: string): boolean {
 }
 
 export async function readClassroom(id: string): Promise<PersistedClassroomData | null> {
-  if (process.env.VERCEL === '1') {
+  if (usesPersistentClassroomStore()) {
     const { data, error } = await createSupabaseAdminClient()
       .from('generated_classrooms')
       .select('classroom_data')
@@ -84,7 +93,7 @@ export async function persistClassroom(
     createdAt: new Date().toISOString(),
   };
 
-  if (process.env.VERCEL === '1') {
+  if (usesPersistentClassroomStore()) {
     if (!ownerId) throw new Error('Classroom owner is required in hosted mode');
     const { error } = await createSupabaseAdminClient().from('generated_classrooms').upsert({
       id: data.id,

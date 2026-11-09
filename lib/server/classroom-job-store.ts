@@ -9,6 +9,7 @@ import type {
 import {
   CLASSROOM_JOBS_DIR,
   ensureClassroomJobsDir,
+  usesPersistentClassroomStore,
   writeJsonFileAtomic,
 } from '@/lib/server/classroom-storage';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -46,7 +47,7 @@ function jobFilePath(jobId: string) {
 }
 
 async function persistJob(jobId: string, job: ClassroomGenerationJob) {
-  if (process.env.VERCEL === '1') {
+  if (usesPersistentClassroomStore()) {
     const { error } = await createSupabaseAdminClient()
       .from('classroom_generation_jobs')
       .update({ job_data: job })
@@ -128,7 +129,7 @@ export async function createClassroomGenerationJob(
     scenesGenerated: 0,
   };
 
-  if (process.env.VERCEL === '1') {
+  if (usesPersistentClassroomStore()) {
     if (!ownerId) throw new Error('Classroom job owner is required in hosted mode');
     const { error } = await createSupabaseAdminClient().from('classroom_generation_jobs').insert({
       id: jobId,
@@ -148,7 +149,7 @@ export async function readClassroomGenerationJob(
   ownerId?: string,
 ): Promise<ClassroomGenerationJob | null> {
   try {
-    if (process.env.VERCEL === '1') {
+    if (usesPersistentClassroomStore()) {
       let query = createSupabaseAdminClient()
         .from('classroom_generation_jobs')
         .select('job_data')
