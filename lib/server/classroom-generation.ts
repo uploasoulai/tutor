@@ -38,6 +38,8 @@ export interface GenerateClassroomInput {
   requirement: string;
   /** Keep serverless lesson runs within the hosting function's time limit. */
   maxScenes?: number;
+  /** Bound expensive interactive widget generation for serverless lessons. */
+  maxInteractiveScenes?: number;
   pdfContent?: { text: string; images: string[] };
   enableWebSearch?: boolean;
   webSearchProviderId?: WebSearchProviderId;
@@ -302,7 +304,18 @@ export async function generateClassroom(
     Number.isInteger(input.maxScenes) && input.maxScenes! > 0
       ? Math.min(input.maxScenes!, generatedOutlines.length)
       : generatedOutlines.length;
-  const outlines = generatedOutlines.slice(0, maxScenes);
+  let interactiveScenesKept = 0;
+  const maxInteractiveScenes =
+    Number.isInteger(input.maxInteractiveScenes) && input.maxInteractiveScenes! >= 0
+      ? input.maxInteractiveScenes!
+      : Number.POSITIVE_INFINITY;
+  const outlines = generatedOutlines.slice(0, maxScenes).map((outline) => {
+    if (outline.type !== 'interactive') return outline;
+    interactiveScenesKept += 1;
+    if (interactiveScenesKept <= maxInteractiveScenes) return outline;
+    log.info(`Using a lightweight lesson scene instead of another widget: ${outline.title}`);
+    return { ...outline, type: 'slide' as const };
+  });
   log.info(
     `Generated ${generatedOutlines.length} scene outlines; using ${outlines.length} (languageDirective: ${languageDirective})`,
   );

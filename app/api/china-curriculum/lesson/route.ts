@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
     const input: GenerateClassroomInput = {
       requirement,
       maxScenes: 3,
+      maxInteractiveScenes: 1,
       agentMode: 'default',
       enableWebSearch: false,
       enableImageGeneration: false,
