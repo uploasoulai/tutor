@@ -22,6 +22,7 @@ import { buildSearchQuery } from '@/lib/server/search-query-builder';
 import { formatSearchResultsAsContext, searchWeb } from '@/lib/web-search';
 import type { WebSearchProviderId } from '@/lib/web-search/types';
 import { persistClassroom } from '@/lib/server/classroom-storage';
+import type { CurriculumLessonCacheDescriptor } from '@/lib/server/curriculum-lesson-cache';
 import {
   generateMediaForClassroom,
   replaceMediaPlaceholders,
@@ -36,6 +37,8 @@ const log = createLogger('Classroom');
 
 export interface GenerateClassroomInput {
   requirement: string;
+  /** A curriculum artifact identity enables safe cross-learner course reuse. */
+  curriculumLessonCache?: CurriculumLessonCacheDescriptor;
   /** Keep serverless lesson runs within the hosting function's time limit. */
   maxScenes?: number;
   /** Bound expensive interactive widget generation for serverless lessons. */
@@ -344,7 +347,9 @@ export async function generateClassroom(
     agents = getDefaultAgents();
   }
 
-  const stageId = nanoid(10);
+  const stageId = input.curriculumLessonCache
+    ? `course-${input.curriculumLessonCache.cacheKey.slice(0, 32)}`
+    : nanoid(10);
   const stage: Stage = {
     id: stageId,
     name: outlines[0]?.title || requirement.slice(0, 50),
@@ -481,6 +486,7 @@ export async function generateClassroom(
     },
     options.baseUrl,
     options.ownerId,
+    input.curriculumLessonCache,
   );
 
   log.info(`Classroom persisted: ${persisted.id}, URL: ${persisted.url}`);

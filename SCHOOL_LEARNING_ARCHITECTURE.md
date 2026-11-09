@@ -13,6 +13,28 @@
 - CoastalTutor provides role-checked single-sign-on shortcuts to DeepTutor Practice/mistake review, Mastery Paths, personal learning progress, learner profile, and parent Guardian reports. These open DeepTutor's native screens in the same per-learner workspace instead of reproducing them in CoastalTutor.
 - An incorrect School Learning answer stays in CoastalTutor's curriculum mastery record and can be handed to the learner's same-identity DeepTutor chat using a signed, short-lived SSO claim. DeepTutor receives the prompt through a one-time HttpOnly cookie bound to that learner ID and pre-fills its composer for the learner to review. The request asks the tutor to coach step by step and save the mistake through DeepTutor's native question-bank tool. The handoff omits the answer key and does not reveal the course explanation before the learner asks DeepTutor for help.
 
+## Learning record ownership and family view
+
+- Keep one CoastalTutor/Supabase learner UUID and one corresponding DeepTutor workspace. Do not create mirrored learner accounts or copy raw DeepTutor chat, notes, or question-bank records into CoastalTutor.
+- CoastalTutor is authoritative for BC/China curriculum enrollment, course sessions, answers, completion, and curriculum mastery. DeepTutor is authoritative for Personal AI Tutor conversations, its native mastery paths, practice/question notebook, and study activity.
+- The learner and parent experience should present one learning timeline by reading each system's authorized summaries at request time. Keep source labels and timestamps; retain only a short-lived cache for performance if needed. Parent access must use the platform's verified parent-child link and DeepTutor's guardian grant. If DeepTutor is unavailable, show CoastalTutor records and clearly mark tutor activity as temporarily unavailable; never imply its records are empty.
+- Wrong answers from School Learning remain attached to the curriculum session and are handed to the same learner's Personal AI Tutor. DeepTutor owns the coaching conversation and its native saved-mistake entry. Do not store a duplicate copy of the tutor conversation in the School Learning database.
+
+## Reusable curriculum lessons and storage
+
+- Separate a reusable course artifact from a learner's learning session. A course artifact contains the curriculum-grounded lesson and interactions; each learner gets an independent session row for attempts, completion, mastery, and review scheduling.
+- Reuse a published artifact across learners only when its cache identity matches the curriculum track, jurisdiction, textbook/edition, grade, subject, canonical outcome/topic ID, language, learning objectives, and lesson-generation schema/prompt version. Include relevant source-data revisions so a changed graph or BC outcome invalidates the old artifact.
+- Cache only successful, quality-checked artifacts. A first generation remains a draft until its structure and answer paths pass server-side validation; bad or partial generations must not become the shared lesson. Keep explicit revisioning and an admin invalidation path.
+- For current tester scale, use Supabase Storage for versioned lesson JSON and media objects, with a small Supabase metadata row for cache key, status, size, checksum, timestamps, and storage path. Do not keep growing course JSONB blobs in `learning_sessions`; the session should reference the reusable artifact. Keep storage behind a server adapter so the object store can move to an S3-compatible service (for example Cloudflare R2) as volume/cost needs become clear. Put media in object storage from the start; do not store generated video/image bytes in Postgres.
+- Generated classroom JSON already stored in `generated_classrooms` is the current persistence path, not yet the long-term shared curriculum cache. Existing per-student `reuse_key` behavior reopens that student's session and does not provide cross-learner course reuse.
+
+## BC and China lesson generation
+
+- BC and China use the same underlying OpenMAIC-derived classroom generation engine (`generateClassroom`) for the interactive classroom output. Their curriculum adapters differ: China builds the prompt from a canonical knowledge-graph topic, standards, prerequisites, mastery criteria, and local questions; BC currently retrieves matching BC curriculum outcomes, builds a local instructional blueprint/quiz artifact, then asks the shared classroom engine to render it.
+- The BC route therefore has more preprocessing and a legacy per-student lesson artifact layer; it is not yet the same end-to-end pipeline as China. The target is one curriculum-neutral pipeline: curriculum adapter → validated lesson specification → shared classroom engine → quality-checked reusable course artifact → learner-specific session/progress. Keep the adapter responsible for province, grade, subject, outcome, elaborations, and provenance.
+- When BC source outcomes or elaborations are missing, generate only from the confirmed selected outcome and clearly mark the lesson as provisional; do not fabricate official curriculum text or block the student from a useful lesson. As the user adds curriculum data, the source revision changes the cache identity and lessons can be regenerated.
+- The BC instructional blueprint and teacher-persona preference should remain lesson inputs where educationally useful. They must not create a second rendering engine or cause a fresh full classroom to be generated every time a learner opens the same outcome.
+
 ## China curriculum implementation
 
 - The China route uses a downloaded, versioned knowledge graph for its complete included scope: topic nodes, hard/soft prerequisites, question bank, standards mapping, and available textbook mappings.

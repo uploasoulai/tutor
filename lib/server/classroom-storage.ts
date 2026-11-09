@@ -3,6 +3,14 @@ import path from 'path';
 import type { NextRequest } from 'next/server';
 import type { Scene, Stage } from '@/lib/types/stage';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import {
+  readCachedClassroomById,
+  saveCurriculumLessonArtifact,
+  type CurriculumLessonCacheDescriptor,
+} from '@/lib/server/curriculum-lesson-cache';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('ClassroomStorage');
 
 export const CLASSROOMS_DIR = path.join(process.cwd(), 'data', 'classrooms');
 export const CLASSROOM_JOBS_DIR = path.join(process.cwd(), 'data', 'classroom-jobs');
@@ -63,7 +71,9 @@ export async function readClassroom(id: string): Promise<PersistedClassroomData 
       .eq('id', id)
       .maybeSingle();
     if (error) throw error;
-    return (data?.classroom_data as PersistedClassroomData | undefined) ?? null;
+    const classroom = (data?.classroom_data as PersistedClassroomData | undefined) ?? null;
+    if (classroom) return classroom;
+    return readCachedClassroomById(id);
   }
   const filePath = path.join(CLASSROOMS_DIR, `${id}.json`);
   try {
@@ -85,6 +95,7 @@ export async function persistClassroom(
   },
   baseUrl: string,
   ownerId?: string,
+  cacheDescriptor?: CurriculumLessonCacheDescriptor,
 ): Promise<PersistedClassroomData & { url: string }> {
   const classroomData: PersistedClassroomData = {
     id: data.id,
@@ -95,12 +106,25 @@ export async function persistClassroom(
 
   if (usesPersistentClassroomStore()) {
     if (!ownerId) throw new Error('Classroom owner is required in hosted mode');
-    const { error } = await createSupabaseAdminClient().from('generated_classrooms').upsert({
-      id: data.id,
-      owner_id: ownerId,
-      classroom_data: classroomData,
-    });
-    if (error) throw error;
+    let savedToCurriculumStore = false;
+    if (cacheDescriptor) {
+      try {
+        savedToCurriculumStore = await saveCurriculumLessonArtifact(cacheDescriptor, classroomData);
+      } catch (cacheError) {
+        log.warn(
+          'Could not save reusable curriculum lesson; falling back to learner classroom storage:',
+          cacheError,
+        );
+      }
+    }
+    if (!savedToCurriculumStore) {
+      const { error } = await createSupabaseAdminClient().from('generated_classrooms').upsert({
+        id: data.id,
+        owner_id: ownerId,
+        classroom_data: classroomData,
+      });
+      if (error) throw error;
+    }
   } else {
     await ensureClassroomsDir();
     const filePath = path.join(CLASSROOMS_DIR, `${data.id}.json`);

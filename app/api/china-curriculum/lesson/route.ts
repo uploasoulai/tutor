@@ -13,7 +13,12 @@ import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { type GenerateClassroomInput } from '@/lib/server/classroom-generation';
 import { runClassroomGenerationJob } from '@/lib/server/classroom-job-runner';
 import { createClassroomGenerationJob } from '@/lib/server/classroom-job-store';
+import { markClassroomGenerationJobSucceeded } from '@/lib/server/classroom-job-store';
 import { buildRequestOrigin } from '@/lib/server/classroom-storage';
+import {
+  describeCurriculumLesson,
+  findCurriculumLessonArtifact,
+} from '@/lib/server/curriculum-lesson-cache';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { randomUUID } from 'node:crypto';
@@ -86,9 +91,6 @@ export async function POST(request: NextRequest) {
     if ((await resolveAccountRole(user)) !== 'student') {
       return apiError('INVALID_REQUEST', 403, 'Only a learner can start this lesson');
     }
-    failedStage = 'platform_ai_check';
-    await assertPlatformAiWithinLimit(user.id);
-
     failedStage = 'request_validation';
     const body = (await request.json()) as { topicId?: string; editionId?: string };
     if (!body.topicId) return apiError('MISSING_REQUIRED_FIELD', 400, 'topicId is required');
@@ -99,8 +101,14 @@ export async function POST(request: NextRequest) {
     if (!details) return apiError('INVALID_REQUEST', 404, 'Learning topic not found');
 
     const requirement = makeClassroomRequirement(details);
+    const curriculumLessonCache = describeCurriculumLesson({
+      track: 'china',
+      canonicalId: `${details.textbook.id}:${details.topic.id}`,
+      requirement,
+    });
     const input: GenerateClassroomInput = {
       requirement,
+      curriculumLessonCache,
       maxScenes: 3,
       maxInteractiveScenes: 1,
       agentMode: 'default',
@@ -114,8 +122,26 @@ export async function POST(request: NextRequest) {
     failedStage = 'learner_profile_storage';
     await ensureStudentRecord(user);
 
+    failedStage = 'curriculum_lesson_cache';
+    const reusableLesson = await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey);
+    if (!reusableLesson) {
+      failedStage = 'platform_ai_check';
+      await assertPlatformAiWithinLimit(user.id);
+    }
+
     failedStage = 'classroom_job_storage';
     const job = await createClassroomGenerationJob(jobId, input, user.id);
+    const classroomUrl = reusableLesson ? `${origin}/classroom/${reusableLesson.id}` : undefined;
+    if (reusableLesson && classroomUrl) {
+      await markClassroomGenerationJobSucceeded(jobId, {
+        id: reusableLesson.id,
+        url: classroomUrl,
+        stage: reusableLesson.stage,
+        scenes: reusableLesson.scenes,
+        scenesCount: reusableLesson.scenes.length,
+        createdAt: reusableLesson.createdAt,
+      });
+    }
 
     failedStage = 'learning_history_storage';
     const admin = createSupabaseAdminClient();
@@ -135,7 +161,10 @@ export async function POST(request: NextRequest) {
           curriculumChapter: details.topic.chapter,
           curriculumGrade: details.topic.grade,
           classroomJobId: jobId,
-          classroomStatus: job.status,
+          classroomStatus: reusableLesson ? 'succeeded' : job.status,
+          ...(reusableLesson && classroomUrl
+            ? { classroomId: reusableLesson.id, classroomUrl }
+            : {}),
         },
         reuse_key: `${user.id}:china:${details.topic.id}:${jobId}`,
         status: 'planned',
@@ -144,7 +173,9 @@ export async function POST(request: NextRequest) {
       .single();
     if (error) throw error;
 
-    after(() => runClassroomGenerationJob(jobId, input, origin, { billingUserId: user.id }));
+    if (!reusableLesson) {
+      after(() => runClassroomGenerationJob(jobId, input, origin, { billingUserId: user.id }));
+    }
 
     return apiSuccess(
       {

@@ -8,9 +8,16 @@ import {
   updateLessonEngineJob,
 } from '@/lib/curriculum/lesson-artifact';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
-import { createClassroomGenerationJob } from '@/lib/server/classroom-job-store';
+import {
+  createClassroomGenerationJob,
+  markClassroomGenerationJobSucceeded,
+} from '@/lib/server/classroom-job-store';
 import { runClassroomGenerationJob } from '@/lib/server/classroom-job-runner';
 import { buildRequestOrigin } from '@/lib/server/classroom-storage';
+import {
+  describeCurriculumLesson,
+  findCurriculumLessonArtifact,
+} from '@/lib/server/curriculum-lesson-cache';
 import { resolveLessonEngineMediaFlags } from '@/lib/server/lesson-engine-media-flags';
 import { createClient } from '@/lib/supabase/server';
 import { resolveTeacherPersonaPreference } from '@/lib/curriculum/teacher-personas';
@@ -26,8 +33,6 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return apiError('INVALID_REQUEST', 401, 'Authentication required');
     }
-    await assertPlatformAiWithinLimit(user.id);
-
     const body = (await req.json()) as {
       grade?: string;
       subject?: string;
@@ -55,24 +60,44 @@ export async function POST(req: NextRequest) {
       const baseUrl = buildRequestOrigin(req);
       const jobId = nanoid(10);
       const requirement = buildLessonEngineRequirement(artifact.payload);
+      const curriculumLessonCache = describeCurriculumLesson({
+        track: 'bc',
+        canonicalId: `${artifact.payload.bc_context.grade}:${artifact.payload.bc_context.subject}:${artifact.payload.bc_context.outcome_code || artifact.payload.bc_context.knowledge_point}`,
+        requirement,
+      });
+      const reusableLesson = await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey);
+      if (!reusableLesson) await assertPlatformAiWithinLimit(user.id);
       const mediaFlags = resolveLessonEngineMediaFlags({
         userId: user.id,
         email: user.email,
       });
       const generationInput = {
         requirement,
+        curriculumLessonCache,
         ...mediaFlags,
         agentMode: 'default' as const,
       };
       const job = await createClassroomGenerationJob(jobId, generationInput, user.id);
+      const classroomUrl = reusableLesson ? `${baseUrl}/classroom/${reusableLesson.id}` : undefined;
       const lessonEngine = {
         jobId,
-        status: job.status,
+        status: reusableLesson ? ('succeeded' as const) : job.status,
         pollUrl: `${baseUrl}/api/generate-classroom/${jobId}`,
         pollIntervalMs: 5000,
         requirement,
+        ...(reusableLesson && classroomUrl ? { classroomId: reusableLesson.id, classroomUrl } : {}),
         createdAt: job.createdAt,
       };
+      if (reusableLesson && classroomUrl) {
+        await markClassroomGenerationJobSucceeded(jobId, {
+          id: reusableLesson.id,
+          url: classroomUrl,
+          stage: reusableLesson.stage,
+          scenes: reusableLesson.scenes,
+          scenesCount: reusableLesson.scenes.length,
+          createdAt: reusableLesson.createdAt,
+        });
+      }
       const payload = await updateLessonEngineJob({
         sessionId: artifact.sessionId,
         payload: artifact.payload,
@@ -85,9 +110,11 @@ export async function POST(req: NextRequest) {
         payload,
       };
 
-      after(() =>
-        runClassroomGenerationJob(jobId, generationInput, baseUrl, { billingUserId: user.id }),
-      );
+      if (!reusableLesson) {
+        after(() =>
+          runClassroomGenerationJob(jobId, generationInput, baseUrl, { billingUserId: user.id }),
+        );
+      }
     } else {
       const synced = await syncLessonEngineJob({
         studentId: user.id,
