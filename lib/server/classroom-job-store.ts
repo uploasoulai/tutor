@@ -88,7 +88,7 @@ async function withJobLock<T>(jobId: string, fn: () => Promise<T>): Promise<T> {
 }
 
 /** Max age (ms) before a "running" job without an active runner is considered stale. */
-const STALE_JOB_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+const STALE_JOB_TIMEOUT_MS = 6 * 60 * 1000; // Allow margin after Vercel's 5-minute Hobby limit.
 
 function markStaleIfNeeded(job: ClassroomGenerationJob): ClassroomGenerationJob {
   if (job.status !== 'running') return job;

@@ -36,6 +36,8 @@ const log = createLogger('Classroom');
 
 export interface GenerateClassroomInput {
   requirement: string;
+  /** Keep serverless lesson runs within the hosting function's time limit. */
+  maxScenes?: number;
   pdfContent?: { text: string; images: string[] };
   enableWebSearch?: boolean;
   webSearchProviderId?: WebSearchProviderId;
@@ -295,8 +297,15 @@ export async function generateClassroom(
     throw new Error(outlinesResult.error || 'Failed to generate scene outlines');
   }
 
-  const { languageDirective, outlines } = outlinesResult.data;
-  log.info(`Generated ${outlines.length} scene outlines (languageDirective: ${languageDirective})`);
+  const { languageDirective, outlines: generatedOutlines } = outlinesResult.data;
+  const maxScenes =
+    Number.isInteger(input.maxScenes) && input.maxScenes! > 0
+      ? Math.min(input.maxScenes!, generatedOutlines.length)
+      : generatedOutlines.length;
+  const outlines = generatedOutlines.slice(0, maxScenes);
+  log.info(
+    `Generated ${generatedOutlines.length} scene outlines; using ${outlines.length} (languageDirective: ${languageDirective})`,
+  );
 
   await options.onProgress?.({
     step: 'generating_outlines',

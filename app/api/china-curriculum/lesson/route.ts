@@ -20,6 +20,7 @@ import { randomUUID } from 'node:crypto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300;
 
 function makeClassroomRequirement(
   details: NonNullable<Awaited<ReturnType<typeof getChinaTopicDetails>>>,
@@ -46,7 +47,7 @@ function makeClassroomRequirement(
     )
     .join('\n');
 
-  return `请为 CoastalTutor 的中国课程学习制作一堂虚拟互动课。
+  return `请为 CoastalTutor 的中国课程学习制作一堂虚拟互动课，共 3 个课堂场景。
 
 学习者：${grade} 学生
 学科：${CHINA_SUBJECTS[subject] ?? subject}
@@ -60,7 +61,7 @@ function makeClassroomRequirement(
 题库参考：\n${questionLines || '根据知识点掌握目标创作新练习。'}
 
 教学要求：
-- 让学生按顺序经历引入、直观讲解、互动练习、检查理解和回顾。
+- 三个场景依次承担：生活化引入与直观讲解；一个可操作的互动练习；检查理解、纠错提示与回顾。不要额外扩展成更多场景。
 - 先用小问题引导学生思考，不要一开始直接给最终答案；答错时指出可能卡住的步骤，再用更小的例子提示。
 - 适配 ${grade} 儿童的中文表达与注意力时长，句子短、一次只讲一个新概念。
 - 使用浏览器可运行的 SVG、HTML、CSS 或 Canvas 做图表、卡片、数轴、几何或其他适合本知识点的交互演示。
@@ -100,6 +101,7 @@ export async function POST(request: NextRequest) {
     const requirement = makeClassroomRequirement(details);
     const input: GenerateClassroomInput = {
       requirement,
+      maxScenes: 3,
       agentMode: 'default',
       enableWebSearch: false,
       enableImageGeneration: false,
