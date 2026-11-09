@@ -142,10 +142,18 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('platform_usage_limit_reached:')) {
-      return apiError('PLATFORM_USAGE_LIMIT_REACHED', 402, error.message.replace(/^platform_usage_limit_reached:\s*/, ''));
+      return apiError(
+        'PLATFORM_USAGE_LIMIT_REACHED',
+        402,
+        error.message.replace(/^platform_usage_limit_reached:\s*/, ''),
+      );
     }
     if (error instanceof Error && error.message.startsWith('PLATFORM_AI_NOT_CONFIGURED:')) {
-      return apiError('PLATFORM_AI_NOT_CONFIGURED', 503, error.message.replace(/^PLATFORM_AI_NOT_CONFIGURED:\s*/, ''));
+      return apiError(
+        'PLATFORM_AI_NOT_CONFIGURED',
+        503,
+        error.message.replace(/^PLATFORM_AI_NOT_CONFIGURED:\s*/, ''),
+      );
     }
     return apiError(
       'INTERNAL_ERROR',

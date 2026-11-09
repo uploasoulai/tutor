@@ -291,12 +291,10 @@ export async function POST(req: NextRequest) {
               let fullText = '';
               parsedOutlines = [];
               languageDirective = null;
-              const textStream = await withPlatformAiRequest(req, async () =>
-                streamLLM(
-                  streamParams,
-                  'scene-outlines-stream',
-                  thinkingConfig,
-                ).textStream,
+              const textStream = await withPlatformAiRequest(
+                req,
+                async () =>
+                  streamLLM(streamParams, 'scene-outlines-stream', thinkingConfig).textStream,
               );
 
               for await (const chunk of textStream) {

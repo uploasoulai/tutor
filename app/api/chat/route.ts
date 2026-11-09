@@ -77,7 +77,9 @@ export async function POST(req: NextRequest) {
     let platformUserId: string | null = null;
     if (!isByok) {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
       platformUserId = user.id;
       await assertPlatformAiWithinLimit(user.id);
@@ -135,8 +137,8 @@ export async function POST(req: NextRequest) {
         try {
           startHeartbeat();
 
-          const thinkingConfig: ThinkingConfig =
-            body.thinkingConfig ?? body.thinking ?? { mode: 'disabled', enabled: false };
+          const thinkingConfig: ThinkingConfig = body.thinkingConfig ??
+            body.thinking ?? { mode: 'disabled', enabled: false };
 
           const generator = statelessGenerate(
             {

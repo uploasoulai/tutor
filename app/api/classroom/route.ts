@@ -17,7 +17,9 @@ export async function POST(request: NextRequest) {
   let sceneCount: number | undefined;
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
     const body = await request.json();
     const { stage, scenes } = body;
@@ -35,7 +37,11 @@ export async function POST(request: NextRequest) {
     const id = stage.id || randomUUID();
     const baseUrl = buildRequestOrigin(request);
 
-    const persisted = await persistClassroom({ id, stage: { ...stage, id }, scenes }, baseUrl, user.id);
+    const persisted = await persistClassroom(
+      { id, stage: { ...stage, id }, scenes },
+      baseUrl,
+      user.id,
+    );
 
     return apiSuccess({ id: persisted.id, url: persisted.url }, 201);
   } catch (error) {

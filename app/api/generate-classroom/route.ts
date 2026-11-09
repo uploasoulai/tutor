@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
   let requirementSnippet: string | undefined;
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
     await assertPlatformAiWithinLimit(user.id);
 
@@ -65,10 +67,18 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('platform_usage_limit_reached:')) {
-      return apiError('PLATFORM_USAGE_LIMIT_REACHED', 402, error.message.replace(/^platform_usage_limit_reached:\s*/, ''));
+      return apiError(
+        'PLATFORM_USAGE_LIMIT_REACHED',
+        402,
+        error.message.replace(/^platform_usage_limit_reached:\s*/, ''),
+      );
     }
     if (error instanceof Error && error.message.startsWith('PLATFORM_AI_NOT_CONFIGURED:')) {
-      return apiError('PLATFORM_AI_NOT_CONFIGURED', 503, error.message.replace(/^PLATFORM_AI_NOT_CONFIGURED:\s*/, ''));
+      return apiError(
+        'PLATFORM_AI_NOT_CONFIGURED',
+        503,
+        error.message.replace(/^PLATFORM_AI_NOT_CONFIGURED:\s*/, ''),
+      );
     }
     log.error(
       `Classroom generation job creation failed [requirement="${requirementSnippet ?? 'unknown'}..."]:`,

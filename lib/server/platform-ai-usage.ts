@@ -47,18 +47,19 @@ export async function withPlatformAiRequest<T>(request: NextRequest, callback: (
     return callback();
   }
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error('Authentication required for Platform AI');
   const savedCredential = await getLearnerCredential(user.id);
-  const verifiedProviders = (process.env.BYOK_VERIFIED_PROVIDERS || '').split(',').map((v) => v.trim());
+  const verifiedProviders = (process.env.BYOK_VERIFIED_PROVIDERS || '')
+    .split(',')
+    .map((v) => v.trim());
   if (savedCredential && verifiedProviders.includes(savedCredential.providerId)) {
     return callback();
   }
   await assertPlatformAiWithinLimit(user.id);
-  return runWithPlatformAiUsage(
-    { userId: user.id, requestId: randomUUID() },
-    callback,
-  );
+  return runWithPlatformAiUsage({ userId: user.id, requestId: randomUUID() }, callback);
 }
 
 export function platformAiErrorResponse(error: unknown): NextResponse | null {
@@ -127,7 +128,9 @@ export async function getPlatformAiMonthlyUsage(userId: string) {
 export async function assertPlatformAiWithinLimit(userId: string) {
   const platformAi = getPlatformAiConfig();
   if (!platformAi.apiKey) {
-    throw new Error(`PLATFORM_AI_NOT_CONFIGURED: 管理员需要先在服务器环境配置 ${platformAi.keyEnvName}。`);
+    throw new Error(
+      `PLATFORM_AI_NOT_CONFIGURED: 管理员需要先在服务器环境配置 ${platformAi.keyEnvName}。`,
+    );
   }
   if (!isPlatformAiUsageEnforcementEnabled()) {
     return { costUsd: 0, inputTokens: 0, outputTokens: 0, limitUsd: getOptionalMonthlyLimit() };
@@ -136,7 +139,9 @@ export async function assertPlatformAiWithinLimit(userId: string) {
   try {
     getPlatformAiRates();
   } catch (error) {
-    throw new Error(`PLATFORM_AI_NOT_CONFIGURED: ${error instanceof Error ? error.message : '平台模型价格未配置。'}`);
+    throw new Error(
+      `PLATFORM_AI_NOT_CONFIGURED: ${error instanceof Error ? error.message : '平台模型价格未配置。'}`,
+    );
   }
   const usage = await getPlatformAiMonthlyUsage(userId);
   if (usage.costUsd >= limitUsd) {
@@ -148,14 +153,20 @@ export async function assertPlatformAiWithinLimit(userId: string) {
       month: 'numeric',
       day: 'numeric',
     }).format(nextMonth);
-    const error = new Error(`platform_usage_limit_reached: 本月平台 AI 使用额度已用完，将于 ${date} 恢复。`);
+    const error = new Error(
+      `platform_usage_limit_reached: 本月平台 AI 使用额度已用完，将于 ${date} 恢复。`,
+    );
     Object.assign(error, { code: 'platform_usage_limit_reached', status: 402 });
     throw error;
   }
   return { ...usage, limitUsd };
 }
 
-export async function recordPlatformAiUsage(userId: string, requestId: string, usage: PlatformAiUsage) {
+export async function recordPlatformAiUsage(
+  userId: string,
+  requestId: string,
+  usage: PlatformAiUsage,
+) {
   const config = getPlatformAiConfig();
   if (usage.providerId !== config.providerId) return false;
   let inputRate: number;
@@ -166,8 +177,7 @@ export async function recordPlatformAiUsage(userId: string, requestId: string, u
     if (!isPlatformAiUsageEnforcementEnabled()) return false;
     throw error;
   }
-  const costUsd =
-    (usage.inputTokens * inputRate + usage.outputTokens * outputRate) / 1_000_000;
+  const costUsd = (usage.inputTokens * inputRate + usage.outputTokens * outputRate) / 1_000_000;
   const admin = createPlatformUsageAdminClient();
   const { error } = await admin.from('platform_ai_usage').insert({
     user_id: userId,

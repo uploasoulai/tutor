@@ -23,7 +23,9 @@ export async function GET(req: NextRequest, context: { params: Promise<{ jobId: 
     }
 
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
 
     const job = await readClassroomGenerationJob(jobId, user.id);

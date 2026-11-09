@@ -107,10 +107,18 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Lesson generation failed';
     if (message.startsWith('platform_usage_limit_reached:')) {
-      return apiError('PLATFORM_USAGE_LIMIT_REACHED', 402, message.replace(/^platform_usage_limit_reached:\s*/, ''));
+      return apiError(
+        'PLATFORM_USAGE_LIMIT_REACHED',
+        402,
+        message.replace(/^platform_usage_limit_reached:\s*/, ''),
+      );
     }
     if (message.startsWith('PLATFORM_AI_NOT_CONFIGURED:')) {
-      return apiError('PLATFORM_AI_NOT_CONFIGURED', 503, message.replace(/^PLATFORM_AI_NOT_CONFIGURED:\s*/, ''));
+      return apiError(
+        'PLATFORM_AI_NOT_CONFIGURED',
+        503,
+        message.replace(/^PLATFORM_AI_NOT_CONFIGURED:\s*/, ''),
+      );
     }
     if (message.includes('VOYAGE_API_KEY')) {
       return apiError('MISSING_API_KEY', 400, message);

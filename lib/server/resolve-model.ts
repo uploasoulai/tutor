@@ -56,9 +56,7 @@ export async function resolveModel(params: {
   trialClientId?: string;
 }): Promise<ResolvedModel> {
   const hasUserApiKey = Boolean(params.apiKey || params.baseUrl);
-  const usePlatformAi =
-    !hasUserApiKey &&
-    process.env.PLATFORM_AI_ENABLED !== 'false';
+  const usePlatformAi = !hasUserApiKey && process.env.PLATFORM_AI_ENABLED !== 'false';
   const platformAiConfig = usePlatformAi ? getPlatformAiConfig() : undefined;
   const platformAiModel = platformAiConfig?.modelString;
   let modelString = usePlatformAi
@@ -188,19 +186,27 @@ export async function resolveModelFromHeaders(req: NextRequest): Promise<Resolve
   const explicitBaseUrl = req.headers.get('x-base-url') || undefined;
   if (!explicitApiKey && !explicitBaseUrl) {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
       const credential = await getLearnerCredential(user.id);
       const verified = (process.env.BYOK_VERIFIED_PROVIDERS || '').split(',').map((v) => v.trim());
       if (credential && verified.includes(credential.providerId)) {
         let defaults: Record<string, string> = {};
         try {
-          defaults = JSON.parse(process.env.BYOK_DEFAULT_MODELS_JSON || '{}') as Record<string, string>;
+          defaults = JSON.parse(process.env.BYOK_DEFAULT_MODELS_JSON || '{}') as Record<
+            string,
+            string
+          >;
         } catch {
           throw new Error('BYOK_DEFAULT_MODELS_JSON must be a valid JSON object');
         }
         const modelId = defaults[credential.providerId];
-        if (!modelId) throw new Error(`No platform-approved BYOK default model is configured for ${credential.providerId}`);
+        if (!modelId)
+          throw new Error(
+            `No platform-approved BYOK default model is configured for ${credential.providerId}`,
+          );
         return resolveModel({
           modelString: `${credential.providerId}:${modelId}`,
           apiKey: credential.apiKey,

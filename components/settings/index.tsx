@@ -725,7 +725,9 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
               onClick={() => setActiveSection('ai-provider')}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left min-w-0',
-                activeSection === 'ai-provider' ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted',
+                activeSection === 'ai-provider'
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'hover:bg-muted',
               )}
             >
               <Settings className="h-4 w-4 shrink-0" />
@@ -1098,7 +1100,11 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
               <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
                 {t('settings.close')}
               </Button>
-              {activeSection !== 'ai-provider' && <Button size="sm" onClick={handleSave}>{t('settings.save')}</Button>}
+              {activeSection !== 'ai-provider' && (
+                <Button size="sm" onClick={handleSave}>
+                  {t('settings.save')}
+                </Button>
+              )}
             </div>
           </div>
         </div>

@@ -1,8 +1,6 @@
 import { createLogger } from '@/lib/logger';
 import { generateClassroom, type GenerateClassroomInput } from '@/lib/server/classroom-generation';
-import {
-  runWithPlatformAiUsage,
-} from '@/lib/server/platform-ai-usage';
+import { runWithPlatformAiUsage } from '@/lib/server/platform-ai-usage';
 import {
   markClassroomGenerationJobFailed,
   markClassroomGenerationJobRunning,
