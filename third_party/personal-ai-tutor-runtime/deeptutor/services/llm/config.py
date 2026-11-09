@@ -196,6 +196,45 @@ def _get_llm_config_from_resolver() -> LLMConfig:
     """Resolve LLM config from the TutorBot-style runtime adapter."""
     resolved = resolve_llm_runtime_config()
     if not resolved.model:
+        # Older production images predate the host's platform-provider
+        # resolver. Keep a narrow environment-backed default so those images
+        # can use the same server-managed model without asking each learner to
+        # configure a provider. Newer runtimes resolve this in provider_runtime.
+        import os
+
+        platform_provider = os.environ.get("PLATFORM_AI_PROVIDER", "siliconflow").strip().lower()
+        platform_key_env = {
+            "deepseek": "DEEPSEEK_API_KEY",
+            "siliconflow": "SILICONFLOW_API_KEY",
+        }.get(platform_provider)
+        platform_key = os.environ.get(platform_key_env, "").strip() if platform_key_env else ""
+        if platform_key and os.environ.get("PLATFORM_AI_ENABLED", "true").lower() != "false":
+            configured_model = os.environ.get("PLATFORM_AI_MODEL", "").strip()
+            default_models = {
+                "deepseek": "deepseek-flash",
+                "siliconflow": "deepseek-ai/DeepSeek-V3",
+            }
+            model = default_models[platform_provider]
+            if configured_model:
+                model_provider, separator, model_id = configured_model.partition(":")
+                if not separator or model_provider.strip().lower() != platform_provider:
+                    raise LLMConfigError("PLATFORM_AI_MODEL must use the active platform provider")
+                model = model_id.strip()
+            base_url = os.environ.get(f"{platform_provider.upper()}_BASE_URL", "").strip()
+            if not base_url:
+                base_url = {
+                    "deepseek": "https://api.deepseek.com/v1",
+                    "siliconflow": "https://api.siliconflow.cn/v1",
+                }[platform_provider]
+            if model and base_url:
+                return LLMConfig(
+                    model=model,
+                    api_key=platform_key,
+                    base_url=base_url,
+                    effective_url=base_url,
+                    binding=platform_provider,
+                    provider_name=platform_provider,
+                )
         raise LLMConfigError(
             "No active LLM model is configured. Please set it in Settings > Language models."
         )

@@ -7,6 +7,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { ArrowLeft, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import SettingsNav from './SettingsNav'
+import { CoastalTutorHomeLink } from '@/components/layout/CoastalTutorHomeLink'
+import { COASTALTUTOR_HOME_URL } from '@/lib/platform-links'
 import { SettingsToolbar } from './SettingsToolbar'
 import { SettingsLoadStatusBanner } from './SettingsLoadStatusBanner'
 import { SETTINGS_RETURN_KEY } from './SettingsReturnTracker'
@@ -21,6 +23,7 @@ export default function SettingsMain({ children }: { children: React.ReactNode }
   const [mobileOpen, setMobileOpen] = useState(false)
   const [leaving, setLeaving] = useState(false)
   const [leaveFailed, setLeaveFailed] = useState(false)
+  const [pendingExternalHref, setPendingExternalHref] = useState<string | null>(null)
   const scroller = useRef<HTMLDivElement>(null)
   const content = useRef<HTMLDivElement>(null)
   const priorPath = useRef(pathname)
@@ -44,11 +47,26 @@ export default function SettingsMain({ children }: { children: React.ReactNode }
     }
     router.push(destination)
   }
+  const returnToPendingDestination = () => {
+    if (pendingExternalHref) window.location.assign(pendingExternalHref)
+    else returnToApp()
+  }
+  const handleReturnToApp = () => {
+    setPendingExternalHref(null)
+    if (hasUnsavedChanges) setLeaving(true)
+    else returnToApp()
+  }
+  const handleBrandClick: React.MouseEventHandler<HTMLAnchorElement> = (event) => {
+    if (!hasUnsavedChanges) return
+    event.preventDefault()
+    setPendingExternalHref(COASTALTUTOR_HOME_URL)
+    setLeaving(true)
+  }
   const returnButton = (
     <button
       type="button"
       disabled={saving || applying}
-      onClick={() => (hasUnsavedChanges ? setLeaving(true) : returnToApp())}
+      onClick={handleReturnToApp}
       className="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] font-medium text-foreground outline-none transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:opacity-40"
     >
       <ArrowLeft size={16} strokeWidth={1.7} />
@@ -62,21 +80,27 @@ export default function SettingsMain({ children }: { children: React.ReactNode }
       data-settings-shell
     >
       <aside className="hidden w-[248px] shrink-0 flex-col border-r border-border/60 bg-[color-mix(in_srgb,var(--muted)_25%,var(--background))] md:flex">
-        <div className="px-2.5 pb-1.5 pt-4">{returnButton}</div>
+        <div className="px-3 pt-3">
+          <CoastalTutorHomeLink onClick={handleBrandClick} />
+        </div>
+        <div className="px-2.5 pb-1.5 pt-2">{returnButton}</div>
         <SettingsNav />
       </aside>
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 px-3 md:hidden">
-          {returnButton}
-          <button
-            type="button"
-            aria-label={t('Settings sections')}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen(true)}
-            className="rounded-md p-2 hover:bg-accent"
-          >
-            <Menu size={20} />
-          </button>
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 px-2 md:hidden">
+          <CoastalTutorHomeLink onClick={handleBrandClick} className="gap-1 px-1" />
+          <div className="flex items-center gap-1">
+            {returnButton}
+            <button
+              type="button"
+              aria-label={t('Settings sections')}
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen(true)}
+              className="rounded-md p-2 hover:bg-accent"
+            >
+              <Menu size={20} />
+            </button>
+          </div>
         </div>
         <div
           ref={scroller}
@@ -123,7 +147,10 @@ export default function SettingsMain({ children }: { children: React.ReactNode }
             <button
               type="button"
               disabled={saving}
-              onClick={() => setLeaving(false)}
+              onClick={() => {
+                setLeaving(false)
+                setPendingExternalHref(null)
+              }}
               className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm"
             >
               {t('Keep editing')}
@@ -134,7 +161,7 @@ export default function SettingsMain({ children }: { children: React.ReactNode }
               onClick={async () => {
                 const saved = await saveDraft()
                 if (saved === null) return
-                if (saved) returnToApp()
+                if (saved) returnToPendingDestination()
                 else setLeaveFailed(true)
               }}
               className="rounded-lg bg-[var(--foreground)] px-3 py-2 text-sm text-[var(--background)] disabled:opacity-40"
@@ -145,7 +172,7 @@ export default function SettingsMain({ children }: { children: React.ReactNode }
           <button
             type="button"
             disabled={saving}
-            onClick={returnToApp}
+            onClick={returnToPendingDestination}
             className="text-xs text-[var(--muted-foreground)] underline underline-offset-4"
           >
             {t('Leave without saving')}

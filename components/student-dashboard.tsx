@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
+import { CoastalMark } from '@/components/coastal-mark';
 import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import { buildFallbackGoals, type TodayGoal } from '@/lib/curriculum/planner';
 import {
@@ -23,7 +24,6 @@ import {
   Settings,
   Sparkles,
   Target,
-  Users,
   Zap,
 } from 'lucide-react';
 
@@ -547,8 +547,8 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
                   >
                     <div className="absolute -right-10 -top-12 h-48 w-48 rounded-full border-[24px] border-white/10" />
                     <div className="relative">
-                      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
-                        <GraduationCap className="h-6 w-6" />
+                      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#003461] text-white">
+                        <CoastalMark className="h-6 w-6" />
                       </span>
                       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
                         Learn along your course
@@ -570,8 +570,8 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
                     className="group flex min-h-[230px] flex-col items-start justify-between rounded-2xl border border-[#dbe5ef] bg-[linear-gradient(145deg,#fff_0%,#f1f7ff_100%)] p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#a9c8e6] hover:shadow-md sm:p-8"
                   >
                     <div>
-                      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#e5efff] text-[#003461]">
-                        <Sparkles className="h-6 w-6" />
+                      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#003461] text-white">
+                        <CoastalMark className="h-6 w-6" />
                       </span>
                       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[#5b7188]">
                         Here whenever you need help
@@ -594,8 +594,8 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
                     className="group flex min-h-[230px] flex-col items-start justify-between rounded-2xl border border-[#e5e1d6] bg-[linear-gradient(145deg,#fff_0%,#fff9ed_100%)] p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#e9c982] hover:shadow-md sm:p-8"
                   >
                     <div>
-                      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff0cb] text-[#845d10]">
-                        <Users className="h-6 w-6" />
+                      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#003461] text-white">
+                        <CoastalMark className="h-6 w-6" />
                       </span>
                       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[#8b7547]">
                         Make learning hands-on

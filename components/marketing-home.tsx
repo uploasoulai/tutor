@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import './marketing-home.css';
+import { CoastalMark } from '@/components/coastal-mark';
 
 type Intent = 'school' | 'tutor' | 'classroom' | 'general';
 
@@ -117,7 +118,6 @@ function Icon({
 
 const entries = [
   {
-    icon: 'school' as const,
     number: '01',
     title: 'School Learning',
     copy: 'Follow your grade and curriculum through virtual lessons. Practise each idea, get gentle help with mistakes, and keep a record of progress to revisit.',
@@ -127,7 +127,6 @@ const entries = [
     alt: 'Student working through a science lesson at a desk',
   },
   {
-    icon: 'spark' as const,
     number: '02',
     title: 'Personal AI Tutor',
     copy: 'A 24/7 personal AI tutor, ready whenever a question comes up. Get patient explanations, explore ideas, organise notes and continue learning at your own pace.',
@@ -137,7 +136,6 @@ const entries = [
     alt: 'A personal learning workspace with notes and ideas',
   },
   {
-    icon: 'class' as const,
     number: '03',
     title: 'Interactive Classroom',
     copy: 'Turn a topic or your own material into a distinctive virtual class with clear explanations, hands-on activities, simulations and quick checks for understanding.',
@@ -321,7 +319,7 @@ export function Home({
                 </div>
                 <div className="entry-top">
                   <span className="entry-icon">
-                    <Icon name={entry.icon} size={24} />
+                    <CoastalMark className="h-6 w-6" />
                   </span>
                 </div>
                 <h3>{entry.title}</h3>

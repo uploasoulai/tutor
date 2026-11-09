@@ -24,6 +24,7 @@ import { useChatWorkspaces } from "@/hooks/useChatWorkspaces";
 import SessionList from "@/components/SessionList";
 import { useSidebarDrawer } from "@/components/layout/AppShell";
 import { useDevice } from "@/hooks/useDevice";
+import { COASTALTUTOR_HOME_URL } from "@/lib/platform-links";
 import { VersionBadge } from "@/components/sidebar/VersionBadge";
 import type {
   SessionOrganizationPatch,
@@ -187,7 +188,7 @@ export function ClassicSidebarShell({
         {/* Header: logo + collapse toggle (toggle replaces logo on hover) */}
         <div className="relative mb-2 flex h-9 w-9 items-center justify-center">
           <Link
-            href="/"
+            href={COASTALTUTOR_HOME_URL}
             prefetch={false}
             aria-label="CoastalTutor"
             className="flex items-center justify-center transition-opacity duration-150 group-hover/sb:opacity-0"
@@ -255,7 +256,7 @@ export function ClassicSidebarShell({
     >
       {/* Header: logo + collapse toggle */}
       <div className="flex h-[52px] shrink-0 items-center justify-between px-4">
-        <Link href="/" prefetch={false} className="group flex items-center gap-1.5">
+        <Link href={COASTALTUTOR_HOME_URL} prefetch={false} className="group flex items-center gap-1.5">
           <Image
             src="/brand/coastaltutor-mark.svg"
             alt="CoastalTutor"

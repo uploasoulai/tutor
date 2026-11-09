@@ -1,3 +1,5 @@
+import { CoastalTutorHomeLink } from "@/components/layout/CoastalTutorHomeLink";
+
 export default function AuthLayout({
   children,
 }: {
@@ -5,6 +7,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+      <CoastalTutorHomeLink className="fixed left-4 top-3 z-50" />
       {children}
     </div>
   );

@@ -22,6 +22,7 @@ import { useChatWorkspaces } from "@/hooks/useChatWorkspaces";
 
 import { useSidebarDrawer } from "@/components/layout/AppShell";
 import { useDevice } from "@/hooks/useDevice";
+import { COASTALTUTOR_HOME_URL } from "@/lib/platform-links";
 import type {
   SessionOrganizationPatch,
   SessionSummary,
@@ -105,7 +106,7 @@ export function SidebarShell({
   homeSlot,
   bodySlot,
   footerOverride,
-  brandHref = "/",
+  brandHref = COASTALTUTOR_HOME_URL,
   initialWidth = 272,
   widthStorageKey,
   sessions = [],
