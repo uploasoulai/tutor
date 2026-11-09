@@ -28,6 +28,7 @@
 - For current tester scale, gzip versioned lesson JSON into private Supabase Storage and keep a small Supabase metadata row for cache key, status, compressed size, checksum, timestamps, and storage path. Do not keep growing course JSONB blobs in `learning_sessions`; the session should reference the reusable artifact. Keep storage behind a server adapter so the object store can move to an S3-compatible service (for example Cloudflare R2) as volume/cost needs become clear. Put media in object storage from the start; do not store generated video/image bytes in Postgres.
 - Curriculum lessons now prefer the private shared object cache; `generated_classrooms` remains the owner-scoped fallback for other classroom artifacts or cache write failures. Per-student `reuse_key` behavior remains separate and reopens that learner's own session.
 - For the current curriculum lesson request path, keep three concise classroom scenes, at most one generated interactive widget, and cap model output at 4,096 tokens per call. This preserves a guided classroom with an active manipulation while keeping first-generation time and artifact size bounded; cache hits bypass generation entirely.
+- Course progress counts each learner's distinct generated classroom artifact once. Failed generation attempts without a classroom ID and repeated sessions that reuse an existing classroom do not inflate the course count; completion remains learner-specific.
 
 ## BC and China lesson generation
 

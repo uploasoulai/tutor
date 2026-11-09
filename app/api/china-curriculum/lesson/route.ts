@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
             : {}),
         },
         reuse_key: `${user.id}:china:${details.topic.id}:${jobId}`,
-        status: 'planned',
+        status: reusableLesson ? 'generated' : 'planned',
       })
       .select('id')
       .single();
@@ -275,7 +275,11 @@ export async function GET(request: NextRequest) {
     const job = await readClassroomGenerationJob(payload.classroomJobId, user.id);
     if (!job) return apiError('INVALID_REQUEST', 404, 'Lesson generation job not found');
 
-    if (job.status === 'succeeded' && job.result?.url && payload.classroomUrl !== job.result.url) {
+    if (
+      job.status === 'succeeded' &&
+      job.result?.url &&
+      (payload.classroomUrl !== job.result.url || session.status === 'planned')
+    ) {
       const { error: updateError } = await admin
         .from('learning_sessions')
         .update({

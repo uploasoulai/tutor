@@ -109,7 +109,10 @@ export async function GET(request: NextRequest) {
     const visibleTopics = filtered.slice(0, limit);
     let progressAvailable = false;
     const masteryByTopic = new Map<string, { mastery_level: number; attempts: number }>();
-    const lessonProgressByTopic = new Map<string, { lessons: number; completedLessons: number }>();
+    const lessonProgressByTopic = new Map<
+      string,
+      { classroomIds: Set<string>; completedClassroomIds: Set<string> }
+    >();
     if (role === 'student') {
       const admin = createSupabaseAdminClient();
       const { data: masteryRows, error } = await admin
@@ -137,14 +140,20 @@ export async function GET(request: NextRequest) {
         const payload = session.lesson_payload as {
           curriculumTrack?: string;
           curriculumTopicId?: string;
+          classroomId?: string;
         } | null;
-        if (payload?.curriculumTrack !== 'china' || !payload.curriculumTopicId) continue;
+        if (
+          payload?.curriculumTrack !== 'china' ||
+          !payload.curriculumTopicId ||
+          !payload.classroomId
+        )
+          continue;
         const progress = lessonProgressByTopic.get(payload.curriculumTopicId) ?? {
-          lessons: 0,
-          completedLessons: 0,
+          classroomIds: new Set<string>(),
+          completedClassroomIds: new Set<string>(),
         };
-        progress.lessons += 1;
-        if (session.status === 'completed') progress.completedLessons += 1;
+        progress.classroomIds.add(payload.classroomId);
+        if (session.status === 'completed') progress.completedClassroomIds.add(payload.classroomId);
         lessonProgressByTopic.set(payload.curriculumTopicId, progress);
       }
     }
@@ -226,7 +235,10 @@ export async function GET(request: NextRequest) {
         prerequisiteCount: prereqCounts.get(topic.id) ?? 0,
         textbookNote: topic.textbookNote ?? null,
         progress: masteryByTopic.get(topic.id) ?? null,
-        lessons: lessonProgressByTopic.get(topic.id) ?? { lessons: 0, completedLessons: 0 },
+        lessons: {
+          lessons: lessonProgressByTopic.get(topic.id)?.classroomIds.size ?? 0,
+          completedLessons: lessonProgressByTopic.get(topic.id)?.completedClassroomIds.size ?? 0,
+        },
       })),
       total: filtered.length,
       recommendedTopic: nextUnmastered
