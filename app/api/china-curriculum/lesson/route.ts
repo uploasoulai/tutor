@@ -15,6 +15,7 @@ import { createClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { buildRequestOrigin } from '@/lib/server/classroom-storage';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import { randomUUID } from 'node:crypto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -71,17 +72,22 @@ function makeClassroomRequirement(
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = randomUUID();
+  let failedStage = 'authentication';
   try {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
+    failedStage = 'learner_access';
     if ((await resolveAccountRole(user)) !== 'student') {
       return apiError('INVALID_REQUEST', 403, 'Only a learner can start this lesson');
     }
+    failedStage = 'platform_ai_check';
     await assertPlatformAiWithinLimit(user.id);
 
+    failedStage = 'request_validation';
     const body = (await request.json()) as { topicId?: string; editionId?: string };
     if (!body.topicId) return apiError('MISSING_REQUIRED_FIELD', 400, 'topicId is required');
     const details = await getChinaTopicDetails(
@@ -101,8 +107,10 @@ export async function POST(request: NextRequest) {
     };
     const origin = buildRequestOrigin(request);
     const jobId = nanoid(12);
+    failedStage = 'classroom_job_storage';
     const job = await createClassroomGenerationJob(jobId, input, user.id);
 
+    failedStage = 'learning_history_storage';
     const admin = createSupabaseAdminClient();
     const { data: session, error } = await admin
       .from('learning_sessions')
@@ -155,12 +163,41 @@ export async function POST(request: NextRequest) {
         error.message.replace(/^PLATFORM_AI_NOT_CONFIGURED:\s*/, ''),
       );
     }
+    const diagnostic = describeStartError(error);
+    console.error('[china-lesson-start-failed]', {
+      requestId,
+      stage: failedStage,
+      ...diagnostic,
+    });
     return apiError(
       'INTERNAL_ERROR',
       500,
-      error instanceof Error ? error.message : 'Could not start this lesson',
+      `课程服务暂时无法启动，请稍后再试。（错误编号：${requestId.slice(0, 8)}）`,
     );
   }
+}
+
+function describeStartError(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  if (error && typeof error === 'object') {
+    const value = error as Record<string, unknown>;
+    return {
+      name: typeof value.name === 'string' ? value.name : 'DatabaseError',
+      message: typeof value.message === 'string' ? value.message : 'Unknown database error',
+      code: typeof value.code === 'string' ? value.code : undefined,
+      details: typeof value.details === 'string' ? value.details : undefined,
+      hint: typeof value.hint === 'string' ? value.hint : undefined,
+    };
+  }
+
+  return { name: 'UnknownError', message: String(error) };
 }
 
 export async function GET(request: NextRequest) {

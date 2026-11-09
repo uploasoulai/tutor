@@ -3,6 +3,36 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Bring existing production learning history up to the columns used by the
+-- shared School Learning session writer. The base schema already has these
+-- fields, but older deployed databases may not.
+ALTER TABLE learning_sessions
+  ADD COLUMN IF NOT EXISTS coastaltutor_lesson_id TEXT,
+  ADD COLUMN IF NOT EXISTS bc_outcome_ids UUID[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS lesson_title TEXT,
+  ADD COLUMN IF NOT EXISTS lesson_payload JSONB,
+  ADD COLUMN IF NOT EXISTS reuse_key TEXT,
+  ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'planned';
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'learning_sessions_status_check'
+      AND conrelid = 'learning_sessions'::regclass
+  ) THEN
+    ALTER TABLE learning_sessions
+      ADD CONSTRAINT learning_sessions_status_check
+      CHECK (status IN ('planned', 'generated', 'started', 'completed'));
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS learning_sessions_student_started_idx
+  ON learning_sessions(student_id, started_at DESC);
+
+CREATE INDEX IF NOT EXISTS learning_sessions_reuse_key_idx
+  ON learning_sessions(student_id, reuse_key);
+
 CREATE TABLE IF NOT EXISTS student_curriculum_mastery (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
