@@ -6,6 +6,7 @@ import {
 } from '@/lib/server/classroom-job-store';
 import { buildRequestOrigin } from '@/lib/server/classroom-storage';
 import { createLogger } from '@/lib/logger';
+import { createClient } from '@/lib/supabase/server';
 
 const log = createLogger('ClassroomJob API');
 
@@ -21,7 +22,11 @@ export async function GET(req: NextRequest, context: { params: Promise<{ jobId: 
       return apiError('INVALID_REQUEST', 400, 'Invalid classroom generation job id');
     }
 
-    const job = await readClassroomGenerationJob(jobId);
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
+
+    const job = await readClassroomGenerationJob(jobId, user.id);
     if (!job) {
       return apiError('INVALID_REQUEST', 404, 'Classroom generation job not found');
     }

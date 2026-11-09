@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     };
     const origin = buildRequestOrigin(request);
     const jobId = nanoid(12);
-    const job = await createClassroomGenerationJob(jobId, input);
+    const job = await createClassroomGenerationJob(jobId, input, user.id);
 
     const admin = createSupabaseAdminClient();
     const { data: session, error } = await admin
@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { readClassroomGenerationJob } = await import('@/lib/server/classroom-job-store');
-    const job = await readClassroomGenerationJob(payload.classroomJobId);
+    const job = await readClassroomGenerationJob(payload.classroomJobId, user.id);
     if (!job) return apiError('INVALID_REQUEST', 404, 'Lesson generation job not found');
 
     if (job.status === 'succeeded' && job.result?.url && payload.classroomUrl !== job.result.url) {

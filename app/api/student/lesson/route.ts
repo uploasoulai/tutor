@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
         ...mediaFlags,
         agentMode: 'default' as const,
       };
-      const job = await createClassroomGenerationJob(jobId, generationInput);
+      const job = await createClassroomGenerationJob(jobId, generationInput, user.id);
       const lessonEngine = {
         jobId,
         status: job.status,

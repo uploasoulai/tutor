@@ -11,6 +11,7 @@ import {
   ensureClassroomJobsDir,
   writeJsonFileAtomic,
 } from '@/lib/server/classroom-storage';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export type ClassroomGenerationJobStatus = 'queued' | 'running' | 'succeeded' | 'failed';
 
@@ -42,6 +43,18 @@ export interface ClassroomGenerationJob {
 
 function jobFilePath(jobId: string) {
   return path.join(CLASSROOM_JOBS_DIR, `${jobId}.json`);
+}
+
+async function persistJob(jobId: string, job: ClassroomGenerationJob) {
+  if (process.env.VERCEL === '1') {
+    const { error } = await createSupabaseAdminClient()
+      .from('classroom_generation_jobs')
+      .update({ job_data: job })
+      .eq('id', jobId);
+    if (error) throw error;
+    return;
+  }
+  await writeJsonFileAtomic(jobFilePath(jobId), job);
 }
 
 function buildInputSummary(input: GenerateClassroomInput): ClassroomGenerationJob['inputSummary'] {
@@ -100,6 +113,7 @@ export function isValidClassroomJobId(jobId: string): boolean {
 export async function createClassroomGenerationJob(
   jobId: string,
   input: GenerateClassroomInput,
+  ownerId?: string,
 ): Promise<ClassroomGenerationJob> {
   const now = new Date().toISOString();
   const job: ClassroomGenerationJob = {
@@ -114,15 +128,37 @@ export async function createClassroomGenerationJob(
     scenesGenerated: 0,
   };
 
-  await ensureClassroomJobsDir();
-  await writeJsonFileAtomic(jobFilePath(jobId), job);
+  if (process.env.VERCEL === '1') {
+    if (!ownerId) throw new Error('Classroom job owner is required in hosted mode');
+    const { error } = await createSupabaseAdminClient().from('classroom_generation_jobs').insert({
+      id: jobId,
+      owner_id: ownerId,
+      job_data: job,
+    });
+    if (error) throw error;
+  } else {
+    await ensureClassroomJobsDir();
+    await writeJsonFileAtomic(jobFilePath(jobId), job);
+  }
   return job;
 }
 
 export async function readClassroomGenerationJob(
   jobId: string,
+  ownerId?: string,
 ): Promise<ClassroomGenerationJob | null> {
   try {
+    if (process.env.VERCEL === '1') {
+      let query = createSupabaseAdminClient()
+        .from('classroom_generation_jobs')
+        .select('job_data')
+        .eq('id', jobId);
+      if (ownerId) query = query.eq('owner_id', ownerId);
+      const { data, error } = await query.maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return markStaleIfNeeded(data.job_data as ClassroomGenerationJob);
+    }
     const content = await fs.readFile(jobFilePath(jobId), 'utf-8');
     const job = JSON.parse(content) as ClassroomGenerationJob;
     return markStaleIfNeeded(job);
@@ -150,7 +186,7 @@ export async function updateClassroomGenerationJob(
       updatedAt: new Date().toISOString(),
     };
 
-    await writeJsonFileAtomic(jobFilePath(jobId), updated);
+    await persistJob(jobId, updated);
     return updated;
   });
 }
@@ -172,7 +208,7 @@ export async function markClassroomGenerationJobRunning(
       updatedAt: new Date().toISOString(),
     };
 
-    await writeJsonFileAtomic(jobFilePath(jobId), updated);
+    await persistJob(jobId, updated);
     return updated;
   });
 }

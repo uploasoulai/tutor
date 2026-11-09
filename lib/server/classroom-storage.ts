@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import type { NextRequest } from 'next/server';
 import type { Scene, Stage } from '@/lib/types/stage';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export const CLASSROOMS_DIR = path.join(process.cwd(), 'data', 'classrooms');
 export const CLASSROOM_JOBS_DIR = path.join(process.cwd(), 'data', 'classroom-jobs');
@@ -46,6 +47,15 @@ export function isValidClassroomId(id: string): boolean {
 }
 
 export async function readClassroom(id: string): Promise<PersistedClassroomData | null> {
+  if (process.env.VERCEL === '1') {
+    const { data, error } = await createSupabaseAdminClient()
+      .from('generated_classrooms')
+      .select('classroom_data')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw error;
+    return (data?.classroom_data as PersistedClassroomData | undefined) ?? null;
+  }
   const filePath = path.join(CLASSROOMS_DIR, `${id}.json`);
   try {
     const content = await fs.readFile(filePath, 'utf-8');
@@ -65,6 +75,7 @@ export async function persistClassroom(
     scenes: Scene[];
   },
   baseUrl: string,
+  ownerId?: string,
 ): Promise<PersistedClassroomData & { url: string }> {
   const classroomData: PersistedClassroomData = {
     id: data.id,
@@ -73,9 +84,19 @@ export async function persistClassroom(
     createdAt: new Date().toISOString(),
   };
 
-  await ensureClassroomsDir();
-  const filePath = path.join(CLASSROOMS_DIR, `${data.id}.json`);
-  await writeJsonFileAtomic(filePath, classroomData);
+  if (process.env.VERCEL === '1') {
+    if (!ownerId) throw new Error('Classroom owner is required in hosted mode');
+    const { error } = await createSupabaseAdminClient().from('generated_classrooms').upsert({
+      id: data.id,
+      owner_id: ownerId,
+      classroom_data: classroomData,
+    });
+    if (error) throw error;
+  } else {
+    await ensureClassroomsDir();
+    const filePath = path.join(CLASSROOMS_DIR, `${data.id}.json`);
+    await writeJsonFileAtomic(filePath, classroomData);
+  }
 
   return {
     ...classroomData,

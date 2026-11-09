@@ -164,6 +164,7 @@ export async function generateClassroom(
   input: GenerateClassroomInput,
   options: {
     baseUrl: string;
+    ownerId?: string;
     onProgress?: (progress: ClassroomGenerationProgress) => Promise<void> | void;
   },
 ): Promise<GenerateClassroomResult> {
@@ -457,6 +458,7 @@ export async function generateClassroom(
       scenes,
     },
     options.baseUrl,
+    options.ownerId,
   );
 
   log.info(`Classroom persisted: ${persisted.id}, URL: ${persisted.url}`);
