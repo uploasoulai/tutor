@@ -1,8 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import media from '@/lib/curriculum/fractions-media.json';
 import story from '@/lib/curriculum/fractions-storyboard.json';
+const LittleClassroom = lazy(() =>
+  import('./little-classroom').then((module) => ({ default: module.LittleClassroom })),
+);
 
 export type FractionChapter = 'explain' | 'reason' | 'recap';
 export interface ReviewedVideoStory {
@@ -29,14 +32,17 @@ export function ReviewedLessonVideo({
   chapter,
   media,
   story,
+  playful = false,
 }: {
   chapter: FractionChapter;
   media: { asset: string };
   story: ReviewedVideoStory;
+  playful?: boolean;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [fallback, setFallback] = useState(false);
   const [status, setStatus] = useState('loading');
+  const [room, setRoom] = useState(true);
   const content = story.chapters.find((item) => item.id === chapter)!;
   useEffect(() => {
     if (fallback) return;
@@ -67,6 +73,26 @@ export function ReviewedLessonVideo({
           ? '图解模式 · 每一步都可以慢慢看，也可以随时回到配音讲解。'
           : '配音与图形同步讲解 · 点播放开始，可暂停、拖动进度或从头再看。'}
       </p>
+      {playful && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-sm font-semibold text-[#9a5a21]">一起看图，一起找到小发现</span>
+          <button
+            type="button"
+            aria-pressed={room}
+            onClick={() => setRoom(!room)}
+            className="min-h-11 rounded-xl border border-[#d6b873] bg-[#fff5db] px-4 text-sm font-bold text-[#72531d]"
+          >
+            {room ? '切换专注模式' : '进入虚拟教室'}
+          </button>
+        </div>
+      )}
+      {playful && room && (
+        <Suspense
+          fallback={<p className="mb-4 rounded-2xl bg-[#fff5db] p-4">小海老师正在准备教室…</p>}
+        >
+          <LittleClassroom speaking={status === 'play' && !fallback} />
+        </Suspense>
+      )}
       {!fallback ? (
         <iframe
           ref={frame}
@@ -139,7 +165,7 @@ export function ReviewedLessonVideo({
         className="mt-3 min-h-11 rounded-xl px-3 text-sm font-semibold underline"
         onClick={() => {
           setFallback(!fallback);
-          if (fallback) setStatus('loading');
+          setStatus('loading');
         }}
       >
         {fallback ? '回到配音讲解' : '看不到或听不清？查看图解'}

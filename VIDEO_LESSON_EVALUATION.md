@@ -28,6 +28,8 @@ The first spatial classroom is CSS perspective scenery plus an original SVG teac
 
 This is a lightweight spatial prototype, not a WebGL 3D world. Measure classroom usability and customer reaction before investing in low-poly GLB assets, WebGL loading and device compatibility. A later true 3D shell should remain optional, lazy-loaded and independent of the teaching engine.
 
+Grade-2 reviewed-trial update (2026-11-11): the multiplication trial now includes a separate, lazy-loaded real WebGL teacher/classroom built from small local meshes. It uses no downloaded models, runtime dependency, server GPU, or generation call. Playback drives a gentle gesture; focus mode preserves the active player, reduced-motion keeps a static pose, and graphics failure shows the original static teacher. This changes only the reviewed Grade-2 trial; the full Interactive Classroom's earlier CSS prototype described above remains separate. General AI-generated video/classroom quality is still under evaluation.
+
 ## Read-only production preflight
 
 Run `scripts/tutor_video_preflight.py` inside only the confirmed Tutor container. It reports Node/npm, pinned runtime package readiness, narration dependency, free disk and cgroup memory where available. It installs nothing, sends no model request and prints no secrets. These checks do not prove the module is enabled, that narration can reach its service or that a generated lesson passes acceptance.

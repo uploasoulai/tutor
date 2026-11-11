@@ -9,7 +9,8 @@ export default async function MultiplicationLabPage() {
     data: { user },
   } = await (await createClient()).auth.getUser();
   if (!user) redirect('/login');
-  if ((await resolveAccountRole(user)) !== 'student') redirect('/');
+  if ((await resolveAccountRole(user)) !== 'student')
+    return <MultiplicationPilot questions={[]} preview />;
   const details = await getChinaTopicDetails(MULTIPLICATION_PILOT.topicId);
   const questions =
     details?.questions

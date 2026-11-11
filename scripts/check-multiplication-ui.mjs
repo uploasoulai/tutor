@@ -15,7 +15,7 @@ const questions = [
 ];
 await build({
   stdin: {
-    contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import {MultiplicationPilot} from './components/learning/multiplication-pilot'; createRoot(document.getElementById('app')).render(<MultiplicationPilot questions={${JSON.stringify(questions)}}/>);`,
+    contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import {MultiplicationPilot} from './components/learning/multiplication-pilot'; createRoot(document.getElementById('app')).render(<MultiplicationPilot questions={${JSON.stringify(questions)}} preview={new URLSearchParams(location.search).has('preview')}/>);`,
     resolveDir: root,
     loader: 'tsx',
   },
@@ -129,6 +129,17 @@ try {
   await expect(
     page.frameLocator('iframe').getByRole('button', { name: '暂停讲解', exact: true }),
   ).toBeVisible();
+  const room = page.getByRole('complementary', { name: '小海老师的立体教室' });
+  await expect(room).toHaveAttribute('data-renderer', 'webgl');
+  await expect(room).toHaveAttribute('data-speaking', 'true');
+  await room.screenshot({ path: join(work, '3d-room.png') });
+  await page.getByRole('button', { name: '切换专注模式' }).click();
+  await expect(room).toHaveCount(0);
+  await expect(
+    page.frameLocator('iframe').getByRole('button', { name: '暂停讲解', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: '进入虚拟教室' }).click();
+  await expect(room).toHaveAttribute('data-renderer', 'webgl');
   await page.getByRole('button', { name: '我来摆一摆' }).click();
   await expect(page.getByRole('button', { name: '看看为什么这样写' })).toBeDisabled();
   await page.evaluate(() =>
@@ -200,8 +211,49 @@ try {
   await expect(page.getByRole('heading', { name: '暂时还没有保存这节试课' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '这节试课已存入你的学习档案' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '开始二年级试课' })).toBeDisabled();
+  let previewCalls = 0;
+  await page.unroute('**/api/**');
+  await page.route('**/api/**', (route) => {
+    previewCalls++;
+    return route.fulfill({ status: 500, json: { success: false } });
+  });
+  await page.goto(address + '?preview=1');
+  await page.getByRole('button', { name: '开始二年级体验' }).click();
+  await page.getByRole('button', { name: '图形一', exact: true }).click();
+  await page.getByRole('button', { name: '看老师讲一讲' }).click();
+  await expect(page.getByRole('complementary', { name: '小海老师的立体教室' })).toHaveAttribute(
+    'data-renderer',
+    'webgl',
+  );
+  await page.getByRole('button', { name: '我来摆一摆' }).click();
+  await fillGroups();
+  await page.getByRole('button', { name: '看看为什么这样写' }).click();
+  await page.getByRole('button', { name: '试试一个小问题' }).click();
+  await page.getByRole('button', { name: '6', exact: true }).click();
+  await page.getByRole('button', { name: '记住今天的发现' }).click();
+  await page.getByRole('button', { name: '结束体验' }).click();
+  await expect(page.getByRole('heading', { name: '二年级课堂体验完成了！' })).toBeVisible();
+  if (previewCalls !== 0) throw new Error('Preview touched a learner API');
+  // Device fallback keeps teaching usable without a graphics context.
+  const fallbackPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await fallbackPage.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      return type === 'webgl' ? null : original.call(this, type, ...args);
+    };
+  });
+  await fallbackPage.goto(address + '?preview=1');
+  await fallbackPage.getByRole('button', { name: '开始二年级体验' }).click();
+  await fallbackPage.getByRole('button', { name: '图形一', exact: true }).click();
+  await fallbackPage.getByRole('button', { name: '看老师讲一讲' }).click();
+  await expect(fallbackPage.getByRole('img', { name: '微笑的小海老师' })).toBeVisible();
+  await expect(
+    fallbackPage.frameLocator('iframe').getByRole('button', { name: '播放讲解', exact: true }),
+  ).toBeVisible();
+  await fallbackPage.screenshot({ path: join(work, 'static-teacher-mobile.png'), fullPage: true });
+  await fallbackPage.close();
   console.log(
-    'Grade-2 UI passed: one saved profile reference, explicit start, six steps, actual grouping/clear gate, owner-session answers, Tutor handoff, review without writes, phone resume.',
+    'Grade-2 UI passed: one saved profile reference, explicit start, six steps, actual grouping/clear gate, owner-session answers, Tutor handoff, review without writes, phone resume, real 3D teacher/focus, role-preview without learner API calls and static fallback.',
   );
 } finally {
   await browser.close();
