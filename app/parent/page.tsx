@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { LearningSupportGuide } from '@/components/learning-support-guide';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { getDevPreviewUser } from '@/lib/auth/dev-preview';
@@ -333,6 +334,12 @@ export default function ParentDashboardPage() {
                 </button>
               </div>
             </section>
+          )}
+
+          {activeNav === 'dashboard' && (
+            <div className="mb-6">
+              <LearningSupportGuide audience="parent" />
+            </div>
           )}
 
           {activeNav === 'progress' ? (

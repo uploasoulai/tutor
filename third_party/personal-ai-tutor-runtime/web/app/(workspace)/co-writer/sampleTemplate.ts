@@ -106,7 +106,7 @@ ${FENCE}
 
 ### Images
 
-![](/brand/color-logo.png)
+![CoastalTutor](/brand/coastaltutor-mark.svg)
 
 > CoastalTutor brand mark used inside the co-writer template.
 

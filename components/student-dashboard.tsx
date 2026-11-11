@@ -7,6 +7,7 @@ import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from '@/components/settings';
 import { CoastalMark } from '@/components/coastal-mark';
+import { LearningSupportGuide } from '@/components/learning-support-guide';
 import { DEFAULT_GRADE_LABEL, DEFAULT_SUBJECT } from '@/lib/curriculum/grade';
 import { buildFallbackGoals, type TodayGoal } from '@/lib/curriculum/planner';
 import {
@@ -215,10 +216,6 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
 
   const openPersonalTutor = () => {
     window.location.assign('/api/learning/launch?mode=personal');
-  };
-
-  const openTutorSpace = (mode: 'practice' | 'mastery' | 'progress' | 'profile') => {
-    window.location.assign(`/api/learning/launch?mode=${mode}`);
   };
 
   const openSchoolPlan = () => {
@@ -615,43 +612,7 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
                 </section>
               )}
 
-              {activeNav === 'dashboard' && (
-                <section
-                  aria-label="More ways to learn with your tutor"
-                  className="grid gap-3 rounded-2xl border border-[#dbe5ef] bg-white p-5 sm:grid-cols-2 lg:grid-cols-[1fr_repeat(4,auto)] lg:items-center"
-                >
-                  <div className="sm:pr-3">
-                    <h2 className="font-semibold text-[#172b43]">Your tutor learning tools</h2>
-                    <p className="mt-1 text-sm text-[#64758a]">
-                      Review tricky questions, explore a learning path, or check your progress.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => openTutorSpace('practice')}
-                    className="min-h-11 rounded-xl bg-[#edf4ff] px-4 text-sm font-semibold text-[#244d79] hover:bg-[#e2edfc]"
-                  >
-                    Review my mistakes
-                  </button>
-                  <button
-                    onClick={() => openTutorSpace('mastery')}
-                    className="min-h-11 rounded-xl bg-[#edf4ff] px-4 text-sm font-semibold text-[#244d79] hover:bg-[#e2edfc]"
-                  >
-                    My learning paths
-                  </button>
-                  <button
-                    onClick={() => openTutorSpace('progress')}
-                    className="min-h-11 rounded-xl bg-[#edf4ff] px-4 text-sm font-semibold text-[#244d79] hover:bg-[#e2edfc]"
-                  >
-                    My progress
-                  </button>
-                  <button
-                    onClick={() => openTutorSpace('profile')}
-                    className="min-h-11 rounded-xl bg-[#f5f6f8] px-4 text-sm font-semibold text-[#536579] hover:bg-[#eceff3]"
-                  >
-                    Learning profile
-                  </button>
-                </section>
-              )}
+              {activeNav === 'dashboard' && <LearningSupportGuide />}
             </>
           )}
         </div>
