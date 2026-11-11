@@ -63,22 +63,29 @@ export function isValidClassroomId(id: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(id);
 }
 
-export async function readClassroom(id: string): Promise<PersistedClassroomData | null> {
+export async function readClassroom(
+  id: string,
+  ownerId: string,
+): Promise<PersistedClassroomData | null> {
+  if (!ownerId || !isValidClassroomId(id)) return null;
   if (usesPersistentClassroomStore()) {
     const { data, error } = await createSupabaseAdminClient()
       .from('generated_classrooms')
-      .select('classroom_data')
+      .select('classroom_data,owner_id')
       .eq('id', id)
       .maybeSingle();
     if (error) throw error;
     const classroom = (data?.classroom_data as PersistedClassroomData | undefined) ?? null;
-    if (classroom) return classroom;
+    if (data) return data.owner_id === ownerId ? classroom : null;
     return readCachedClassroomById(id);
   }
   const filePath = path.join(CLASSROOMS_DIR, `${id}.json`);
   try {
     const content = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(content) as PersistedClassroomData;
+    const stored = JSON.parse(content) as PersistedClassroomData & { ownerId?: string };
+    if (stored.ownerId !== ownerId) return null;
+    const { ownerId: _ownerId, ...classroom } = stored;
+    return classroom;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       return null;
@@ -97,6 +104,7 @@ export async function persistClassroom(
   ownerId?: string,
   cacheDescriptor?: CurriculumLessonCacheDescriptor,
 ): Promise<PersistedClassroomData & { url: string }> {
+  if (!isValidClassroomId(data.id)) throw new Error('Invalid classroom id');
   const classroomData: PersistedClassroomData = {
     id: data.id,
     stage: data.stage,
@@ -118,17 +126,34 @@ export async function persistClassroom(
       }
     }
     if (!savedToCurriculumStore) {
-      const { error } = await createSupabaseAdminClient().from('generated_classrooms').upsert({
-        id: data.id,
-        owner_id: ownerId,
-        classroom_data: classroomData,
-      });
+      const admin = createSupabaseAdminClient();
+      const { data: existing, error: lookupError } = await admin
+        .from('generated_classrooms')
+        .select('owner_id')
+        .eq('id', data.id)
+        .maybeSingle();
+      if (lookupError) throw lookupError;
+      if (existing && existing.owner_id !== ownerId) throw new Error('Classroom is unavailable');
+      // An insert collision fails atomically; updates remain constrained to this owner.
+      const table = admin.from('generated_classrooms');
+      const { error } = existing
+        ? await table
+            .update({ classroom_data: classroomData })
+            .eq('id', data.id)
+            .eq('owner_id', ownerId)
+        : await table.insert({ id: data.id, owner_id: ownerId, classroom_data: classroomData });
       if (error) throw error;
     }
   } else {
     await ensureClassroomsDir();
     const filePath = path.join(CLASSROOMS_DIR, `${data.id}.json`);
-    await writeJsonFileAtomic(filePath, classroomData);
+    try {
+      const existing = JSON.parse(await fs.readFile(filePath, 'utf-8')) as { ownerId?: string };
+      if (!ownerId || existing.ownerId !== ownerId) throw new Error('Classroom is unavailable');
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    }
+    await writeJsonFileAtomic(filePath, { ...classroomData, ownerId });
   }
 
   return {

@@ -8,6 +8,7 @@ import { useSettingsStore } from '@/lib/store/settings';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { SceneSidebar } from './stage/scene-sidebar';
 import { Header } from './header';
+import { VirtualClassroomShell } from './stage/virtual-classroom-shell';
 import { CanvasArea } from '@/components/canvas/canvas-area';
 import { Roundtable } from '@/components/roundtable';
 import { PlaybackEngine, computePlaybackView } from '@/lib/playback';
@@ -985,43 +986,50 @@ export function Stage({
           }}
           suppressHydrationWarning
         >
-          <CanvasArea
-            currentScene={currentScene}
-            currentSceneIndex={currentSceneIndex}
-            scenesCount={totalScenesCount}
-            mode={mode}
-            engineState={canvasEngineState}
-            isLiveSession={
-              chatIsStreaming || isTopicPending || engineMode === 'live' || !!chatSessionType
+          <VirtualClassroomShell
+            speaking={
+              Boolean(speakingAgentId) && (engineMode === 'playing' || engineMode === 'live')
             }
-            whiteboardOpen={whiteboardOpen}
-            sidebarCollapsed={sidebarCollapsed}
-            chatCollapsed={chatAreaCollapsed}
-            onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-            onToggleChat={() => setChatAreaCollapsed(!chatAreaCollapsed)}
-            onPrevSlide={handlePreviousScene}
-            onNextSlide={handleNextScene}
-            onPlayPause={handlePlayPause}
-            onWhiteboardClose={handleWhiteboardToggle}
-            isPresenting={isPresenting}
-            onTogglePresentation={togglePresentation}
-            showStopDiscussion={
-              engineMode === 'live' ||
-              (chatIsStreaming && (chatSessionType === 'qa' || chatSessionType === 'discussion'))
-            }
-            onStopDiscussion={handleStopDiscussion}
-            hideToolbar={mode === 'playback' || (isPresenting && !controlsVisible)}
-            isPendingScene={isPendingScene}
-            isCourseComplete={isCourseComplete}
-            isGenerationFailed={
-              isPendingScene && failedOutlines.some((f) => f.id === generatingOutlines[0]?.id)
-            }
-            onRetryGeneration={
-              onRetryOutline && generatingOutlines[0]
-                ? () => onRetryOutline(generatingOutlines[0].id)
-                : undefined
-            }
-          />
+            presenting={isPresenting || mode !== 'playback'}
+          >
+            <CanvasArea
+              currentScene={currentScene}
+              currentSceneIndex={currentSceneIndex}
+              scenesCount={totalScenesCount}
+              mode={mode}
+              engineState={canvasEngineState}
+              isLiveSession={
+                chatIsStreaming || isTopicPending || engineMode === 'live' || !!chatSessionType
+              }
+              whiteboardOpen={whiteboardOpen}
+              sidebarCollapsed={sidebarCollapsed}
+              chatCollapsed={chatAreaCollapsed}
+              onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+              onToggleChat={() => setChatAreaCollapsed(!chatAreaCollapsed)}
+              onPrevSlide={handlePreviousScene}
+              onNextSlide={handleNextScene}
+              onPlayPause={handlePlayPause}
+              onWhiteboardClose={handleWhiteboardToggle}
+              isPresenting={isPresenting}
+              onTogglePresentation={togglePresentation}
+              showStopDiscussion={
+                engineMode === 'live' ||
+                (chatIsStreaming && (chatSessionType === 'qa' || chatSessionType === 'discussion'))
+              }
+              onStopDiscussion={handleStopDiscussion}
+              hideToolbar={mode === 'playback' || (isPresenting && !controlsVisible)}
+              isPendingScene={isPendingScene}
+              isCourseComplete={isCourseComplete}
+              isGenerationFailed={
+                isPendingScene && failedOutlines.some((f) => f.id === generatingOutlines[0]?.id)
+              }
+              onRetryGeneration={
+                onRetryOutline && generatingOutlines[0]
+                  ? () => onRetryOutline(generatingOutlines[0].id)
+                  : undefined
+              }
+            />
+          </VirtualClassroomShell>
         </div>
 
         {/* Roundtable Area */}

@@ -18,6 +18,13 @@ This short file is the working index. **The latest user-approved decisions in ch
 - The user explicitly approved the existing SiliconFlow key as the temporary **primary** Platform AI provider for private testing. This is an explicit provider setting, not an automatic fallback. Switch to DeepSeek when its key is ready. Do not enable SiliconFlow as a general commercial SaaS fallback without the separate forwarding-terms review.
 - Only text teaching is required for initial launch; optional media providers must not block ordinary lessons.
 
+## 2026-11-10 advisory review
+
+- `IMPROVEMENT_ROADMAP.md` records the evidence-based decisions and eight acceptance stages from Recommendations_v3. The advisory is not an instruction to rewrite the system.
+- First local patch requires authenticated classroom reads, private owner checks, and owner-safe writes. Six regression tests pass; deployment and the remaining media/export privacy audit are pending.
+- A resource-conscious spatial classroom prototype wraps playback with CSS scenery and an SVG teacher, with focus/presentation/mobile/reduced-motion fallbacks. This is not a WebGL 3D scene and adds no paid API or server render work. See `VIDEO_LESSON_EVALUATION.md` for the Video Lesson pilot decision and unverified production gates.
+- Personal launch currently resolves to chat; evaluate the existing native learning dashboard before adding a new learning homepage. Video Lesson is present in pinned source but production readiness and comparison are unverified.
+
 ## Delivery sequence
 
 1. Make student testers able to use China K–12 courses, classroom generation, and DeepTutor with the temporary SiliconFlow platform key.

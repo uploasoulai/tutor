@@ -12,6 +12,8 @@ import { createClient } from '@/lib/supabase/server';
 
 const log = createLogger('Classroom API');
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   let stageId: string | undefined;
   let sceneCount: number | undefined;
@@ -35,6 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     const id = stage.id || randomUUID();
+    if (!isValidClassroomId(id)) return apiError('INVALID_REQUEST', 400, 'Invalid classroom id');
     const baseUrl = buildRequestOrigin(request);
 
     const persisted = await persistClassroom(
@@ -74,12 +77,20 @@ export async function GET(request: NextRequest) {
       return apiError(API_ERROR_CODES.INVALID_REQUEST, 400, 'Invalid classroom id');
     }
 
-    const classroom = await readClassroom(id);
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
+
+    const classroom = await readClassroom(id, user.id);
     if (!classroom) {
       return apiError(API_ERROR_CODES.INVALID_REQUEST, 404, 'Classroom not found');
     }
 
-    return apiSuccess({ classroom });
+    const response = apiSuccess({ classroom });
+    response.headers.set('Cache-Control', 'private, no-store');
+    return response;
   } catch (error) {
     log.error(
       `Classroom retrieval failed [id=${request.nextUrl.searchParams.get('id') ?? 'unknown'}]:`,
