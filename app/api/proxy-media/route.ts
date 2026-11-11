@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
 import { apiError } from '@/lib/server/api-response';
 import { createLogger } from '@/lib/logger';
+import { createClient } from '@/lib/supabase/server';
 
 const log = createLogger('ProxyMedia');
 
@@ -23,6 +24,10 @@ export const maxDuration = 60;
 export async function POST(request: NextRequest) {
   let url: string | undefined;
   try {
+    const {
+      data: { user },
+    } = await (await createClient()).auth.getUser();
+    if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
     ({ url } = await request.json());
 
     if (!url || typeof url !== 'string') {
@@ -36,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Disable redirect following to prevent redirect-to-internal attacks
-    const response = await fetch(url, { redirect: 'manual' });
+    const response = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(50_000) });
     if (response.status >= 300 && response.status < 400) {
       return apiError('REDIRECT_NOT_ALLOWED', 403, 'Redirects are not allowed');
     }
@@ -51,11 +56,14 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': contentType,
         'Content-Length': String(blob.size),
-        'Cache-Control': 'private, max-age=3600',
+        'Cache-Control': 'private, no-store',
+        'X-Content-Type-Options': 'nosniff',
       },
     });
   } catch (error) {
-    log.error(`Proxy media failed [url="${url?.substring(0, 100) ?? 'unknown'}"]:`, error);
-    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
+    // Remote media links may contain provider signatures or private query tokens.
+    // Do not put them (or upstream exception messages containing them) in logs/responses.
+    log.error('Proxy media failed', error instanceof Error ? error.name : 'UnknownError');
+    return apiError('INTERNAL_ERROR', 500, 'Could not retrieve media');
   }
 }

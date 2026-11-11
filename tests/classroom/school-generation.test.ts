@@ -95,6 +95,7 @@ import {
   advanceSchoolGeneration,
   schoolGenerationError,
   assertSchoolAiAvailable,
+  schoolGenerationUserPrompt,
 } from '@/lib/server/school-generation-runner';
 
 const run = (retry = false) =>
@@ -145,6 +146,34 @@ describe('durable school generation', () => {
     expect(mock.ai).toHaveBeenCalledTimes(1);
     expect(mock.job?.schoolGeneration?.phase).toBe('content');
     expect(mock.job?.schoolGeneration?.reservedCalls).toBe(1);
+  });
+  it('continues from the previous saved narration after a step resumes', async () => {
+    await run();
+    await run();
+    await run();
+    const state = mock.job!.schoolGeneration!;
+    state.scenes[0].actions = [
+      { id: 'earlier', type: 'speech', text: 'Earlier explanation' },
+      { id: 'last', type: 'speech', text: '现在我们已经发现每组同样多。' },
+      { id: 'point', type: 'laser', elementId: 'group-picture' },
+    ];
+    await run();
+    await run();
+    expect(mock.actions.mock.calls.at(-1)?.[3].ctx.previousSpeeches).toEqual([
+      '现在我们已经发现每组同样多。',
+    ]);
+    expect(mock.actions.mock.calls.at(-1)?.[3].ctx.pageIndex).toBe(2);
+    expect(mock.ai).toHaveBeenCalledTimes(5);
+  });
+  it('applies grounded teaching directions only to School action generation', async () => {
+    const state = mock.job!.schoolGeneration!;
+    state.phase = 'actions';
+    const prompt = schoolGenerationUserPrompt(state, 'Actual scene content');
+    expect(prompt).toContain('Actual scene content');
+    expect(prompt).toContain('objects, labels and controls that actually exist');
+    expect(prompt).toContain('rather than reading slide text aloud');
+    state.phase = 'outline';
+    expect(schoolGenerationUserPrompt(state, 'Outline')).toBe('Outline');
   });
   it('saves each phase and publishes only a complete lesson; completed reads spend nothing', async () => {
     for (let i = 0; i < 8; i++) await run();

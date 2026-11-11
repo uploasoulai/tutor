@@ -4,7 +4,9 @@ import type { Scene, Stage } from '@/lib/types/stage';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 const BUCKET = 'curriculum-lessons';
-const CACHE_SCHEMA_VERSION = 2;
+// Includes the School-only teaching delivery policy, not just JSON shape.
+// Existing learner history still opens old artifact IDs; new requests use this revision.
+const CACHE_SCHEMA_VERSION = 3;
 
 function usesPersistentClassroomStore() {
   return (

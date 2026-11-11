@@ -64,6 +64,8 @@ export function schoolGenerationMessage(code?: string) {
 }
 
 export function schoolGenerationUserPrompt(state: SchoolGenerationState, user: string) {
+  if (state.phase === 'actions')
+    return `${user}\n\nSchool Learning teaching delivery: use the learner age/grade and language specified in this curriculum, without assuming every learner is Grade 2. Explain the idea behind the visible example rather than reading slide text aloud. Keep each speech turn to one short idea. Refer only to objects, labels and controls that actually exist in the current supplied scene; never invent a chair, draggable object, animation, or button. For slide emphasis, use only actual supplied element IDs and place the spotlight/laser immediately before the matching explanation. For an activity, explain its real touch/click controls, invite the learner to try, and do not narrate a successful learner action as if it already happened. Use one brief observation question where useful, with warm specific encouragement rather than speed pressure. Do not repeat the course greeting on later pages. Keep the existing structured action output format.`;
   if (state.phase !== 'content' || state.outlines?.[state.sceneIndex]?.type !== 'interactive')
     return user;
   return `${user}\n\nSchool Learning delivery constraints: use ONE small touch/click teaching activity, not a timed arcade game. Replace any drag instruction in the outline with a touch/click equivalent, keeping the same mathematical goal. No countdown, speed score, external images, or external game libraries. Make buttons at least 44px, use border-box sizing, wrap for 390px screens. Use addEventListener for controls. All referenced objects and event handlers must exist. Keep HTML compact: at most 100 lines and about 1800 output tokens, simple CSS, no decorative animation. Tie feedback to the learning objective. Do not remove the underlying subject-learning task.`;
@@ -326,7 +328,12 @@ export async function generateSchoolStep(state: SchoolGenerationState, aiCall: A
       pageIndex: state.sceneIndex + 1,
       totalPages: state.outlines!.length,
       allTitles: state.outlines!.map((o) => o.title),
-      previousSpeeches: [],
+      previousSpeeches:
+        state.scenes
+          .at(-1)
+          ?.actions?.filter((action) => action.type === 'speech' && typeof action.text === 'string')
+          .slice(-1)
+          .map((action) => (action.type === 'speech' ? action.text.slice(-150) : '')) ?? [],
     },
   });
   if (!actions.length) throw new Error('Teaching actions unavailable');

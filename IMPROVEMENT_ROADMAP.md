@@ -39,6 +39,8 @@ Recommendations_v3.md is advisory. Latest user decisions and observed code take 
 
 ## First patch verification
 
+2026-11-11 follow-up: local classroom media and the media proxy now require platform authentication; local media uses the existing classroom owner/shared-artifact decision before filesystem access and is no longer publicly cached. Interactive scene/thumbnail scripts run without platform-origin privileges; real browser tests retain controls and teacher messaging. See `CLASSROOM_ACCESS_REVIEW.md` for evidence and remaining boundaries. The durable School runner now also passes the previous saved narration to the next scene, with School-only grounded explanation directions; this is a generation improvement, not verified automatic video delivery.
+
 - tests/classroom/storage-ownership.test.ts: 6 tests passed (private read isolation, owner access, identity required, authenticated shared reuse, private overwrite rejection).
 - Scope: /api/classroom GET and classroom storage. This is not a complete audit of media/export routes.
 - Hosted writes use insert for new IDs (unique-key collision cannot overwrite an existing owner) and owner-filtered update for existing records. Local stored records carry owner metadata; legacy local records lacking ownership are denied rather than guessed. Hosted records use the existing owner_id.
