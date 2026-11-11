@@ -16,6 +16,8 @@ vi.mock('next/navigation', () => ({
   },
 }));
 import Page from '@/app/school-learning/china/multiplication-lab/page';
+import PlaceValuePage from '@/app/school-learning/china/place-value-lab/page';
+import { renderToStaticMarkup } from 'react-dom/server';
 describe('shared reviewed trial access', () => {
   beforeEach(() => {
     state.user = { id: 'learner' };
@@ -47,5 +49,27 @@ describe('shared reviewed trial access', () => {
     state.user = null;
     await expect(Page()).rejects.toThrow('redirect:/login');
     expect(state.catalog).not.toHaveBeenCalled();
+  });
+  it('opens the prepared four-place exploration for a signed-in parent without private bank data', async () => {
+    state.role = 'parent';
+    const markup = renderToStaticMarkup(
+      await PlaceValuePage({ searchParams: Promise.resolve({ topic: 'cnm_p055' }) }),
+    );
+    expect(markup).toContain('2046');
+    expect(markup).toContain('不写入学习记录或成绩');
+    expect(state.catalog).not.toHaveBeenCalled();
+  });
+  it('does not reflect arbitrary topic input into the prepared exploration', async () => {
+    const markup = renderToStaticMarkup(
+      await PlaceValuePage({ searchParams: Promise.resolve({ topic: 'private-topic-input' }) }),
+    );
+    expect(markup).toContain('243');
+    expect(markup).not.toContain('private-topic-input');
+  });
+  it('requires sign-in before opening the exploration', async () => {
+    state.user = null;
+    await expect(PlaceValuePage({ searchParams: Promise.resolve({}) })).rejects.toThrow(
+      'redirect:/login',
+    );
   });
 });

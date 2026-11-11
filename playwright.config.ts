@@ -26,7 +26,7 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       PORT: '3002',
-      COASTALTUTOR_NEXT_DIST_DIR: '.next-e2e',
+      COASTALTUTOR_NEXT_DIST_DIR: process.env.COASTALTUTOR_NEXT_DIST_DIR ?? '.next-e2e',
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321',
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
         process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??

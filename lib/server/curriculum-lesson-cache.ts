@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import type { Scene, Stage } from '@/lib/types/stage';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { reviewedSchoolActivity } from '@/lib/curriculum/reviewed-school-activities';
 
 const BUCKET = 'curriculum-lessons';
 // Includes the School-only teaching delivery policy, not just JSON shape.
@@ -53,11 +54,13 @@ export function describeCurriculumLesson({
   requirement: string;
 }): CurriculumLessonCacheDescriptor {
   const sourceRevision = createHash('sha256').update(requirement).digest('hex');
+  const activity = reviewedSchoolActivity(track, canonicalId);
   const identity = JSON.stringify({
     track,
     canonicalId,
     sourceRevision,
     schemaVersion: CACHE_SCHEMA_VERSION,
+    ...(activity ? { reviewedActivity: activity.id } : {}),
   });
 
   return {

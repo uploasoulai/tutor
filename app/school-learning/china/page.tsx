@@ -1094,6 +1094,20 @@ export default function ChinaSchoolLearningPage() {
                 )}
               </section>
 
+              {['cnm_p053', 'cnm_p055'].includes(selected.topic.id) && (
+                <section className="rounded-3xl border border-[#aac9bd] bg-[#fff5db] p-5 sm:p-6">
+                  <h3 className="font-bold text-[#173e49]">先搭一搭，再开始课堂</h3>
+                  <p className="my-3 text-sm leading-7 text-[#52716e]">
+                    用计数块看看每个数位怎样组成一个数。探索已经准备好，不用等待生成；这里不计分，课程理解检查会单独记录。
+                  </p>
+                  <a
+                    href={`/school-learning/china/place-value-lab?topic=${selected.topic.id}`}
+                    className="inline-flex min-h-12 items-center rounded-2xl bg-[#126e75] px-5 font-bold text-white"
+                  >
+                    打开数位探索 →
+                  </a>
+                </section>
+              )}
               {selected.topic.id === 'cnm_p038' && (
                 <section className="rounded-3xl border border-[#aac9bd] bg-[#edf6ee] p-5 sm:p-6">
                   <h3 className="font-bold text-[#173e49]">二年级配音互动试课</h3>

@@ -266,6 +266,37 @@ describe('durable school generation', () => {
     expect(mock.content).toHaveBeenCalledTimes(1);
     expect(mock.ai).toHaveBeenCalledTimes(2);
   });
+  it.each(['cnm_p053', 'cnm_p055'])(
+    'restores the same reviewed task at a saved %s checkpoint without generating widget code',
+    async (topic) => {
+      mock.job!.schoolGeneration!.input.curriculumLessonCache!.canonicalId = 'pep:' + topic;
+      await run();
+      expect(mock.job!.schoolGeneration!.outlines![1].title).toContain(
+        topic === 'cnm_p053' ? '243' : '2046',
+      );
+      const state = mock.job!.schoolGeneration!;
+      state.phase = 'content';
+      state.sceneIndex = 1;
+      state.outlines![1].title = 'Unrelated old draft';
+      state.outlines![1].description = 'Drag chairs';
+      await run();
+      expect(mock.ai).toHaveBeenCalledTimes(1);
+      expect(mock.content).not.toHaveBeenCalled();
+      expect(mock.job!.schoolGeneration!.outlines![1].description).not.toContain('chairs');
+      expect(mock.job!.schoolGeneration!.pendingContent).toMatchObject({
+        teacherActions: [expect.objectContaining({ type: 'speech' })],
+      });
+    },
+  );
+  it('grounds planning in the same quantities and real controls as the reviewed activity', () => {
+    const state = mock.job!.schoolGeneration!;
+    state.input.curriculumLessonCache!.canonicalId = 'pep:cnm_p053';
+    const prompt = schoolGenerationUserPrompt(state, 'Curriculum requirements');
+    expect(prompt).toContain('Curriculum requirements');
+    expect(prompt).toContain('243');
+    expect(prompt).toContain('加一个');
+    expect(prompt).toContain('Do not promise different objects');
+  });
   it('retains provider status when content catches the original exception', async () => {
     await run();
     mock.ai.mockRejectedValueOnce(Object.assign(new Error('private body'), { statusCode: 401 }));

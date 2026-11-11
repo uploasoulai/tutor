@@ -26,7 +26,10 @@ import {
 import { resolveLearnerJobModel } from './resolve-model';
 import { runWithPlatformAiUsage, assertPlatformAiWithinLimit } from './platform-ai-usage';
 import { persistClassroom } from './classroom-storage';
-import { GROUPING_ACTIVITY_HTML } from '@/lib/curriculum/grouping-activity';
+import {
+  reviewedSchoolActivity,
+  bindReviewedActivity,
+} from '@/lib/curriculum/reviewed-school-activities';
 
 export async function assertSchoolAiAvailable(ownerId: string) {
   const { byok } = await resolveLearnerJobModel(ownerId);
@@ -64,6 +67,12 @@ export function schoolGenerationMessage(code?: string) {
 }
 
 export function schoolGenerationUserPrompt(state: SchoolGenerationState, user: string) {
+  const activity = reviewedSchoolActivity(
+    state.input.curriculumLessonCache?.track,
+    state.input.curriculumLessonCache?.canonicalId,
+  );
+  if (state.phase === 'outline' && activity)
+    return `${user}\n\nReviewed classroom activity contract: the ONE interactive scene will use this existing activity, not generated controls. Title: ${activity.title}. Learning objective: ${activity.objective}. Actual visible task and controls: ${activity.description}. Ground the course's interaction and transitions in these exact quantities and representations. Other examples may differ, but announce each new example clearly. Do not promise different objects, drag controls, or a different target number in this interactive scene.`;
   if (state.phase === 'actions')
     return `${user}\n\nSchool Learning teaching delivery: use the learner age/grade and language specified in this curriculum, without assuming every learner is Grade 2. Explain the idea behind the visible example rather than reading slide text aloud. Keep each speech turn to one short idea. Refer only to objects, labels and controls that actually exist in the current supplied scene; never invent a chair, draggable object, animation, or button. For slide emphasis, use only actual supplied element IDs and place the spotlight/laser immediately before the matching explanation. For an activity, explain its real touch/click controls, invite the learner to try, and do not narrate a successful learner action as if it already happened. Use one brief observation question where useful, with warm specific encouragement rather than speed pressure. Do not repeat the course greeting on later pages. Keep the existing structured action output format.`;
   if (state.phase !== 'content' || state.outlines?.[state.sceneIndex]?.type !== 'interactive')
@@ -265,6 +274,14 @@ export async function generateSchoolStep(state: SchoolGenerationState, aiCall: A
         true,
       ),
     );
+    const activity = reviewedSchoolActivity(
+      state.input.curriculumLessonCache?.track,
+      state.input.curriculumLessonCache?.canonicalId,
+    );
+    if (activity)
+      state.outlines = state.outlines.map((outline) =>
+        outline.type === 'interactive' ? bindReviewedActivity(outline, activity) : outline,
+      );
     state.languageDirective = result.data.languageDirective;
     state.stage = {
       id: `course-${state.input.curriculumLessonCache!.cacheKey.slice(0, 32)}`,
@@ -278,24 +295,30 @@ export async function generateSchoolStep(state: SchoolGenerationState, aiCall: A
     state.phase = 'content';
     return;
   }
-  const outline = state.outlines![state.sceneIndex];
+  let outline = state.outlines![state.sceneIndex];
+  const activity =
+    outline.type === 'interactive'
+      ? reviewedSchoolActivity(
+          state.input.curriculumLessonCache?.track,
+          state.input.curriculumLessonCache?.canonicalId,
+        )
+      : null;
+  // Bind the same teaching contract on old checkpoints too; content and narration
+  // must never refer to a different model-generated task for this reviewed scene.
+  if (activity)
+    state.outlines![state.sceneIndex] = outline = bindReviewedActivity(outline, activity);
   const options = { agents, languageDirective: state.languageDirective };
   if (state.phase === 'content') {
-    // A reviewed manipulative replaces uncertain generated JS only for this exact graph topic.
-    const reviewedGrouping =
-      outline.type === 'interactive' &&
-      state.input.curriculumLessonCache?.track === 'china' &&
-      state.input.curriculumLessonCache.canonicalId.endsWith(':cnm_p038');
-    const content = reviewedGrouping
+    // Reviewed manipulatives replace generated JS only for explicitly matched graph topics.
+    const content = activity
       ? {
-          html: GROUPING_ACTIVITY_HTML,
+          html: activity.html,
           widgetType: 'simulation' as const,
           teacherActions: [
             {
-              id: 'grouping-intro',
+              id: `${activity.id}-intro`,
               type: 'speech' as const,
-              content:
-                '我们来分一分。每个盒子放两个圆片。先点圆片，再点盒子；放好以后数一数，一共有几个二。',
+              content: activity.narration,
             },
           ],
         }
