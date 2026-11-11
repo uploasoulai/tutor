@@ -1,0 +1,15 @@
+import React from 'react';
+import { AbsoluteFill, useCurrentFrame } from 'remotion';
+export const LESSON = { width: 1280, height: 720, fps: 30, durationInFrames: 600 };
+export function Lesson() {
+  const frame = useCurrentFrame();
+  const shaded = frame < 120 ? 0 : frame < 240 ? 1 : frame < 360 ? 2 : 3;
+  const caption = frame < 120 ? '先把一个整体平均分成 4 份。' : frame < 420 ? '每一份都是四分之一。数一数涂色的份数。' : '涂色 3 份，就是四分之三。再涂 1 份会怎样？';
+  return <AbsoluteFill style={{background:'#f2f8f5',fontFamily:'Microsoft YaHei, sans-serif',padding:70,color:'#173e49'}}>
+    <div style={{fontSize:23,color:'#427d78'}}>CoastalTutor · 分数小课堂</div>
+    <h1 style={{fontSize:55,margin:'28px 0 20px'}}>认识四分之三</h1>
+    <p style={{fontSize:31}}>同样大的四份，才能用四分之一表示每一份。</p>
+    <div style={{display:'flex',gap:8,marginTop:35}}>{[0,1,2,3].map(i=><div key={i} style={{width:245,height:170,border:'4px solid #187d82',background:i<shaded?'#65cbb0':'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:42}}>1/4</div>)}</div>
+    <div style={{marginTop:45,fontSize:32,padding:23,borderRadius:15,background:'#fff'}}>{caption}</div>
+  </AbsoluteFill>;
+}

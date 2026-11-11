@@ -1,3 +1,4 @@
+import { selectCurriculumOutlines } from '@/lib/curriculum/select-lesson-outlines';
 import { nanoid } from 'nanoid';
 import { callLLM } from '@/lib/ai/llm';
 import { createStageAPI } from '@/lib/api/stage-api';
@@ -316,7 +317,10 @@ export async function generateClassroom(
     Number.isInteger(input.maxInteractiveScenes) && input.maxInteractiveScenes! >= 0
       ? input.maxInteractiveScenes!
       : Number.POSITIVE_INFINITY;
-  const outlines = generatedOutlines.slice(0, maxScenes).map((outline) => {
+  const boundedOutlines = input.curriculumLessonCache
+    ? selectCurriculumOutlines(generatedOutlines, maxScenes)
+    : generatedOutlines.slice(0, maxScenes);
+  const outlines = boundedOutlines.map((outline) => {
     if (outline.type !== 'interactive') return outline;
     interactiveScenesKept += 1;
     if (interactiveScenesKept <= maxInteractiveScenes) return outline;

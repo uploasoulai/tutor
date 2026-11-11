@@ -18,7 +18,9 @@ Start with one short China elementary-math concept, a single job, a modest scene
 
 Promote Video Lesson only if its teaching and playback quality justify its generation time and cost. For a failed video, preserve the teaching specification and offer ordinary guided explanation; do not automatically launch a second full renderer and bill another generation without a deliberate policy.
 
-Current status: source audit complete; production dependency preflight and actual generated/playback comparison not performed. No new dependency installation or production toggle change in this patch.
+Current status: production read-only preflight and an isolated local compiler pilot completed. Production has Node v22.23.4/npm 10.9.9, but no installed video runtime packages or edge_tts dependency. No production video dependency installation or model generation was performed.
+
+The local pinned runtime installed 16 packages in 15 seconds. An original scripted 20-second fraction lesson compiled and passed 25 isolated frame samples in approximately 1.3 seconds, producing a 583,097-byte player bundle. This is a compiler smoke test, not a measurement of AI generation, visual acceptance, narration sync, mobile usability or resource peak. The silent, public demo at `/demos/fractions-video.html` contains authored sample teaching content only, no learner material. The fixture is `eval/video-lesson/fractions.tsx.txt`.
 
 ## Classroom shell implemented in this patch
 
