@@ -778,10 +778,16 @@ function LearningHistory({
   return (
     <section>
       <div className="mb-4">
-        <p className="text-sm font-semibold text-[#003461]">Reusable lessons</p>
+        <p className="text-sm font-semibold text-[#003461]">Saved lessons and learning history</p>
         <h2 className="mt-1 text-xl font-semibold tracking-tight text-[#191c1d] sm:text-2xl">
           My Learning
         </h2>
+        <button
+          onClick={() => onOpenSession('/school-learning/china/multiplication-lab')}
+          className="mt-3 min-h-11 rounded-xl border border-[#aac9bd] bg-[#edf6ee] px-4 text-sm font-semibold text-[#126e75]"
+        >
+          Open and save the Grade 2 narrated trial →
+        </button>
       </div>
       <div className="rounded-lg border border-[#e7e8e9] bg-white shadow-sm">
         <div className="hidden grid-cols-[minmax(0,1fr)_110px_120px_100px_90px_100px_90px] gap-4 bg-[#f8f9fa] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#727781] md:grid">
@@ -796,8 +802,8 @@ function LearningHistory({
         {loading && <div className="p-6 text-sm text-[#727781]">Loading learning history...</div>}
         {!loading && sessions.length === 0 && (
           <div className="p-6 text-sm text-[#727781]">
-            No lesson sessions yet. Start today&apos;s first Grade 2 target to create a reusable
-            lesson.
+            No saved lessons yet. Try the Grade 2 narrated lesson below; it will be saved to your
+            own learning profile.
           </div>
         )}
         {!loading &&
@@ -815,7 +821,13 @@ function LearningHistory({
                 </p>
               </div>
               <span className="w-fit rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-[#003461]">
-                {session.status}
+                {session.status === 'planned'
+                  ? 'Saved · not started'
+                  : session.status === 'started'
+                    ? 'In progress'
+                    : session.status === 'completed'
+                      ? 'Completed'
+                      : session.status}
               </span>
               <span className="text-sm text-[#424750]">
                 <span className="font-semibold text-[#727781] md:hidden">Accuracy: </span>

@@ -57,7 +57,19 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium --with-deps
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 180s pnpm exec playwright install chromium --with-deps; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            echo "Browser dependencies could not be downloaded; retrying ($attempt/3)."
+            sleep 5
+          done
 
       - name: Run e2e tests
         run: pnpm exec playwright test

@@ -1,0 +1,84 @@
+{
+  "version": 2,
+  "asset": "/lessons/multiplication-narrated-v1.html",
+  "fps": 30,
+  "durationInFrames": 2123,
+  "chapters": [
+    {
+      "id": "explain",
+      "title": "从一组到几组",
+      "start": 0,
+      "end": 646
+    },
+    {
+      "id": "reason",
+      "title": "乘法为什么更方便",
+      "start": 647,
+      "end": 1505
+    },
+    {
+      "id": "recap",
+      "title": "把乘法带到生活中",
+      "start": 1506,
+      "end": 2122
+    }
+  ],
+  "shots": [
+    {
+      "id": "one-group",
+      "start": 0,
+      "end": 202,
+      "audioStart": 10,
+      "audioEnd": 182
+    },
+    {
+      "id": "two-groups",
+      "start": 203,
+      "end": 401,
+      "audioStart": 213,
+      "audioEnd": 381
+    },
+    {
+      "id": "three-groups",
+      "start": 402,
+      "end": 646,
+      "audioStart": 412,
+      "audioEnd": 626
+    },
+    {
+      "id": "shorter",
+      "start": 647,
+      "end": 905,
+      "audioStart": 657,
+      "audioEnd": 885
+    },
+    {
+      "id": "meaning",
+      "start": 906,
+      "end": 1203,
+      "audioStart": 916,
+      "audioEnd": 1183
+    },
+    {
+      "id": "unequal",
+      "start": 1204,
+      "end": 1505,
+      "audioStart": 1214,
+      "audioEnd": 1485
+    },
+    {
+      "id": "remember-groups",
+      "start": 1506,
+      "end": 1812,
+      "audioStart": 1516,
+      "audioEnd": 1792
+    },
+    {
+      "id": "new-groups",
+      "start": 1813,
+      "end": 2122,
+      "audioStart": 1823,
+      "audioEnd": 2102
+    }
+  ]
+}

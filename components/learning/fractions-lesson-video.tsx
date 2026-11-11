@@ -5,7 +5,35 @@ import media from '@/lib/curriculum/fractions-media.json';
 import story from '@/lib/curriculum/fractions-storyboard.json';
 
 export type FractionChapter = 'explain' | 'reason' | 'recap';
+export interface ReviewedVideoStory {
+  chapters: {
+    id: string;
+    title: string;
+    shots: {
+      id: string;
+      title: string;
+      text: string;
+      cue?: string;
+      shaded?: number;
+      groups?: number;
+      each?: number;
+      groupSizes?: number[];
+      formula?: string;
+    }[];
+  }[];
+}
 export function FractionsLessonVideo({ chapter }: { chapter: FractionChapter }) {
+  return <ReviewedLessonVideo chapter={chapter} media={media} story={story} />;
+}
+export function ReviewedLessonVideo({
+  chapter,
+  media,
+  story,
+}: {
+  chapter: FractionChapter;
+  media: { asset: string };
+  story: ReviewedVideoStory;
+}) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [fallback, setFallback] = useState(false);
   const [status, setStatus] = useState('loading');
@@ -55,19 +83,43 @@ export function FractionsLessonVideo({ chapter }: { chapter: FractionChapter }) 
           {content.shots.map((shot) => (
             <div key={shot.id}>
               <h3 className="font-bold">{shot.title}</h3>
-              <div
-                aria-label={`四个相等部分，${shot.shaded} 份涂色`}
-                className="my-3 grid grid-cols-4 overflow-hidden rounded-xl border-2 border-[#126e75]"
-              >
-                {[0, 1, 2, 3].map((part) => (
-                  <div
-                    key={part}
-                    className={`flex min-h-16 items-center justify-center border-r border-[#126e75] text-lg last:border-r-0 ${part < shot.shaded ? 'bg-[#65cbb0]' : 'bg-white'}`}
-                  >
-                    1/4
-                  </div>
-                ))}
-              </div>
+              {shot.groups ? (
+                <div className="my-3 grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label={shot.cue}>
+                  {(shot.groupSizes ?? Array(shot.groups).fill(shot.each ?? 2)).map(
+                    (count: number, i: number) => (
+                      <div
+                        key={i}
+                        className="rounded-xl border-2 border-[#126e75] bg-white p-3 text-center"
+                      >
+                        <span>第 {i + 1} 组</span>
+                        <div className="my-2 flex flex-wrap justify-center gap-2">
+                          {Array.from({ length: count }, (_, j) => (
+                            <span
+                              key={j}
+                              className="size-6 rounded-full border border-[#126e75] bg-[#65cbb0]"
+                            />
+                          ))}
+                        </div>
+                        <span>{count} 个</span>
+                      </div>
+                    ),
+                  )}
+                </div>
+              ) : (
+                <div
+                  aria-label={`四个相等部分，${shot.shaded} 份涂色`}
+                  className="my-3 grid grid-cols-4 overflow-hidden rounded-xl border-2 border-[#126e75]"
+                >
+                  {[0, 1, 2, 3].map((part) => (
+                    <div
+                      key={part}
+                      className={`flex min-h-16 items-center justify-center border-r border-[#126e75] text-lg last:border-r-0 ${part < (shot.shaded ?? 0) ? 'bg-[#65cbb0]' : 'bg-white'}`}
+                    >
+                      1/4
+                    </div>
+                  ))}
+                </div>
+              )}
               <p className="leading-7">{shot.text}</p>
             </div>
           ))}

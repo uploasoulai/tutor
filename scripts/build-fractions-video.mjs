@@ -4,14 +4,19 @@ import { execFileSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
-const work = join(root, 'data/narrated-fractions');
+const name = process.argv.includes('--multiplication') ? 'multiplication' : 'fractions';
+const work = join(root, 'data/narrated-' + name);
+const asset =
+  name === 'multiplication'
+    ? '/lessons/multiplication-narrated-v1.html'
+    : '/lessons/fractions-narrated-v2.html';
 const kit = join(
   root,
   'third_party/personal-ai-tutor-runtime/deeptutor/agents/video_lesson/remotion',
 );
 const runtime = join(root, 'data/video-lesson-pilot');
 const story = JSON.parse(
-  readFileSync(join(root, 'lib/curriculum/fractions-storyboard.json'), 'utf8'),
+  readFileSync(join(root, `lib/curriculum/${name}-storyboard.json`), 'utf8'),
 );
 const voice = JSON.parse(
   readFileSync(join(work, 'voice.ts'), 'utf8')
@@ -38,7 +43,7 @@ const chapters = story.chapters.map((chapter) => {
 });
 const manifest = {
   version: 2,
-  asset: '/lessons/fractions-narrated-v2.html',
+  asset,
   fps: story.fps,
   durationInFrames: offset,
   chapters,
@@ -54,7 +59,14 @@ const manifest = {
 mkdirSync(work, { recursive: true });
 for (const name of ['kit.tsx', 'china_outline.json'])
   copyFileSync(join(kit, name), join(work, name));
-const source = `import React from 'react';import {AbsoluteFill} from 'remotion';import {Scenes,lessonLength} from './kit';
+const groupingPicture = `function Picture({shot}){const counts=shot.groupSizes??Array(shot.groups).fill(shot.each);return <AbsoluteFill style={{background:'#f2f8f5',fontFamily:'system-ui,sans-serif',color:'#173e49'}}>
+<div style={{position:'absolute',top:28,left:70,fontSize:24,color:'#427d78'}}>CoastalTutor · 二年级数学</div>
+<h1 style={{position:'absolute',top:76,left:70,right:70,margin:0,fontSize:42}}>{shot.title}</h1>
+<p style={{position:'absolute',top:146,left:70,right:70,margin:0,fontSize:30}}>{shot.cue}</p>
+<div style={{position:'absolute',left:70,right:70,top:220,display:'flex',justifyContent:'center',gap:20}}>{counts.map((count,i)=><div key={i} style={{width:Math.min(220,760/counts.length),height:170,border:'3px solid #126e75',borderRadius:20,background:shot.groupSizes&&count!==shot.each?'#fff1d9':'#fff',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12}}><span style={{fontSize:24}}>第 {i+1} 组</span><div style={{display:'grid',gridTemplateColumns:'repeat(2,44px)',gap:10}}>{Array.from({length:count},(_,j)=><span key={j} style={{width:42,height:42,borderRadius:'50%',background:'#65cbb0',border:'2px solid #126e75'}}/>)}</div></div>)}</div>
+<p style={{position:'absolute',left:70,right:70,top:408,margin:0,textAlign:'center',fontSize:40,fontWeight:700}}>{shot.formula}</p></AbsoluteFill>}
+`;
+let source = `import React from 'react';import {AbsoluteFill} from 'remotion';import {Scenes,lessonLength} from './kit';
 const SHOTS=${JSON.stringify(shots)};
 function Picture({shot}){return <AbsoluteFill style={{background:'#f2f8f5',fontFamily:'system-ui,sans-serif',color:'#173e49'}}>
   <div style={{position:'absolute',top:28,left:70,fontSize:24,color:'#427d78'}}>CoastalTutor · 分数小课堂</div>
@@ -68,6 +80,11 @@ function Picture({shot}){return <AbsoluteFill style={{background:'#f2f8f5',fontF
 const SCENES=SHOTS.map(shot=>({voice:shot.id,frames:1,content:<Picture shot={shot}/>}));
 export const LESSON={width:960,height:720,fps:30,durationInFrames:lessonLength(SCENES)};
 export const Lesson=()=> <Scenes scenes={SCENES}/>;`;
+if (name === 'multiplication') {
+  const a = source.indexOf('function Picture');
+  const b = source.indexOf('const SCENES=');
+  source = source.slice(0, a) + groupingPicture + source.slice(b);
+}
 writeFileSync(join(work, 'Lesson.tsx'), source);
 const report = execFileSync(
   process.execPath,
@@ -77,7 +94,7 @@ const report = execFileSync(
 const checked = JSON.parse(report.trim().split('\n').at(-1));
 if (!checked.ok) throw new Error('Native composition check failed');
 writeFileSync(join(work, 'manifest.json'), JSON.stringify(manifest));
-copyFileSync(join(root, 'lib/curriculum/fractions-storyboard.json'), join(work, 'storyboard.json'));
+copyFileSync(join(root, `lib/curriculum/${name}-storyboard.json`), join(work, 'storyboard.json'));
 copyFileSync(
   join(root, 'eval/video-lesson/reviewed-player.tsx.txt'),
   join(work, 'reviewed-player.tsx'),
@@ -101,15 +118,15 @@ require('esbuild').buildSync({
 const js = readFileSync(join(work, 'player.js'), 'utf8').replaceAll('</script', '<\\/script');
 const html = `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; media-src data: blob:; connect-src data: blob:; base-uri 'none'; form-action 'none'">
-<title>CoastalTutor 分数讲解</title><style>*{box-sizing:border-box}body{margin:0;background:#f2f8f5;color:#173e49;font:16px system-ui,sans-serif}#player{max-width:960px;margin:auto}.readable-caption{display:none}@media(max-width:600px){.readable-caption{display:block;margin:0;padding:10px 14px;background:#e7f1ec;font-size:16px;line-height:1.65}}.tools{padding:8px 12px;background:white}.seek{display:flex;align-items:center;gap:10px;font-size:14px}.seek input{flex:1;min-width:60px;min-height:28px}.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}button{min-height:44px;border:1px solid #126e75;border-radius:10px;color:#173e49;background:#f2f8f5;font:600 14px system-ui,sans-serif;cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #d38d19;outline-offset:1px}output{display:block;font-size:12px;margin-top:3px;color:#52716e}</style><div id="player"></div><script>${js}</script></html>`;
+<title>CoastalTutor 数学讲解</title><style>*{box-sizing:border-box}body{margin:0;background:#f2f8f5;color:#173e49;font:16px system-ui,sans-serif}#player{max-width:960px;margin:auto}.readable-caption{display:none}@media(max-width:600px){.readable-caption{display:block;margin:0;padding:10px 14px;background:#e7f1ec;font-size:16px;line-height:1.65}}.tools{padding:8px 12px;background:white}.seek{display:flex;align-items:center;gap:10px;font-size:14px}.seek input{flex:1;min-width:60px;min-height:28px}.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}button{min-height:44px;border:1px solid #126e75;border-radius:10px;color:#173e49;background:#f2f8f5;font:600 14px system-ui,sans-serif;cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #d38d19;outline-offset:1px}output{display:block;font-size:12px;margin-top:3px;color:#52716e}</style><div id="player"></div><script>${js}</script></html>`;
 // Native kit CSS templates contain trailing spaces; normalize this generated asset.
 const cleanHtml = html
   .split('\n')
   .map((line) => line.trimEnd())
   .join('\n');
-writeFileSync(join(root, 'public/lessons/fractions-narrated-v2.html'), cleanHtml);
+writeFileSync(join(root, 'public', asset), cleanHtml);
 writeFileSync(
-  join(root, 'lib/curriculum/fractions-media.json'),
+  join(root, `lib/curriculum/${name}-media.json`),
   JSON.stringify(manifest, null, 2) + '\n',
 );
 writeFileSync(
@@ -127,7 +144,7 @@ writeFileSync(
 console.log(
   JSON.stringify({
     nativeFramesChecked: checked.frames.length,
-    assetBytes: statSync(join(root, 'public/lessons/fractions-narrated-v2.html')).size,
+    assetBytes: statSync(join(root, 'public', asset)).size,
     seconds: offset / 30,
     chapters: chapters.length,
   }),

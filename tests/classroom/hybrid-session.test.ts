@@ -51,6 +51,12 @@ vi.mock('@/lib/supabase/admin', () => ({
   }),
 }));
 import { GET, POST } from '@/app/api/china-curriculum/hybrid/route';
+import {
+  GET as getMultiplication,
+  POST as postMultiplication,
+} from '@/app/api/china-curriculum/multiplication-pilot/route';
+import { MULTIPLICATION_PILOT } from '@/lib/curriculum/reviewed-lessons';
+import { reviewedBookmarkId } from '@/lib/server/reviewed-lesson-api';
 const id = '11111111-1111-4111-8111-111111111111';
 const session = (owner = 'learner') => ({
   id,
@@ -201,5 +207,106 @@ describe('hybrid classroom learner records', () => {
   it('treats a duplicate start as the same session', async () => {
     expect((await post('start')).status).toBe(200);
     expect(state.writes).not.toHaveBeenCalled();
+  });
+  const multiplicationPost = (body: object) =>
+    postMultiplication(
+      new NextRequest('https://example.test/api/china-curriculum/multiplication-pilot', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    );
+  it('saves one owner-bound grade-2 media reference without claiming study or copying bytes', async () => {
+    state.session = null;
+    const first = await multiplicationPost({ action: 'bookmark', sessionId: id });
+    expect(first.status).toBe(201);
+    const stored = state.writes.mock.calls[0][1];
+    expect(stored).toMatchObject({
+      id: reviewedBookmarkId('learner', MULTIPLICATION_PILOT.id),
+      student_id: 'learner',
+      status: 'planned',
+      lesson_payload: {
+        curriculumGrade: 2,
+        curriculumTopicId: 'cnm_p038',
+        isTestLesson: true,
+        reviewedMediaAsset: MULTIPLICATION_PILOT.mediaAsset,
+      },
+    });
+    expect(JSON.stringify(stored)).not.toContain('base64');
+    expect(stored.xp_earned).toBeUndefined();
+    state.session = stored;
+    state.writes.mockClear();
+    const repeated = await multiplicationPost({ action: 'bookmark' });
+    expect((await repeated.json()).sessionId).toBe(stored.id);
+    expect(state.writes).not.toHaveBeenCalled();
+  });
+  it('starts a saved course explicitly, preserving the same profile row', async () => {
+    const savedId = reviewedBookmarkId('learner', MULTIPLICATION_PILOT.id);
+    state.session = {
+      id: savedId,
+      student_id: 'learner',
+      status: 'planned',
+      lesson_payload: { hybridLessonId: MULTIPLICATION_PILOT.id, hybridPhase: 'question' },
+    };
+    expect(
+      (await multiplicationPost({ action: 'checkpoint', sessionId: savedId, phase: 'video' }))
+        .status,
+    ).toBe(409);
+    state.writes.mockClear();
+    const result = await multiplicationPost({ action: 'start', sessionId: savedId });
+    expect((await result.json()).status).toBe('started');
+    expect(state.writes).toHaveBeenCalledWith(
+      'learning_sessions',
+      expect.objectContaining({ status: 'started', started_at: expect.any(String) }),
+    );
+    expect(state.filters).toHaveBeenCalledWith('learning_sessions', 'student_id', 'learner');
+  });
+  it('never reveals an owner session through the wrong reviewed course route', async () => {
+    expect(
+      (
+        await getMultiplication(
+          new NextRequest(
+            `https://example.test/api/china-curriculum/multiplication-pilot?sessionId=${id}`,
+          ),
+        )
+      ).status,
+    ).toBe(404);
+    state.session = {
+      ...session(),
+      lesson_payload: { hybridLessonId: MULTIPLICATION_PILOT.id, hybridPhase: 'check' },
+    };
+    state.attempts = FRACTIONS_HYBRID.questionIds.map((q) => attempt(q));
+    expect((await multiplicationPost({ action: 'complete', sessionId: id })).status).toBe(409);
+  });
+  it('requires the two grade-2 questions, not answers from a different topic/session', async () => {
+    state.session = {
+      ...session(),
+      lesson_payload: { hybridLessonId: MULTIPLICATION_PILOT.id, hybridPhase: 'check' },
+    };
+    state.attempts = MULTIPLICATION_PILOT.questionIds.map((q) => ({
+      ...attempt(q),
+      topic_id: MULTIPLICATION_PILOT.topicId,
+    }));
+    expect((await multiplicationPost({ action: 'complete', sessionId: id })).status).toBe(200);
+    expect(state.writes).toHaveBeenCalledWith(
+      'learning_sessions',
+      expect.objectContaining({
+        lesson_payload: expect.objectContaining({
+          hybridAssessmentQuestionIds: MULTIPLICATION_PILOT.questionIds,
+        }),
+      }),
+    );
+  });
+  it('does not reset completed work when the saved test lesson is reopened', async () => {
+    state.session = {
+      id: reviewedBookmarkId('learner', MULTIPLICATION_PILOT.id),
+      student_id: 'learner',
+      status: 'completed',
+      lesson_payload: { hybridLessonId: MULTIPLICATION_PILOT.id, hybridPhase: 'completed' },
+    };
+    expect((await (await multiplicationPost({ action: 'bookmark' })).json()).phase).toBe(
+      'completed',
+    );
+    expect(state.writes).not.toHaveBeenCalled();
+    expect(reviewedBookmarkId('other', MULTIPLICATION_PILOT.id)).not.toBe(state.session.id);
   });
 });

@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     '/api/china-curriculum': ['./curriculum_data/china/**/*'],
     '/api/china-curriculum/attempt': ['./curriculum_data/china/**/*'],
     '/api/china-curriculum/lesson': ['./curriculum_data/china/**/*'],
+    '/school-learning/china/fractions-lab': ['./curriculum_data/china/**/*'],
+    '/school-learning/china/multiplication-lab': ['./curriculum_data/china/**/*'],
   },
   experimental: {
     proxyClientMaxBodySize: '200mb',

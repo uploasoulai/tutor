@@ -14,8 +14,9 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-WORK = ROOT / "data/narrated-fractions"
-STORY = json.loads((ROOT / "lib/curriculum/fractions-storyboard.json").read_text(encoding="utf-8"))
+LESSON = "multiplication" if "--multiplication" in sys.argv else "fractions"
+WORK = ROOT / ("data/narrated-" + LESSON)
+STORY = json.loads((ROOT / ("lib/curriculum/" + LESSON + "-storyboard.json")).read_text(encoding="utf-8"))
 VOICE = "zh-CN-XiaoxiaoNeural"
 
 
@@ -55,4 +56,5 @@ async def main(record: bool):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--record", action="store_true")
+    parser.add_argument("--multiplication", action="store_true")
     asyncio.run(main(parser.parse_args().record))

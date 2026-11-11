@@ -1094,6 +1094,20 @@ export default function ChinaSchoolLearningPage() {
                 )}
               </section>
 
+              {selected.topic.id === 'cnm_p038' && (
+                <section className="rounded-3xl border border-[#aac9bd] bg-[#edf6ee] p-5 sm:p-6">
+                  <h3 className="font-bold text-[#173e49]">二年级配音互动试课</h3>
+                  <p className="my-3 text-sm leading-7 text-[#52716e]">
+                    跟着讲解看分组，亲手摆出几个几，再做两道理解检查。打开后会保存到你自己的学习档案，方便反复测试。
+                  </p>
+                  <a
+                    href="/school-learning/china/multiplication-lab"
+                    className="inline-flex min-h-12 items-center rounded-2xl bg-[#126e75] px-5 font-bold text-white"
+                  >
+                    打开并保存二年级试课 →
+                  </a>
+                </section>
+              )}
               {selected.topic.id === 'cnm_p226' && (
                 <section className="rounded-3xl border border-[#aac9bd] bg-[#edf6ee] p-5 sm:p-6">
                   <h3 className="font-bold text-[#173e49]">试试新的学习方式</h3>

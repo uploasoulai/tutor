@@ -1,4 +1,4 @@
-import { FRACTIONS_HYBRID } from '@/lib/curriculum/hybrid-fractions';
+import { reviewedLessonById } from '@/lib/curriculum/reviewed-lessons';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export interface StudentSessionListItem {
@@ -29,9 +29,10 @@ export function mapStudentSession(row: Record<string, unknown>): StudentSessionL
           classroomJobId?: string;
         })
       : null;
+  const reviewed = reviewedLessonById(payload?.hybridLessonId);
   const openPath =
-    payload?.hybridLessonId === FRACTIONS_HYBRID.id && payload.curriculumTrack === 'china'
-      ? `/school-learning/china/fractions-lab?sessionId=${encodeURIComponent(String(row.id))}`
+    reviewed && payload?.curriculumTrack === 'china'
+      ? `${reviewed.path}?sessionId=${encodeURIComponent(String(row.id))}`
       : payload?.curriculumTrack === 'china'
         ? `/school-learning/china${payload.curriculumTopicId ? `?topicId=${encodeURIComponent(payload.curriculumTopicId)}${payload.curriculumEditionId && payload.curriculumEditionId !== 'pep' ? `&edition=${encodeURIComponent(payload.curriculumEditionId)}` : ''}${payload.classroomJobId ? `&sessionId=${encodeURIComponent(String(row.id))}` : ''}` : ''}`
         : `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`;
@@ -83,12 +84,10 @@ function roundRatio(value: number) {
 function countLessonProgressActivities(payload: unknown) {
   if (payload && typeof payload === 'object') {
     const hybrid = payload as { hybridLessonId?: string; hybridAssessmentQuestionIds?: unknown };
-    if (
-      hybrid.hybridLessonId === FRACTIONS_HYBRID.id &&
-      Array.isArray(hybrid.hybridAssessmentQuestionIds)
-    ) {
+    const reviewed = reviewedLessonById(hybrid.hybridLessonId);
+    if (reviewed && Array.isArray(hybrid.hybridAssessmentQuestionIds)) {
       const verified = hybrid.hybridAssessmentQuestionIds;
-      return FRACTIONS_HYBRID.questionIds.filter((id) => verified.includes(id)).length;
+      return reviewed.questionIds.filter((id) => verified.includes(id)).length;
     }
   }
 

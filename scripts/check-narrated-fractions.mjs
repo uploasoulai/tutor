@@ -4,15 +4,23 @@ import { readFileSync, mkdirSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { chromium, expect } from '@playwright/test';
 const root = resolve(import.meta.dirname, '..');
-const work = join(root, 'data/narrated-fractions/browser-check');
+const lesson = process.argv.includes('--multiplication') ? 'multiplication' : 'fractions';
+const work = join(root, 'data/narrated-' + lesson + '/browser-check');
 mkdirSync(work, { recursive: true });
 const manifest = JSON.parse(
-  readFileSync(join(root, 'lib/curriculum/fractions-media.json'), 'utf8'),
+  readFileSync(join(root, `lib/curriculum/${lesson}-media.json`), 'utf8'),
 );
 const story = JSON.parse(
-  readFileSync(join(root, 'lib/curriculum/fractions-storyboard.json'), 'utf8'),
+  readFileSync(join(root, `lib/curriculum/${lesson}-storyboard.json`), 'utf8'),
 );
-const html = readFileSync(join(root, 'public/lessons/fractions-narrated-v2.html'));
+const html = readFileSync(
+  join(
+    root,
+    lesson === 'multiplication'
+      ? 'public/lessons/multiplication-narrated-v1.html'
+      : 'public/lessons/fractions-narrated-v2.html',
+  ),
+);
 const server = createServer((_req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.end(html);

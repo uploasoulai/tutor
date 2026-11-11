@@ -1,8 +1,23 @@
 import { describe, expect, it } from 'vitest';
 
 import { mapStudentSession } from '@/lib/curriculum/student-sessions';
+import { MULTIPLICATION_PILOT } from '@/lib/curriculum/reviewed-lessons';
 
 describe('mapStudentSession', () => {
+  it('opens saved grade-2 media at its learner session and keeps unstarted work unscored', () => {
+    const saved = mapStudentSession({
+      id: 'saved-multiplication',
+      status: 'planned',
+      reuse_key: 'owned-reference',
+      lesson_payload: { curriculumTrack: 'china', hybridLessonId: MULTIPLICATION_PILOT.id },
+    });
+    expect(saved.openPath).toBe(
+      '/school-learning/china/multiplication-lab?sessionId=saved-multiplication',
+    );
+    expect(saved.canReuse).toBe(true);
+    expect(saved.accuracyRate).toBeNull();
+    expect(saved.activitiesCompleted).toBe(0);
+  });
   it('marks reusable generated sessions', () => {
     const session = mapStudentSession({
       id: 'session-1',
