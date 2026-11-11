@@ -2,7 +2,7 @@
 // Lora + Geist type, and restrained motion live here, so the model composes content instead of
 // inventing styling. Every component reads the frame from its enclosing <Sequence>.
 import React, {createContext, useContext} from "react";
-import {AbsoluteFill, Easing, Html5Audio, Sequence, Series, interpolate, useCurrentFrame} from "remotion";
+import {AbsoluteFill, Easing, Html5Audio, Sequence, Series, interpolate, useCurrentFrame, useVideoConfig} from "remotion";
 import outline from "./china_outline.json";
 import {VOICE} from "./voice";
 
@@ -425,8 +425,17 @@ const sceneLength = (s: Scene) => Math.max(s.frames, LEAD + clip(s.voice).frames
 export const lessonLength = (scenes: Scene[]) => scenes.reduce((n, s) => n + sceneLength(s), 0);
 
 /** Plays the scenes back to back, each with its voice-over and captions timed to the voice. */
-export const Scenes: React.FC<{scenes: Scene[]}> = ({scenes}) => (
-  <Series>
+export const Scenes: React.FC<{scenes: Scene[]}> = ({scenes}) => {
+  const {durationInFrames} = useVideoConfig();
+  const unusedNarration = Object.keys(VOICE).filter(id => !scenes.some(scene => scene.voice === id));
+  if (unusedNarration.length) {
+    throw new Error(`Lesson narration is not connected to a scene: ${unusedNarration.join(", ")}. Add matching scenes or remove unused narration entries.`);
+  }
+  const requiredFrames = lessonLength(scenes);
+  if (durationInFrames < requiredFrames) {
+    throw new Error(`Lesson timeline is truncated: LESSON.durationInFrames=${durationInFrames}, but scenes and narration need ${requiredFrames} frames. Set durationInFrames to lessonLength(SCENES).`);
+  }
+  return <Series>
     {scenes.map((s, i) => {
       const c = clip(s.voice);
       return (
@@ -437,5 +446,5 @@ export const Scenes: React.FC<{scenes: Scene[]}> = ({scenes}) => (
         </Series.Sequence>
       );
     })}
-  </Series>
-);
+  </Series>;
+};

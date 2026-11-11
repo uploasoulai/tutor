@@ -1,0 +1,120 @@
+import React from "react";
+import {interpolate, useCurrentFrame} from "remotion";
+import {Body, Em, lessonLength, Scenes, Scene, Stage, Title} from "./kit";
+
+const Part1 = () => {
+  const frame = useCurrentFrame();
+  return (
+    <Stage>
+      <Title>平均分成四份</Title>
+      <Body x={120} y={300} w={800}>
+        把一个长方形<Em>平均分</Em>成<Em>4份</Em>，每份大小相同
+      </Body>
+      <div style={{
+        position: "absolute",
+        left: 500,
+        top: 300,
+        width: 600,
+        height: 120,
+        border: "3px solid #3b3430",
+        display: "grid",
+        gridTemplateColumns: "repeat(4, 1fr)"
+      }}>
+        {[1,2,3,4].map(i => <div key={i} style={{
+          borderRight: i<4 ? "2px dashed #6d645a" : "none",
+          background: "transparent"
+        }}/>)}
+      </div>
+    </Stage>
+  );
+};
+
+const Part2 = () => {
+  const frame = useCurrentFrame();
+  const showParts = Math.min(3, Math.floor(frame / 15));
+  return (
+    <Stage>
+      <Title>逐步涂色</Title>
+      <div style={{
+        position: "absolute",
+        left: 500,
+        top: 300,
+        width: 600,
+        height: 120,
+        border: "3px solid #3b3430",
+        display: "grid",
+        gridTemplateColumns: "repeat(4, 1fr)"
+      }}>
+        {[1,2,3,4].map(i => <div key={i} style={{
+          borderRight: i<4 ? "2px dashed #6d645a" : "none",
+          background: i <= showParts ? "#b0501e" : "transparent",
+          transition: "background 0.3s"
+        }}/>)}
+      </div>
+      <Body x={120} y={300} w={800}>
+        {showParts >= 1 && "已涂"+showParts+"份 → "}
+        {showParts >= 1 && <Em>四分之{showParts}</Em>}
+      </Body>
+    </Stage>
+  );
+};
+
+const Part3 = () => {
+  return (
+    <Stage>
+      <Title>分数的含义</Title>
+      <Body x={120} y={300} w={800}>
+        <Em>分母4</Em>表示总份数，<Em>分子3</Em>表示涂色份数
+      </Body>
+      <div style={{
+        position: "absolute",
+        left: 500,
+        top: 300,
+        width: 600,
+        height: 120,
+        border: "3px solid #3b3430",
+        display: "grid",
+        gridTemplateColumns: "repeat(4, 1fr)"
+      }}>
+        {[1,2,3,4].map(i => <div key={i} style={{
+          borderRight: i<4 ? "2px dashed #6d645a" : "none",
+          background: i<=3 ? "#b0501e" : "transparent"
+        }}/>)}
+      </div>
+    </Stage>
+  );
+};
+
+const Question = () => {
+  return (
+    <Stage>
+      <Title>你来试一试</Title>
+      <Body x={120} y={300} w={800}>
+        如果把一个整体分成<Em>5份</Em>，要表示<Em>五分之三</Em>，应该涂几份？
+      </Body>
+      <div style={{
+        position: "absolute",
+        left: 500,
+        top: 400,
+        width: 600,
+        height: 80,
+        border: "3px solid #3b3430",
+        display: "grid",
+        gridTemplateColumns: "repeat(5, 1fr)"
+      }}>
+        {[1,2,3,4,5].map(i => <div key={i} style={{
+          borderRight: i<5 ? "2px dashed #6d645a" : "none"
+        }}/>)}
+      </div>
+    </Stage>
+  );
+};
+
+const SCENES: Scene[] = [
+  {voice: "s1", frames: 90, content: <Part1 />},
+  {voice: "s2", frames: 120, content: <Part2 />},
+  {voice: "s5", frames: 90, content: <Part3 />},
+  {voice: "s6", frames: 120, content: <Question />}
+];
+export const LESSON = {durationInFrames: lessonLength(SCENES), fps: 30, width: 1920, height: 1080};
+export const Lesson: React.FC = () => <Scenes scenes={SCENES} />;

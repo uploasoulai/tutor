@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-10",
+  "scenario": "China grade 3 fractions, optional caption-only short explanation",
+  "model_calls": 2,
+  "price_cost_usd": null,
+  "price_note": "No verified active-provider price calculation was performed. Usage is provider-reported, not a cost estimate.",
+  "first_generation": {
+    "attempts": 1,
+    "maximum_output_tokens": 4096,
+    "learner_records_written": false,
+    "prompt_characters": 27459,
+    "ok": true,
+    "finish_reason": "stop",
+    "truncated": false,
+    "provider_usage": {
+      "prompt_tokens": 10172,
+      "completion_tokens": 847,
+      "total_tokens": 11019,
+      "cache_read_input_tokens": 0
+    },
+    "code_characters": 1962,
+    "generation_seconds": 33.47,
+    "pilot_process_peak_rss_mib": 108.1
+  },
+  "first_acceptance": {
+    "accepted": false,
+    "reason": "Declared 300 frames; native caption/scene timeline requires 455. Original compiler accepted it; final scene would not play."
+  },
+  "one_repair_generation": {
+    "attempts": 1,
+    "maximum_output_tokens": 4096,
+    "learner_records_written": false,
+    "prompt_characters": 30288,
+    "ok": true,
+    "finish_reason": "stop",
+    "truncated": false,
+    "provider_usage": {
+      "prompt_tokens": 11178,
+      "completion_tokens": 1301,
+      "total_tokens": 12479,
+      "cache_read_input_tokens": 10112
+    },
+    "code_characters": 3241,
+    "generation_seconds": 42.1,
+    "pilot_process_peak_rss_mib": 110.6
+  },
+  "repair_acceptance": {
+    "accepted": false,
+    "reason": "Narration entries s3 and s4 are not attached to any scene. Manual source review also identified overlapping content region risk and a CSS transition."
+  },
+  "decision": "Keep optional Video Lesson experimental; do not change the School Learning default renderer.",
+  "deployed_fixes": [
+    "Reject shortened Scenes timelines",
+    "Reject disconnected narration entries",
+    "Stop repeated frame checks after these static failures",
+    "Clarify timing and integer-count instructions in both writer prompts"
+  ],
+  "learner_material_included": false
+}

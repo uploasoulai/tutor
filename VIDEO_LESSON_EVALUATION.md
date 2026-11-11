@@ -31,3 +31,17 @@ This is a lightweight spatial prototype, not a WebGL 3D world. Measure classroom
 ## Read-only production preflight
 
 Run `scripts/tutor_video_preflight.py` inside only the confirmed Tutor container. It reports Node/npm, pinned runtime package readiness, narration dependency, free disk and cgroup memory where available. It installs nothing, sends no model request and prints no secrets. These checks do not prove the module is enabled, that narration can reach its service or that a generated lesson passes acceptance.
+
+## Native AI generation pilot and decision
+
+Two bounded native model calls used only an operator-authored fractions question and no learner history. First generation: 33.47s, 10,172 input / 847 output tokens, 108.1 MiB peak RSS for the isolated writer process. One targeted repair: 42.10s, 11,178 input / 1,301 output tokens; the provider reported 10,112 cached input tokens; 110.6 MiB process peak. These are not whole-container peaks or server rendering measurements. Total reported usage: 23,498 tokens. No verified USD calculation was made.
+
+The initial draft passed the old frame checks but declared 300 frames against a 455-frame narration timeline, cutting off the final teaching question. The repair used lessonLength correctly but left two narration entries disconnected; source review also found content overlap risk and CSS transition timing. Neither draft is published as a course. The earlier public demo remains the scripted baseline.
+
+The kit now rejects a Scenes composition shorter than its narration timeline or containing disconnected narration entries. The compiler stops checking duplicate frames on these static failures, returning one concise repair message. Both writer prompts emphasize derived duration, complete endings, requested short-course length and plain integer counts. No capabilities or rendering engines were removed.
+
+Five offline regression cases cover complete output, a short timeline, orphan narration, and both captured native AI failures. Correct output still passes 25 sampled frames. Run `node scripts/check-video-timeline.mjs` with the isolated pinned tooling already installed; it makes no model call. Fixture text is test data and is not served to learners.
+
+Production Tutor image `1.7.1-sso1-ecs-20261110-video-guards` is deployed and healthy. The prompt and guards were confirmed loaded and public/local login returned 200. Production Remotion package installation and voice availability remain separate, uncompleted gates; no production package/voice installation was performed. Layout, audio alignment, mobile playback and cost comparisons remain unaccepted. School Learning stays on its existing classroom renderer.
+
+Preflight scope: runtime package readiness was checked in the operator process context. Native runtime directories may be learner-specific; this was not an audit of every learner workspace. No learner directories were scanned or modified.

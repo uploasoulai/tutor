@@ -94,6 +94,7 @@ if (!errors.length) {
     console.error = realError;
     frames.push({frame: f, chars});
     for (const e of thrown) errors.push("frame " + f + ": " + ((e && e.message) || e));
+    if (thrown.some(e => String((e && e.message) || e).match(/^Lesson (?:timeline is truncated|narration is not connected)/))) break;
     if (!thrown.length && chars < 400) errors.push("frame " + f + ": almost nothing rendered");
     for (const l of logged) if (!/Warning: Each child|useLayoutEffect|The above error occurred/.test(l)) errors.push("frame " + f + " console.error: " + l);
   }

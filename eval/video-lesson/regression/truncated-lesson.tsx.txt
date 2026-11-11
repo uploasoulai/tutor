@@ -1,0 +1,76 @@
+import React from "react";
+import {AbsoluteFill} from "remotion";
+import {Body, Em, Frac, Scenes, Stage, Title} from "./kit";
+
+const Intro = () => (
+  <Stage>
+    <Title>认识分数</Title>
+    <Body x={120} y={300} w={800}>
+      把一个整体<Em>平均分</Em>成<Frac num="4" den="1"/>份，取其中的<Frac num="3" den="1"/>份
+    </Body>
+    <div style={{
+      position: "absolute",
+      left: 1000,
+      top: 280,
+      width: 300,
+      height: 120,
+      border: "3px solid #3b3430",
+      display: "grid",
+      gridTemplateColumns: "repeat(4, 1fr)"
+    }}>
+      {[1,2,3,4].map(i => <div key={i} style={{
+        borderRight: i<4 ? "2px dashed #6d645a" : "none",
+        background: i<4 ? "#f5f2ea" : "transparent"
+      }}/>)}
+    </div>
+  </Stage>
+);
+
+const Steps = () => (
+  <Stage>
+    <Title>四分之三的表示</Title>
+    <div style={{
+      position: "absolute",
+      left: 500,
+      top: 300,
+      width: 600,
+      height: 120,
+      border: "3px solid #3b3430",
+      display: "grid",
+      gridTemplateColumns: "repeat(4, 1fr)"
+    }}>
+      {[1,2,3,4].map(i => <div key={i} style={{
+        borderRight: i<4 ? "2px dashed #6d645a" : "none",
+        background: i<=3 ? "#b0501e" : "transparent"
+      }}/>)}
+    </div>
+    <Body x={120} y={300} w={300}>
+      涂色部分：<Frac num="3" den="4"/>
+    </Body>
+  </Stage>
+);
+
+const Question = () => (
+  <Stage>
+    <Title>你来试一试</Title>
+    <Body x={120} y={300} w={800}>
+      把这条分成<Em>五份</Em>，涂出其中的<Frac num="3" den="5"/>，该怎么画？
+    </Body>
+    <div style={{
+      position: "absolute",
+      left: 400,
+      top: 400,
+      width: 600,
+      height: 80,
+      border: "3px solid #3b3430"
+    }}/>
+  </Stage>
+);
+
+const SCENES: Scene[] = [
+  {voice: "s1", frames: 90, content: <Intro />},
+  {voice: "s2", frames: 120, content: <Steps />},
+  {voice: "s3", frames: 90, content: <Question />}
+];
+export const LESSON = {durationInFrames: 300, fps: 30, width: 1920, height: 1080};
+export const Lesson: React.FC = () => <Scenes scenes={SCENES} />;
