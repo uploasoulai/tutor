@@ -1,3 +1,4 @@
+import { FRACTIONS_HYBRID } from '@/lib/curriculum/hybrid-fractions';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export interface StudentSessionListItem {
@@ -22,14 +23,17 @@ export function mapStudentSession(row: Record<string, unknown>): StudentSessionL
     row.lesson_payload && typeof row.lesson_payload === 'object'
       ? (row.lesson_payload as {
           curriculumTrack?: string;
+          hybridLessonId?: string;
           curriculumTopicId?: string;
           curriculumEditionId?: string;
         })
       : null;
   const openPath =
-    payload?.curriculumTrack === 'china'
-      ? `/school-learning/china${payload.curriculumTopicId ? `?topicId=${encodeURIComponent(payload.curriculumTopicId)}${payload.curriculumEditionId && payload.curriculumEditionId !== 'pep' ? `&edition=${encodeURIComponent(payload.curriculumEditionId)}` : ''}` : ''}`
-      : `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`;
+    payload?.hybridLessonId === FRACTIONS_HYBRID.id && payload.curriculumTrack === 'china'
+      ? `/school-learning/china/fractions-lab?sessionId=${encodeURIComponent(String(row.id))}`
+      : payload?.curriculumTrack === 'china'
+        ? `/school-learning/china${payload.curriculumTopicId ? `?topicId=${encodeURIComponent(payload.curriculumTopicId)}${payload.curriculumEditionId && payload.curriculumEditionId !== 'pep' ? `&edition=${encodeURIComponent(payload.curriculumEditionId)}` : ''}` : ''}`
+        : `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`;
 
   return {
     id: String(row.id),
@@ -76,6 +80,17 @@ function roundRatio(value: number) {
 }
 
 function countLessonProgressActivities(payload: unknown) {
+  if (payload && typeof payload === 'object') {
+    const hybrid = payload as { hybridLessonId?: string; hybridAssessmentQuestionIds?: unknown };
+    if (
+      hybrid.hybridLessonId === FRACTIONS_HYBRID.id &&
+      Array.isArray(hybrid.hybridAssessmentQuestionIds)
+    ) {
+      const verified = hybrid.hybridAssessmentQuestionIds;
+      return FRACTIONS_HYBRID.questionIds.filter((id) => verified.includes(id)).length;
+    }
+  }
+
   const progress =
     payload && typeof payload === 'object' ? (payload as { progress?: unknown }).progress : null;
   if (!progress || typeof progress !== 'object') return 0;

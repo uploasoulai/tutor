@@ -30,6 +30,8 @@ This short file is the working index. **The latest user-approved decisions in ch
 
 - **Native AI Video Lesson pilot:** two bounded calls exposed a truncated ending and disconnected narration. Added native-kit checks and concise compiler feedback; both bad drafts are rejected and are not published. Five offline regression cases pass, including complete output across 25 frames. The video-guards Tutor image is deployed/healthy; both login paths return 200. Video remains experimental; layout/audio/mobile and production tooling gates remain open. See `eval/video-lesson/ai-pilot-results.json` for provider usage; no USD estimate is asserted.
 
+- **Hybrid fractions pilot:** `/school-learning/china/fractions-lab` combines a prepared native caption clip, controlled fraction shading and two existing curriculum questions. The China fractions topic has an entry. Uses owner-scoped platform sessions, checkpoints and the existing attempt/mastery RPC; completion is server-gated on both distinct checks. Static clip fallback and explicit segment advances prevent background playback. No general AI hybrid generation or synchronized voice is claimed. 24 focused tests and an isolated browser flow pass; real student website acceptance remains pending. See `HYBRID_LESSON_PLAN.md`.
+
 ## Delivery sequence
 
 1. Make student testers able to use China K–12 courses, classroom generation, and DeepTutor with the temporary SiliconFlow platform key.

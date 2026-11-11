@@ -16,6 +16,7 @@ const eslintConfig = defineConfig([
     // Vendored/generated code:
     'packages/**',
     'third_party/personal-ai-tutor-runtime/**',
+    'data/**',
     // Claude Code local files:
     '.claude/**',
     '.superpowers/**',

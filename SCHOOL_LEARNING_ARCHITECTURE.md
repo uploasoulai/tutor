@@ -56,3 +56,7 @@ Keep the current split: CoastalTutor is the learner-facing platform and source o
 If a school customer later requires institutional rostering, formal class administration, or a Moodle gradebook, evaluate an optional LTI 1.3 integration. In that design, Moodle may launch a CoastalTutor activity, while CoastalTutor keeps the learner's primary record and accepts only the minimum school context required. Do not mirror conversations, notes, or the full learning history into Moodle.
 
 Moodle provides both an LTI tool consumer and LTI 1.3 provider route, plus external web services. These are future integration options, not a reason to host Moodle now. Any later implementation must separately check Moodle core GPL obligations and plugin licenses.
+
+## Approved hybrid lesson direction
+
+The user approved combining short Video Lesson segments with interaction in one School Learning course. Use a single curriculum-grounded teaching blueprint with per-segment renderers and a single narration owner. Do not duplicate complete course planning in both engines. The first delivery is the grade-3 fraction exploration pilot described in `HYBRID_LESSON_PLAN.md`; it uses a reviewed native compiled clip, a controlled manipulative, existing question-bank grading, and owner-scoped session checkpoints. It is not yet general automatic hybrid generation or voiced synchronization. Personal AI Tutor and Interactive Classroom remain full native modules.

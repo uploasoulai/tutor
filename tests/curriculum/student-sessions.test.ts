@@ -44,3 +44,25 @@ describe('mapStudentSession', () => {
     });
   });
 });
+
+it('opens a hybrid session at its saved classroom and counts only verified distinct checks', () => {
+  const item = mapStudentSession({
+    id: 'hybrid-session',
+    status: 'completed',
+    lesson_payload: {
+      curriculumTrack: 'china',
+      hybridLessonId: 'fractions-hybrid-v1',
+      hybridAssessmentQuestionIds: ['cnm_p226_q1', 'cnm_p226_q1', 'cnm_p226_q3', 'unknown'],
+    },
+  });
+  expect(item.openPath).toBe('/school-learning/china/fractions-lab?sessionId=hybrid-session');
+  expect(item.activitiesCompleted).toBe(2);
+});
+it('keeps ordinary China lessons pointed at their course topic', () => {
+  expect(
+    mapStudentSession({
+      id: 'normal',
+      lesson_payload: { curriculumTrack: 'china', curriculumTopicId: 'topic' },
+    }).openPath,
+  ).toBe('/school-learning/china?topicId=topic');
+});

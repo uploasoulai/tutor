@@ -38,6 +38,7 @@
     "packages/*/src",
     "openclaw",
     "e2e",
-    "third_party/personal-ai-tutor-runtime"
+    "third_party/personal-ai-tutor-runtime",
+    "data"
   ]
 }

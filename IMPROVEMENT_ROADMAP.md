@@ -7,7 +7,7 @@ Recommendations_v3.md is advisory. Latest user decisions and observed code take 
 - Preserve all three modules and the existing shared learner/workspace identity. School Learning owns curriculum progress; the integrated Tutor owns its native personal learning records. Do not move authoritative records merely to match the advisory diagram.
 - Keep the existing classroom engine and curriculum adapters. Do not upgrade the vendored apps or introduce Moodle, a second database, a generic model gateway, or a new renderer now.
 - Platform homepage is https://tutor.uploadsoul.com/ for both signed-in and signed-out users. Dashboard is a separate destination.
-- Use one principal lesson renderer per request. Keep School Learning on the existing classroom engine until a measured alternative passes acceptance. Preserve full functionality in the other two modules.
+- Latest approved hybrid direction: use one teaching blueprint per course, with a renderer selected per segment. Start with the reviewed fraction pilot; general School Learning keeps its classroom engine until automated hybrid generation passes acceptance. Do not generate duplicate full courses. Preserve full functionality in the other modules.
 - Evaluate native browser Video Lesson before enabling curriculum routing to it. Presence in source is not proof of production readiness.
 - Prioritize a lightweight optional spatial classroom prototype in parallel with lesson improvements, per the latest user decision. Use CSS perspective and an original SVG teacher first; preserve the live DOM lesson and focus/mobile fallback. Evaluate customer response before adding a true WebGL/GLB scene.
 

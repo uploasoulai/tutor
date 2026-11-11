@@ -1037,6 +1037,21 @@ export default function ChinaSchoolLearningPage() {
                 )}
               </section>
 
+              {selected.topic.id === 'cnm_p226' && (
+                <section className="rounded-3xl border border-[#aac9bd] bg-[#edf6ee] p-5 sm:p-6">
+                  <h3 className="font-bold text-[#173e49]">试试新的学习方式</h3>
+                  <p className="my-3 text-sm leading-7 text-[#52716e]">
+                    先看字幕动态讲解，再亲手涂色，最后完成两道理解检查。进度会保存到你的学习记录。
+                  </p>
+                  <a
+                    href="/school-learning/china/fractions-lab"
+                    className="inline-flex min-h-12 items-center rounded-2xl bg-[#126e75] px-5 font-bold text-white"
+                  >
+                    进入分数混合课堂 →
+                  </a>
+                </section>
+              )}
+
               <section className="rounded-3xl bg-[#203c5d] p-5 text-white sm:p-6">
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">

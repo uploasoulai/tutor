@@ -26,3 +26,8 @@ lib/export/svg-arc-to-cubic-bezier.d.ts
 
 # Generated native browser-player demo bundle
 public/demos/fractions-video.html
+
+public/lessons/fractions-intro-v1.html
+
+# Local runtime data, deployment bundles and isolated pilot outputs
+data/
