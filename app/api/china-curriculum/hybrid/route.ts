@@ -90,7 +90,8 @@ export async function POST(request: NextRequest) {
           curriculumGrade: 3,
           curriculumSubject: 'math',
           hybridLessonId: FRACTIONS_HYBRID.id,
-          hybridPhase: 'video',
+          hybridPhase: 'question',
+          hybridContentVersion: 2,
           primaryRenderer: 'hybrid-reviewed-pilot',
         },
       });
@@ -108,8 +109,9 @@ export async function POST(request: NextRequest) {
       return apiError('INVALID_REQUEST', 400, '学习操作无效');
     if (!phase || !HYBRID_PHASES.some((item) => item === phase))
       return apiError('INVALID_REQUEST', 400, '学习步骤无效');
-    const verifiedQuestions = phase === 'completed' ? await correctQuestions(id, user.id) : [];
-    if (phase === 'completed' && !hasHybridAssessment(verifiedQuestions))
+    const verifiedQuestions =
+      phase === 'completed' || phase === 'recap' ? await correctQuestions(id, user.id) : [];
+    if ((phase === 'completed' || phase === 'recap') && !hasHybridAssessment(verifiedQuestions))
       return apiError('INVALID_REQUEST', 409, '请先完成两道理解检查，再结束这节课');
     const savedPhase = session.lesson_payload.hybridPhase;
     if (HYBRID_PHASES.indexOf(savedPhase) > HYBRID_PHASES.findIndex((item) => item === phase)) {

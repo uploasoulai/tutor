@@ -1,0 +1,53 @@
+import React, {useEffect, useRef, useState} from 'react';
+import {createRoot} from 'react-dom/client';
+import {Player, type PlayerRef} from '@remotion/player';
+import {Lesson, LESSON} from './Lesson';
+import manifest from './manifest.json';
+import story from './storyboard.json';
+const query = new URLSearchParams(location.hash.slice(1) || location.search);
+const chapter = manifest.chapters.find(c => c.id === query.get('chapter')) ?? manifest.chapters[0];
+const notify = (event: string) => parent.postMessage({channel:'coastaltutor-reviewed-video',version:2,chapter:chapter.id,event}, '*');
+function App() {
+  const player = useRef<PlayerRef>(null);
+  const [playing,setPlaying] = useState(false);
+  const [frame,setFrame] = useState(chapter.start);
+  const [failed,setFailed] = useState(false);
+  useEffect(() => {
+    const p=player.current;
+    if (!p) return;
+    const onPlay=()=>{setPlaying(true);notify('play')};
+    const onPause=()=>{setPlaying(false);notify('pause')};
+    const onEnded=()=>{setPlaying(false);notify('ended')};
+    const onFrame=(e:{detail:{frame:number}})=>setFrame(e.detail.frame);
+    const onError=()=>{p.pause();setFailed(true);notify('error')};
+    const onHidden=()=>{if(document.hidden)p.pause()};
+    p.addEventListener('play',onPlay);p.addEventListener('pause',onPause);p.addEventListener('ended',onEnded);
+    p.addEventListener('frameupdate',onFrame);p.addEventListener('error',onError);
+    document.addEventListener('visibilitychange',onHidden);
+    notify('ready');
+    return ()=>{p.pause();p.removeEventListener('play',onPlay);p.removeEventListener('pause',onPause);
+      p.removeEventListener('ended',onEnded);p.removeEventListener('frameupdate',onFrame);p.removeEventListener('error',onError);
+      document.removeEventListener('visibilitychange',onHidden)};
+  },[]);
+  const current=manifest.shots.find(s=>frame>=s.start&&frame<=s.end);
+  const caption=story.chapters.flatMap(c=>c.shots).find(s=>s.id===current?.id)?.text;
+  return <>
+    <Player ref={player} component={Lesson} {...LESSON} compositionWidth={LESSON.width} compositionHeight={LESSON.height}
+      inFrame={chapter.start} outFrame={chapter.end} initialFrame={chapter.start}
+      autoPlay={false} loop={false} moveToBeginningWhenEnded={false} controls={false} clickToPlay={false}
+      errorFallback={()=> <p role="alert">讲解暂时无法播放，请返回课程查看图解。</p>}
+      style={{width:'100%',aspectRatio:'4/3',maxHeight:'calc(100vh - 100px)'}}/>
+    <p className="readable-caption" aria-live="off">{frame>=(current?.audioStart??0)?caption:"点击播放，听听老师怎么解释。"}</p>
+    <div className="tools" aria-label="讲解播放控制">
+      <label className="seek">讲解进度<input aria-label="讲解进度" type="range" aria-valuetext={"已讲解 "+Math.round((frame-chapter.start)/30)+" 秒，共 "+Math.ceil((chapter.end-chapter.start+1)/30)+" 秒"} min={chapter.start} max={chapter.end} value={frame}
+        onChange={e=>{player.current?.pause();player.current?.seekTo(Number(e.target.value))}}/></label>
+      <div className="buttons">
+        <button disabled={failed} onClick={()=>{const p=player.current;if(!p)return;if(!p.isPlaying()&&p.getCurrentFrame()>=chapter.end)p.seekTo(chapter.start);p.toggle()}}>{playing?'暂停讲解':'播放讲解'}</button>
+        <button onClick={()=>{player.current?.pause();player.current?.seekTo(chapter.start)}}>从头再看</button>
+        <button onClick={()=>document.documentElement.requestFullscreen?.().catch(()=>{})}>全屏观看</button>
+      </div>
+      <output data-frame={frame} aria-label="播放状态">{failed?'播放遇到问题':playing?'正在讲解':'已暂停'}</output>
+    </div>
+  </>;
+}
+createRoot(document.getElementById('player')!,{onUncaughtError:()=>notify('error')}).render(<App/>);

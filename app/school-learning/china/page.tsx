@@ -1098,7 +1098,7 @@ export default function ChinaSchoolLearningPage() {
                 <section className="rounded-3xl border border-[#aac9bd] bg-[#edf6ee] p-5 sm:p-6">
                   <h3 className="font-bold text-[#173e49]">试试新的学习方式</h3>
                   <p className="my-3 text-sm leading-7 text-[#52716e]">
-                    先看字幕动态讲解，再亲手涂色，最后完成两道理解检查。进度会保存到你的学习记录。
+                    先发现平均分，再看配音讲解、亲手涂色，完成理解检查和回顾。进度会保存到你的学习记录。
                   </p>
                   <a
                     href="/school-learning/china/fractions-lab"

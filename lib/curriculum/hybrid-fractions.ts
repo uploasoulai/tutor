@@ -2,11 +2,26 @@ export const FRACTIONS_HYBRID = {
   id: 'fractions-hybrid-v1',
   topicId: 'cnm_p226',
   title: '认识几分之几 · 看一看，动手试试',
-  videoUrl: '/lessons/fractions-intro-v1.html',
+  videoUrl: '/lessons/fractions-narrated-v2.html#chapter=explain',
   questionIds: ['cnm_p226_q1', 'cnm_p226_q3'],
 } as const;
-export type HybridPhase = 'video' | 'practice' | 'check' | 'completed';
-export const HYBRID_PHASES: HybridPhase[] = ['video', 'practice', 'check', 'completed'];
+export type HybridPhase =
+  | 'question'
+  | 'video'
+  | 'practice'
+  | 'reasoning'
+  | 'check'
+  | 'recap'
+  | 'completed';
+export const HYBRID_PHASES: HybridPhase[] = [
+  'question',
+  'video',
+  'practice',
+  'reasoning',
+  'check',
+  'recap',
+  'completed',
+];
 export function hasHybridAssessment(questionIds: readonly string[]) {
   return FRACTIONS_HYBRID.questionIds.every((id) => questionIds.includes(id));
 }

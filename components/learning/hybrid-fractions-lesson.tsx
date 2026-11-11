@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { PlayCircle, Hand, CheckCircle2, Loader2, RotateCcw } from 'lucide-react';
+import { FractionsLessonVideo } from './fractions-lesson-video';
 import {
   FRACTIONS_HYBRID,
   HYBRID_PHASES,
@@ -29,7 +30,7 @@ export function HybridFractionsLesson({ questions }: { questions: Question[] }) 
   const [reviewOnly, setReviewOnly] = useState(false);
   const [error, setError] = useState('');
   const [resumeFailed, setResumeFailed] = useState(false);
-  const [fallback, setFallback] = useState(false);
+  const [equalChoice, setEqualChoice] = useState<boolean | null>(null);
   const [selected, setSelected] = useState<boolean[]>([false, false, false, false]);
   const [practiceChecked, setPracticeChecked] = useState(false);
   const [answer, setAnswer] = useState('');
@@ -77,7 +78,7 @@ export function HybridFractionsLesson({ questions }: { questions: Question[] }) 
       const url = new URL(window.location.href);
       url.searchParams.set('sessionId', sessionId.current);
       window.history.replaceState(window.history.state, '', url);
-      setPhase('video');
+      setPhase('question');
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : '暂时无法开始');
     } finally {
@@ -148,13 +149,19 @@ export function HybridFractionsLesson({ questions }: { questions: Question[] }) 
         <p className="mt-5 text-sm font-semibold text-[#52716e]">三年级数学 · 混合课堂试学</p>
         <h1 className="mt-2 text-2xl font-bold sm:text-3xl">认识几分之几</h1>
         <p className="mt-3 max-w-2xl leading-7 text-[#52716e]">
-          先看分数是怎么来的，再亲手涂一涂，最后试着解决一个新问题。
+          先想一想，再看讲解、亲手涂色，用两个小问题检查理解，最后带走今天的发现。
         </p>
-        <ol aria-label="学习步骤" className="my-6 grid grid-cols-3 gap-2 text-sm">
+        <ol
+          aria-label="学习步骤"
+          className="my-6 grid grid-cols-3 gap-2 text-xs sm:grid-cols-6 sm:text-sm"
+        >
           {[
+            { name: '想一想', icon: PlayCircle, step: 'question' },
             { name: '看一看', icon: PlayCircle, step: 'video' },
             { name: '动手试', icon: Hand, step: 'practice' },
+            { name: '找原因', icon: PlayCircle, step: 'reasoning' },
             { name: '我会了', icon: CheckCircle2, step: 'check' },
+            { name: '带走发现', icon: PlayCircle, step: 'recap' },
           ].map(({ name, icon: Icon, step }, index) => (
             <li
               key={step}
@@ -187,8 +194,7 @@ export function HybridFractionsLesson({ questions }: { questions: Question[] }) 
                 知道“平均分”是什么意思，能用分数说出选中的部分，并分清分子和分母。
               </p>
               <p className="mb-6 text-sm text-[#52716e]">
-                这是一节分数试课。讲解为字幕模式，不需要额外 API
-                Key。答题结果会保存到你的课程学习记录。
+                这是一节配有图形讲解和动手练习的分数试课。讲解已经准备好，不需要额外设置。答题结果会保存到你的课程学习记录。
               </p>
               {questions.length !== 2 && (
                 <p role="alert" className="mb-4 text-amber-800">
@@ -216,48 +222,61 @@ export function HybridFractionsLesson({ questions }: { questions: Question[] }) 
                 {busy && <Loader2 className="size-4 animate-spin" />}开始这节课
               </button>
             </>
+          ) : phase === 'question' ? (
+            <>
+              <h2 className="text-xl font-bold">先来发现：哪一个图形平均分成了四份？</h2>
+              <p className="my-4 leading-7 text-[#52716e]">
+                不着急，看看每一份是不是同样大。点一个图形试试，这一步不计分。
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[true, false].map((equal) => (
+                  <button
+                    key={String(equal)}
+                    type="button"
+                    aria-label={equal ? '图形一' : '图形二'}
+                    aria-describedby={`fraction-figure-${String(equal)}-description`}
+                    aria-pressed={equalChoice === equal}
+                    className="min-h-32 rounded-2xl border-2 border-[#aac9bd] p-4 text-left focus-visible:outline-4 focus-visible:outline-[#126e75]"
+                    onClick={() => setEqualChoice(equal)}
+                  >
+                    <span className="font-bold">{equal ? '图形一' : '图形二'}</span>
+                    <span id={`fraction-figure-${String(equal)}-description`} className="sr-only">
+                      {equal ? '长条分成了大小相同的四份' : '长条分成了大小不同的四份'}
+                    </span>
+                    <span
+                      className="mt-3 flex h-16 overflow-hidden rounded-lg border-2 border-[#126e75]"
+                      aria-hidden="true"
+                    >
+                      {(equal ? [25, 25, 25, 25] : [10, 20, 30, 40]).map((width, i) => (
+                        <span
+                          key={i}
+                          style={{ width: `${width}%` }}
+                          className="border-r border-[#126e75] bg-[#b8e7d9] last:border-r-0"
+                        />
+                      ))}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              {equalChoice !== null && (
+                <p role="status" className="my-4 rounded-xl bg-[#edf6ee] p-4 leading-7">
+                  {equalChoice
+                    ? '你发现了！四份同样大，才叫平均分。我们看看分数是怎么来的。'
+                    : '再比较一下：这个图形的四份大小不同。哪一个图形的每一份同样大呢？'}
+                </p>
+              )}
+              <button
+                className={`${button} mt-5`}
+                disabled={busy || equalChoice !== true}
+                onClick={() => void advance('video')}
+              >
+                看看分数是怎么来的 →
+              </button>
+            </>
           ) : phase === 'video' ? (
             <>
-              <h2 className="mb-2 text-xl font-bold">把一个整体平均分成四份</h2>
-              <p className="mb-3 text-sm font-semibold text-[#52716e]">字幕讲解 · 本片段无语音</p>
-              <p className="mb-4 text-[#52716e]">点击播放，观察涂色的份数。可以随时暂停和回看。</p>
-              {!fallback ? (
-                <iframe
-                  key="fractions-video"
-                  src={FRACTIONS_HYBRID.videoUrl}
-                  title="认识四分之三：字幕动态讲解"
-                  sandbox="allow-scripts"
-                  allow="fullscreen"
-                  allowFullScreen
-                  className="aspect-video w-full rounded-2xl border-0 bg-[#f2f8f5]"
-                />
-              ) : (
-                <div className="rounded-2xl bg-[#f2f8f5] p-5">
-                  <p className="mb-5 leading-7">
-                    四份必须同样大。每一份是四分之一；涂色三份，就是四分之三。
-                  </p>
-                  <div aria-label="四个相等部分，前三份涂色" className="grid grid-cols-4 gap-1">
-                    {[0, 1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className={`flex h-24 items-center justify-center border-2 border-[#126e75] text-lg ${i < 3 ? 'bg-[#65cbb0]' : 'bg-white'}`}
-                      >
-                        1/4
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <p className="mt-3 text-sm leading-6 text-[#52716e] sm:hidden">
-                手机上可以点播放器右下角全屏观看，也可以选择下面的图解。
-              </p>
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-                <button
-                  className="min-h-11 rounded-xl px-3 text-sm font-semibold underline"
-                  onClick={() => setFallback(!fallback)}
-                >
-                  {fallback ? '回到动态讲解' : '视频字小或无法播放？查看图解'}
-                </button>
+              <FractionsLessonVideo key="explain" chapter="explain" />
+              <div className="mt-5 flex justify-end">
                 <button className={button} disabled={busy} onClick={() => void advance('practice')}>
                   我来动手试试 →
                 </button>
@@ -312,15 +331,28 @@ export function HybridFractionsLesson({ questions }: { questions: Question[] }) 
                   <button
                     className={button}
                     disabled={busy}
-                    onClick={() => void advance(reviewOnly ? 'completed' : 'check')}
+                    onClick={() => void advance('reasoning')}
                   >
-                    {reviewOnly ? '结束回看 →' : '试试新的问题 →'}
+                    看看为什么这样写 →
                   </button>
                 ) : (
                   <button className={button} onClick={() => setPracticeChecked(true)}>
                     检查一下
                   </button>
                 )}
+              </div>
+            </>
+          ) : phase === 'reasoning' ? (
+            <>
+              <FractionsLessonVideo key="reason" chapter="reason" />
+              <div className="mt-5 flex justify-end">
+                <button
+                  className={button}
+                  disabled={busy}
+                  onClick={() => void advance(reviewOnly ? 'recap' : 'check')}
+                >
+                  {reviewOnly ? '回看今天的发现 →' : '试试新的问题 →'}
+                </button>
               </div>
             </>
           ) : phase === 'check' ? (
@@ -391,11 +423,25 @@ export function HybridFractionsLesson({ questions }: { questions: Question[] }) 
                 <button
                   className={button}
                   disabled={busy || !hasHybridAssessment(correctIds)}
-                  onClick={() => void advance('completed')}
+                  onClick={() => void advance('recap')}
                 >
-                  {busy ? '正在保存…' : '完成并保存学习记录'}
+                  {busy ? '正在保存…' : '看看今天的发现 →'}
                 </button>
               )}
+            </>
+          ) : phase === 'recap' ? (
+            <>
+              <FractionsLessonVideo key="recap" chapter="recap" />
+              <p className="my-4 leading-7 text-[#52716e]">
+                离开屏幕也能练习：画一个长条，平均分成几份，再涂色。用一个分数说说你涂了多少。
+              </p>
+              <button
+                className={button}
+                disabled={busy || (!reviewOnly && !hasHybridAssessment(correctIds))}
+                onClick={() => void advance('completed')}
+              >
+                {reviewOnly ? '结束回看' : busy ? '正在保存…' : '完成并保存学习记录'}
+              </button>
             </>
           ) : (
             <>

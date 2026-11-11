@@ -59,7 +59,7 @@ Moodle provides both an LTI tool consumer and LTI 1.3 provider route, plus exter
 
 ## Approved hybrid lesson direction
 
-The user approved combining short Video Lesson segments with interaction in one School Learning course. Use a single curriculum-grounded teaching blueprint with per-segment renderers and a single narration owner. Do not duplicate complete course planning in both engines. The first delivery is the grade-3 fraction exploration pilot described in `HYBRID_LESSON_PLAN.md`; it uses a reviewed native compiled clip, a controlled manipulative, existing question-bank grading, and owner-scoped session checkpoints. It is not yet general automatic hybrid generation or voiced synchronization. Personal AI Tutor and Interactive Classroom remain full native modules.
+The user approved combining short Video Lesson segments with interaction in one School Learning course. Use a single curriculum-grounded teaching blueprint with per-segment renderers and a single narration owner. Do not duplicate complete course planning in both engines. The first delivery is the grade-3 fraction exploration pilot described in `HYBRID_LESSON_PLAN.md`; it now uses three reviewed native compiled narrated chapters around a controlled manipulative and existing question-bank grading, with owner-scoped session checkpoints. The authored pilot has verified audio/picture timeline controls; general automatic hybrid generation and generated-course narration remain separate gates. Personal AI Tutor and Interactive Classroom remain full native modules.
 
 ## Durable School generation
 

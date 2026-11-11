@@ -105,7 +105,37 @@ describe('hybrid classroom learner records', () => {
       expect.objectContaining({
         student_id: 'learner',
         status: 'started',
-        lesson_payload: expect.objectContaining({ hybridLessonId: FRACTIONS_HYBRID.id }),
+        lesson_payload: expect.objectContaining({
+          hybridLessonId: FRACTIONS_HYBRID.id,
+          hybridPhase: 'question',
+          hybridContentVersion: 2,
+        }),
+      }),
+    );
+  });
+  it('does not let a recap checkpoint bypass the understanding checks', async () => {
+    const result = await POST(
+      new NextRequest('https://example.test/api/china-curriculum/hybrid', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'checkpoint', sessionId: id, phase: 'recap' }),
+      }),
+    );
+    expect(result.status).toBe(409);
+    expect(state.writes).not.toHaveBeenCalled();
+  });
+  it('allows the recap after both distinct questions in the same learner session', async () => {
+    state.attempts = FRACTIONS_HYBRID.questionIds.map((question) => attempt(question));
+    const result = await POST(
+      new NextRequest('https://example.test/api/china-curriculum/hybrid', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'checkpoint', sessionId: id, phase: 'recap' }),
+      }),
+    );
+    expect(result.status).toBe(200);
+    expect(state.writes).toHaveBeenCalledWith(
+      'learning_sessions',
+      expect.objectContaining({
+        lesson_payload: expect.objectContaining({ hybridPhase: 'recap' }),
       }),
     );
   });

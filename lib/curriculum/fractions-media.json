@@ -1,0 +1,92 @@
+{
+  "version": 2,
+  "asset": "/lessons/fractions-narrated-v2.html",
+  "fps": 30,
+  "durationInFrames": 1746,
+  "chapters": [
+    {
+      "id": "explain",
+      "title": "分数是怎么来的",
+      "start": 0,
+      "end": 641
+    },
+    {
+      "id": "reason",
+      "title": "为什么这样写分数",
+      "start": 642,
+      "end": 1289
+    },
+    {
+      "id": "recap",
+      "title": "把今天的发现带走",
+      "start": 1290,
+      "end": 1745
+    }
+  ],
+  "shots": [
+    {
+      "id": "equal",
+      "start": 0,
+      "end": 220,
+      "audioStart": 10,
+      "audioEnd": 200,
+      "shaded": 0
+    },
+    {
+      "id": "one",
+      "start": 221,
+      "end": 443,
+      "audioStart": 231,
+      "audioEnd": 423,
+      "shaded": 1
+    },
+    {
+      "id": "three",
+      "start": 444,
+      "end": 641,
+      "audioStart": 454,
+      "audioEnd": 621,
+      "shaded": 3
+    },
+    {
+      "id": "denominator",
+      "start": 642,
+      "end": 845,
+      "audioStart": 652,
+      "audioEnd": 825,
+      "shaded": 3
+    },
+    {
+      "id": "numerator",
+      "start": 846,
+      "end": 1053,
+      "audioStart": 856,
+      "audioEnd": 1033,
+      "shaded": 3
+    },
+    {
+      "id": "both",
+      "start": 1054,
+      "end": 1289,
+      "audioStart": 1064,
+      "audioEnd": 1269,
+      "shaded": 3
+    },
+    {
+      "id": "remember",
+      "start": 1290,
+      "end": 1495,
+      "audioStart": 1300,
+      "audioEnd": 1475,
+      "shaded": 3
+    },
+    {
+      "id": "whole",
+      "start": 1496,
+      "end": 1745,
+      "audioStart": 1506,
+      "audioEnd": 1725,
+      "shaded": 4
+    }
+  ]
+}

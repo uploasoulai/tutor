@@ -28,6 +28,7 @@ lib/export/svg-arc-to-cubic-bezier.d.ts
 public/demos/fractions-video.html
 
 public/lessons/fractions-intro-v1.html
+public/lessons/fractions-narrated-v2.html
 
 # Local runtime data, deployment bundles and isolated pilot outputs
 data/
