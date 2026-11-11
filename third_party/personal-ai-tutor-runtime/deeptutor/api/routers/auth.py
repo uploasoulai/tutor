@@ -512,16 +512,9 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
         if not record or record[1].get("disabled"):
             raise HTTPException(status_code=403, detail="This account is unavailable.")
         token = create_token(username, str(record[1].get("role") or "user"), account_id)
-        destinations = {
-            "personal": "/",
-            "school": "/learning",
-            "practice": "/learning/practice",
-            "mastery": "/learning/mastery",
-            "progress": "/settings/progress",
-            "profile": "/settings#learner-profile",
-            "guardian": "/settings#guardian",
-        }
-        destination = destinations[mode]
+        from deeptutor.multi_user.host_navigation import host_learning_destination
+
+        destination = host_learning_destination(mode, has_handoff=handoff_prompt is not None)
         if role == "admin" and _admin_needs_llm_setup():
             destination = "/settings/llm"
         response = RedirectResponse(url=destination, status_code=303)

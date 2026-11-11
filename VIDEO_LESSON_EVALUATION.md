@@ -25,3 +25,7 @@ Current status: source audit complete; production dependency preflight and actua
 The first spatial classroom is CSS perspective scenery plus an original SVG teacher around the existing live DOM screen. It adds no Three.js, GPU server, external models, media API or generation calls. Student interactions remain normal HTML with unchanged hit coordinates. The teacher gesture is decorative playback feedback, not lip synchronization. Focus view removes scenery; presentation/authoring bypass it; narrow/short layouts show the ordinary lesson, and reduced-motion disables gestures.
 
 This is a lightweight spatial prototype, not a WebGL 3D world. Measure classroom usability and customer reaction before investing in low-poly GLB assets, WebGL loading and device compatibility. A later true 3D shell should remain optional, lazy-loaded and independent of the teaching engine.
+
+## Read-only production preflight
+
+Run `scripts/tutor_video_preflight.py` inside only the confirmed Tutor container. It reports Node/npm, pinned runtime package readiness, narration dependency, free disk and cgroup memory where available. It installs nothing, sends no model request and prints no secrets. These checks do not prove the module is enabled, that narration can reach its service or that a generated lesson passes acceptance.

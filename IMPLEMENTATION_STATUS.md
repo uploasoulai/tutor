@@ -21,9 +21,9 @@ This short file is the working index. **The latest user-approved decisions in ch
 ## 2026-11-10 advisory review
 
 - `IMPROVEMENT_ROADMAP.md` records the evidence-based decisions and eight acceptance stages from Recommendations_v3. The advisory is not an instruction to rewrite the system.
-- First local patch requires authenticated classroom reads, private owner checks, and owner-safe writes. Six regression tests pass; deployment and the remaining media/export privacy audit are pending.
+- First local patch requires authenticated classroom reads, private owner checks, and owner-safe writes. Six regression tests pass; the user confirmed GitHub push and Vercel Ready for `4c148bb`; the remaining media/export privacy audit is pending.
 - A resource-conscious spatial classroom prototype wraps playback with CSS scenery and an SVG teacher, with focus/presentation/mobile/reduced-motion fallbacks. This is not a WebGL 3D scene and adds no paid API or server render work. See `VIDEO_LESSON_EVALUATION.md` for the Video Lesson pilot decision and unverified production gates.
-- Personal launch currently resolves to chat; evaluate the existing native learning dashboard before adding a new learning homepage. Video Lesson is present in pinned source but production readiness and comparison are unverified.
+- Personal entry implementation now selects the existing native learning dashboard, with shared shortcuts to chat, mastery, practice, notes, materials and memory in both layouts. Mistake handoffs remain on chat and are not auto-sent. Three routing regression tests pass; the separate Tutor image rollout is pending. Video Lesson is present in pinned source but production readiness and comparison are unverified.
 
 ## Delivery sequence
 
