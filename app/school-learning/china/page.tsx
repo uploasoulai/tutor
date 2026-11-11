@@ -129,6 +129,8 @@ export default function ChinaSchoolLearningPage() {
     sessionId: string;
     pollUrl: string;
     status: string;
+    jobId?: string;
+    resumable?: boolean;
     message?: string;
     classroomUrl?: string;
     error?: string;
@@ -218,7 +220,7 @@ export default function ChinaSchoolLearningPage() {
     }
   }, [catalog?.textbooks, edition]);
 
-  const openTopic = async (topicId: string, editionId = edition) => {
+  const openTopic = async (topicId: string, editionId = edition, resumeSessionId?: string) => {
     answerRequestId.current += 1;
     classroomRequestId.current += 1;
     const requestId = ++detailRequestId.current;
@@ -240,6 +242,24 @@ export default function ChinaSchoolLearningPage() {
       if (!response.ok || !body.success) throw new Error(body.error || '知识点暂时无法打开');
       if (requestId !== detailRequestId.current) return;
       setSelected(body);
+      if (resumeSessionId) {
+        const pollUrl = `/api/china-curriculum/lesson?sessionId=${encodeURIComponent(resumeSessionId)}`;
+        const savedResponse = await fetch(pollUrl, { cache: 'no-store' });
+        const saved = await savedResponse.json();
+        if (!savedResponse.ok || !saved.success || saved.topicId !== topicId)
+          throw new Error('暂时无法恢复这节课，请从学习记录中重新打开');
+        if (requestId !== detailRequestId.current) return;
+        setGeneration({
+          sessionId: resumeSessionId,
+          pollUrl,
+          jobId: saved.jobId,
+          status: saved.status,
+          resumable: saved.resumable,
+          classroomUrl: saved.classroomUrl,
+          message: saved.message,
+          error: saved.error,
+        });
+      }
     } catch (detailError) {
       if (requestId === detailRequestId.current) {
         setError(detailError instanceof Error ? detailError.message : '知识点暂时无法打开');
@@ -278,7 +298,7 @@ export default function ChinaSchoolLearningPage() {
     const topicId = params.get('topicId');
     const editionId = params.get('edition');
     if (editionId) setEdition(editionId);
-    if (topicId) void openTopic(topicId, editionId ?? 'pep');
+    if (topicId) void openTopic(topicId, editionId ?? 'pep', params.get('sessionId') ?? undefined);
     // Open a curriculum topic when continuing it from the shared learning history.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading]);
@@ -387,6 +407,7 @@ export default function ChinaSchoolLearningPage() {
       const body = (await response.json()) as {
         success?: boolean;
         sessionId?: string;
+        jobId?: string;
         pollUrl?: string;
         error?: string;
       };
@@ -396,10 +417,16 @@ export default function ChinaSchoolLearningPage() {
       if (requestId !== classroomRequestId.current) return;
       setGeneration({
         sessionId: body.sessionId,
+        jobId: body.jobId,
         pollUrl: body.pollUrl,
         status: 'queued',
         message: '课堂正在准备中…',
       });
+      const resumeUrl = new URL(window.location.href);
+      resumeUrl.searchParams.set('topicId', selected.topic.id);
+      resumeUrl.searchParams.set('edition', edition);
+      resumeUrl.searchParams.set('sessionId', body.sessionId);
+      window.history.replaceState(window.history.state, '', resumeUrl);
       void loadCatalog();
     } catch (generationError) {
       if (requestId !== classroomRequestId.current) return;
@@ -409,6 +436,32 @@ export default function ChinaSchoolLearningPage() {
         status: 'failed',
         error: generationError instanceof Error ? generationError.message : '课堂暂时无法开始',
       });
+    }
+  };
+
+  const retryClassroom = async () => {
+    if (!generation?.jobId || !generation.resumable) return;
+    const requestId = classroomRequestId.current;
+    try {
+      const response = await fetch(
+        `/api/generate-classroom/${encodeURIComponent(generation.jobId)}`,
+        { method: 'POST' },
+      );
+      const body = await response.json();
+      if (!response.ok || !body.success) throw new Error(body.error || '暂时无法继续，请稍后重试');
+      if (requestId !== classroomRequestId.current) return;
+      setGeneration((current) =>
+        current
+          ? { ...current, status: 'queued', error: undefined, message: '从上次保存的地方继续…' }
+          : current,
+      );
+    } catch (failure) {
+      if (requestId !== classroomRequestId.current) return;
+      setGeneration((current) =>
+        current
+          ? { ...current, error: failure instanceof Error ? failure.message : '暂时无法继续' }
+          : current,
+      );
     }
   };
 
@@ -427,6 +480,8 @@ export default function ChinaSchoolLearningPage() {
         const body = (await response.json()) as {
           success?: boolean;
           status?: string;
+          jobId?: string;
+          resumable?: boolean;
           message?: string;
           classroomUrl?: string;
           error?: string;
@@ -438,6 +493,8 @@ export default function ChinaSchoolLearningPage() {
             ? {
                 ...current,
                 status: body.status ?? current.status,
+                jobId: body.jobId ?? current.jobId,
+                resumable: body.resumable,
                 message: body.message ?? current.message,
                 classroomUrl: body.classroomUrl ?? current.classroomUrl,
                 error: body.error ?? current.error,
@@ -1089,10 +1146,12 @@ export default function ChinaSchoolLearningPage() {
                   >
                     {generation.error}
                     <button
-                      onClick={() => void startClassroom()}
+                      onClick={() =>
+                        void (generation.resumable ? retryClassroom() : startClassroom())
+                      }
                       className="ml-2 font-bold underline"
                     >
-                      再试一次
+                      {generation.resumable ? '保留内容，继续准备' : '重新准备课程'}
                     </button>
                   </div>
                 )}

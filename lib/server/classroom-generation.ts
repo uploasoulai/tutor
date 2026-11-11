@@ -46,6 +46,8 @@ export interface GenerateClassroomInput {
   maxInteractiveScenes?: number;
   /** Cap lesson-specific response size so curriculum builds finish predictably. */
   maxOutputTokens?: number;
+  /** School-only durable pipeline; each polling request advances one saved step. */
+  resumableSchoolLesson?: boolean;
   pdfContent?: { text: string; images: string[] };
   enableWebSearch?: boolean;
   webSearchProviderId?: WebSearchProviderId;
@@ -83,7 +85,7 @@ export interface GenerateClassroomResult {
   createdAt: string;
 }
 
-function createInMemoryStore(stage: Stage): StageStore {
+export function createInMemoryStore(stage: Stage): StageStore {
   let state = {
     stage: stage as Stage | null,
     scenes: [] as Scene[],

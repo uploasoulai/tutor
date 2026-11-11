@@ -3,7 +3,6 @@ import { nanoid } from 'nanoid';
 
 import { resolveAccountRole } from '@/lib/auth/account-role';
 import { ensureStudentRecord } from '@/lib/auth/ensure-student-record';
-import { assertPlatformAiWithinLimit } from '@/lib/server/platform-ai-usage';
 import {
   CHINA_SUBJECTS,
   chinaGradeLabel,
@@ -22,6 +21,12 @@ import {
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { randomUUID } from 'node:crypto';
+import {
+  advanceSchoolGeneration,
+  schoolGenerationMessage,
+  assertSchoolAiAvailable,
+} from '@/lib/server/school-generation-runner';
+import { canAdvanceSchoolGeneration } from '@/lib/server/school-generation-state';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -52,7 +57,7 @@ function makeClassroomRequirement(
     )
     .join('\n');
 
-  return `请为 CoastalTutor 的中国课程学习制作一堂虚拟互动课，共 3 个课堂场景。
+  return `请为 CoastalTutor 的中国课程学习制作一堂虚拟互动课，共 6 个简短课堂场景。
 
 学习者：${grade} 学生
 学科：${CHINA_SUBJECTS[subject] ?? subject}
@@ -66,7 +71,7 @@ function makeClassroomRequirement(
 题库参考：\n${questionLines || '根据知识点掌握目标创作新练习。'}
 
 教学要求：
-- 三个场景依次承担：生活化引入与直观讲解；一个可操作的互动练习；检查理解、纠错提示与回顾。不要额外扩展成更多场景。
+- 六个场景依次承担：生活化小问题（slide）；直观讲解（slide）；一个可操作的互动练习（interactive）；例题推理（slide）；理解检查（quiz）；回顾与迁移（slide）。整堂课只用同一套目标与例子，不要生成两套课程。
 - 先用小问题引导学生思考，不要一开始直接给最终答案；答错时指出可能卡住的步骤，再用更小的例子提示。
 - 适配 ${grade} 儿童的中文表达与注意力时长，句子短、一次只讲一个新概念。
 - 使用浏览器可运行的 SVG、HTML、CSS 或 Canvas 做图表、卡片、数轴、几何或其他适合本知识点的交互演示。
@@ -114,7 +119,8 @@ export async function POST(request: NextRequest) {
     const input: GenerateClassroomInput = {
       requirement,
       curriculumLessonCache,
-      maxScenes: 3,
+      resumableSchoolLesson: true,
+      maxScenes: 6,
       // Keep one concise built-in interaction, while bounding each model response.
       maxInteractiveScenes: 1,
       maxOutputTokens: 4096,
@@ -135,7 +141,7 @@ export async function POST(request: NextRequest) {
       : await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey);
     if (!reusableLesson) {
       failedStage = 'platform_ai_check';
-      await assertPlatformAiWithinLimit(user.id);
+      await assertSchoolAiAvailable(user.id);
     }
 
     failedStage = 'classroom_job_storage';
@@ -273,6 +279,8 @@ export async function GET(request: NextRequest) {
       classroomJobId?: string;
       classroomUrl?: string;
       classroomId?: string;
+      curriculumTopicId?: string;
+      curriculumEditionId?: string;
     } | null;
     if (payload?.curriculumTrack !== 'china' || !payload.classroomJobId) {
       return apiError('INVALID_REQUEST', 404, 'China lesson job not found');
@@ -281,6 +289,9 @@ export async function GET(request: NextRequest) {
     const { readClassroomGenerationJob } = await import('@/lib/server/classroom-job-store');
     const job = await readClassroomGenerationJob(payload.classroomJobId, user.id);
     if (!job) return apiError('INVALID_REQUEST', 404, 'Lesson generation job not found');
+    if (job.schoolGeneration && job.status !== 'succeeded' && job.status !== 'failed') {
+      after(() => advanceSchoolGeneration(job.id, user.id, buildRequestOrigin(request)));
+    }
 
     if (
       job.status === 'succeeded' &&
@@ -299,12 +310,17 @@ export async function GET(request: NextRequest) {
           },
         })
         .eq('id', session.id)
-        .eq('student_id', user.id);
+        .eq('student_id', user.id)
+        .eq('status', session.status);
       if (updateError) throw updateError;
     }
 
     return apiSuccess({
       sessionId: session.id,
+      jobId: job.id,
+      topicId: payload.curriculumTopicId,
+      editionId: payload.curriculumEditionId,
+      resumable: !!job.schoolGeneration && canAdvanceSchoolGeneration(job.schoolGeneration),
       status: job.status,
       progress: job.progress,
       message: job.message,
@@ -312,11 +328,17 @@ export async function GET(request: NextRequest) {
       classroomId: job.result?.classroomId ?? payload.classroomId ?? null,
       error:
         job.status === 'failed'
-          ? job.error?.includes('Platform AI is not configured')
-            ? '平台 AI 尚未连接，请管理员配置服务后再试。'
-            : job.error?.includes('platform_usage_limit_reached')
-              ? '本月平台 AI 使用额度已用完，将在下月恢复。'
-              : '课堂生成遇到问题，请稍后再试。'
+          ? job.schoolGeneration
+            ? schoolGenerationMessage(job.error)
+            : job.error?.includes('Platform AI is not configured')
+              ? '平台 AI 尚未连接，请管理员配置服务后再试。'
+              : job.error?.includes('platform_usage_limit_reached')
+                ? '本月平台 AI 使用额度已用完，将在下月恢复。'
+                : job.error === 'lesson_generation_budget_reached'
+                  ? '本次课程已达到重试上限，已完成的内容仍保留。可以稍后重新准备课程。'
+                  : job.error === 'byok_provider_unavailable'
+                    ? '你的 AI 设置暂不可用，请到设置中检查。系统不会自动改用平台付费服务。'
+                    : '这个环节暂时未完成，已完成的内容仍保留。可以从断点继续。'
           : null,
     });
   } catch (error) {

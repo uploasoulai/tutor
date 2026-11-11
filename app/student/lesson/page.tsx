@@ -94,6 +94,8 @@ type LessonSession = {
       classroomUrl?: string;
       classroomId?: string;
       createdAt: string;
+      resumable?: boolean;
+      message?: string;
     };
   } | null;
 };
@@ -155,6 +157,7 @@ function LessonContent() {
   const [xp, setXp] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [syncingLessonEngine, setSyncingLessonEngine] = useState(false);
+  const [engineRetryError, setEngineRetryError] = useState('');
 
   const quiz = useMemo(
     () =>
@@ -309,6 +312,26 @@ function LessonContent() {
       }
     } catch {
       // Polling is opportunistic; the poll URL remains available for manual checks.
+    } finally {
+      setSyncingLessonEngine(false);
+    }
+  }
+
+  async function retryLessonEngine() {
+    const engine = session?.lesson_payload?.lessonEngine;
+    if (!engine?.resumable || syncingLessonEngine) return;
+    setEngineRetryError('');
+    setSyncingLessonEngine(true);
+    try {
+      const response = await fetch(`/api/generate-classroom/${encodeURIComponent(engine.jobId)}`, {
+        method: 'POST',
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success)
+        throw new Error(result.error || 'Please try again shortly.');
+      await syncLessonEngineJob();
+    } catch (failure) {
+      setEngineRetryError(failure instanceof Error ? failure.message : 'Please try again shortly.');
     } finally {
       setSyncingLessonEngine(false);
     }
@@ -876,15 +899,20 @@ function LessonContent() {
           </div>
 
           <div className="rounded-lg border border-[#e7e8e9] bg-white p-6 shadow-sm">
-            <h2 className="text-base font-semibold text-[#191c1d]">CoastalTutor engine</h2>
+            <h2 className="text-base font-semibold text-[#191c1d]">Your interactive classroom</h2>
             {lessonEngine ? (
               <div className="mt-4 space-y-3">
                 <div className="rounded-md bg-[#f8f9fa] p-3">
                   <p className="text-xs font-semibold uppercase tracking-wider text-[#727781]">
-                    Job
+                    Lesson preparation
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-[#191c1d]">{lessonEngine.jobId}</p>
-                  <p className="mt-1 text-xs text-[#727781]">status: {lessonEngine.status}</p>
+                  <p className="mt-1 text-sm font-semibold text-[#191c1d]">
+                    {lessonEngine.status === 'succeeded'
+                      ? 'Ready to explore'
+                      : lessonEngine.status === 'failed'
+                        ? 'Preparation paused. Your saved work is safe.'
+                        : 'Preparing your lesson, one step at a time…'}
+                  </p>
                   {quality?.lessonEngine ? (
                     <p className="mt-1 text-xs text-[#727781]">
                       scenes: {quality.lessonEngine.scenesGenerated}/
@@ -892,15 +920,31 @@ function LessonContent() {
                     </p>
                   ) : null}
                 </div>
-                <a
-                  href={lessonEngine.classroomUrl ?? lessonEngine.pollUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex h-9 items-center gap-2 rounded-md border border-[#e7e8e9] px-3 text-sm font-semibold text-[#003461] hover:bg-[#f0f4ff]"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  {lessonEngine.classroomUrl ? 'Open classroom' : 'Check generation'}
-                </a>
+                {lessonEngine.classroomUrl && (
+                  <a
+                    href={lessonEngine.classroomUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-9 items-center gap-2 rounded-md border border-[#e7e8e9] px-3 text-sm font-semibold text-[#003461] hover:bg-[#f0f4ff]"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open classroom
+                  </a>
+                )}
+                {lessonEngine.status === 'failed' && lessonEngine.resumable && (
+                  <button
+                    disabled={syncingLessonEngine}
+                    onClick={() => void retryLessonEngine()}
+                    className="min-h-12 rounded-xl bg-[#003461] px-4 font-semibold text-white disabled:opacity-50"
+                  >
+                    Continue from saved progress
+                  </button>
+                )}
+                {engineRetryError && (
+                  <p role="alert" className="text-sm text-rose-700">
+                    {engineRetryError}
+                  </p>
+                )}
                 {lessonEngine.status !== 'succeeded' && lessonEngine.status !== 'failed' ? (
                   <button
                     onClick={() => void syncLessonEngineJob()}

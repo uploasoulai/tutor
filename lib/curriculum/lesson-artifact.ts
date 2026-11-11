@@ -3,6 +3,7 @@ import type { BCCurriculumMatch } from '@/lib/curriculum/search';
 import { searchBCCurriculum } from '@/lib/curriculum/search';
 import type { ClassroomGenerationJob } from '@/lib/server/classroom-job-store';
 import { readClassroomGenerationJob } from '@/lib/server/classroom-job-store';
+import { canAdvanceSchoolGeneration } from '@/lib/server/school-generation-state';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import {
   DEFAULT_TEACHER_PERSONA,
@@ -97,6 +98,8 @@ export type LessonEngineJob = {
   classroomUrl?: string;
   classroomId?: string;
   createdAt: string;
+  resumable?: boolean;
+  message?: string;
 };
 
 export function buildLessonReuseKey({
@@ -135,7 +138,7 @@ export function buildLessonEngineRequirement(payload: LessonPayload) {
     )
     .join('\n');
 
-  return `Create a Grade 2-first CoastalTutor interactive classroom lesson.
+  return `Create a CoastalTutor interactive classroom lesson for the selected grade.
 
 Audience:
 - Grade: ${payload.bc_context.grade}
@@ -144,9 +147,9 @@ Audience:
 - BC outcome: ${payload.bc_context.outcome_code || 'Use the strongest matched BC outcome'}
 
 Duration and structure:
-- Target length: about 2 minutes
-- Generate 3 concise scenes: warm intro, guided practice, quick quiz
-- Keep all wording age-appropriate for Grade 2
+- Target length: about 4 minutes, with learner-controlled interaction pauses
+- Generate 6 concise scenes from ONE coherent teaching plan: question (slide), explanation (slide), hands-on practice (interactive), worked reasoning (slide), understanding check (quiz), recap (slide)
+- Keep all wording age-appropriate for the selected grade
 - Use concrete examples, visual representations, simple image prompts, and gentle tutor feedback
 - Include a short Rive-avatar-friendly teacher narration cue for each scene
 - Include the quiz checks below as active mini-games, not text-only slides
@@ -342,6 +345,8 @@ export function mergeLessonEngineJobStatus(
     lessonEngine: {
       ...payload.lessonEngine,
       status: job.status,
+      resumable: !!job.schoolGeneration && canAdvanceSchoolGeneration(job.schoolGeneration),
+      message: job.message,
       classroomId: job.result?.classroomId ?? payload.lessonEngine.classroomId,
       classroomUrl,
     },
@@ -357,7 +362,7 @@ export function evaluateLessonEngineGenerationQuality(
   job: ClassroomGenerationJob,
   classroomUrl?: string,
 ): NonNullable<LessonQualityReport['lessonEngine']> {
-  const expectedScenes = Math.max(3, payload.blueprint?.scenes?.length ?? 3);
+  const expectedScenes = job.totalScenes ?? Math.max(3, payload.blueprint?.scenes?.length ?? 3);
   const sceneRatio = Math.min(1, job.scenesGenerated / expectedScenes);
   const statusScore =
     job.status === 'succeeded'
@@ -447,7 +452,7 @@ export async function syncLessonEngineJob({
     };
   }
 
-  const job = await readClassroomGenerationJob(payload.lessonEngine.jobId);
+  const job = await readClassroomGenerationJob(payload.lessonEngine.jobId, studentId);
   const nextPayload = mergeLessonEngineJobStatus(payload, job);
 
   if (nextPayload !== payload) {

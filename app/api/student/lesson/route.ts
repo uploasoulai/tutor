@@ -22,6 +22,9 @@ import { resolveLessonEngineMediaFlags } from '@/lib/server/lesson-engine-media-
 import { createClient } from '@/lib/supabase/server';
 import { resolveTeacherPersonaPreference } from '@/lib/curriculum/teacher-personas';
 import { assertPlatformAiWithinLimit } from '@/lib/server/platform-ai-usage';
+import { assertSchoolAiAvailable } from '@/lib/server/school-generation-runner';
+
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   try {
@@ -74,12 +77,20 @@ export async function POST(req: NextRequest) {
       const reusableLesson = curriculumLessonCache
         ? await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey)
         : null;
-      if (!reusableLesson) await assertPlatformAiWithinLimit(user.id);
+      if (!reusableLesson) {
+        if (curriculumLessonCache) await assertSchoolAiAvailable(user.id);
+        else await assertPlatformAiWithinLimit(user.id);
+      }
       const generationInput = {
         requirement,
         ...(curriculumLessonCache ? { curriculumLessonCache } : {}),
         ...(curriculumLessonCache
-          ? { maxScenes: 3, maxInteractiveScenes: 1, maxOutputTokens: 4096 }
+          ? {
+              maxScenes: 6,
+              maxInteractiveScenes: 1,
+              maxOutputTokens: 4096,
+              resumableSchoolLesson: true,
+            }
           : {}),
         ...mediaFlags,
         agentMode: 'default' as const,

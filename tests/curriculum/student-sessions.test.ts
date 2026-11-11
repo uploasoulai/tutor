@@ -66,3 +66,16 @@ it('keeps ordinary China lessons pointed at their course topic', () => {
     }).openPath,
   ).toBe('/school-learning/china?topicId=topic');
 });
+it('resumes a generated China job from history using the same learner session', () => {
+  expect(
+    mapStudentSession({
+      id: 'saved-session',
+      lesson_payload: {
+        curriculumTrack: 'china',
+        curriculumTopicId: 'topic',
+        classroomJobId: 'job',
+        curriculumEditionId: 'hujiao',
+      },
+    }).openPath,
+  ).toBe('/school-learning/china?topicId=topic&edition=hujiao&sessionId=saved-session');
+});

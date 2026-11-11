@@ -41,6 +41,29 @@ export interface ResolvedModel extends ModelWithInfo {
 
 let autoFreeCursor = 0;
 
+/** Resolve a durable job's learner at execution time; no key is stored with the job. */
+export async function resolveLearnerJobModel(userId: string) {
+  const credential = await getLearnerCredential(userId);
+  if (!credential) return { resolved: await resolveModel({}), byok: false };
+  const verified = (process.env.BYOK_VERIFIED_PROVIDERS || '').split(',').map((v) => v.trim());
+  if (!verified.includes(credential.providerId)) {
+    throw new Error('BYOK_PROVIDER_UNAVAILABLE');
+  }
+  const defaults = JSON.parse(process.env.BYOK_DEFAULT_MODELS_JSON || '{}') as Record<
+    string,
+    string
+  >;
+  const modelId = defaults[credential.providerId];
+  if (!modelId) throw new Error('BYOK_PROVIDER_UNAVAILABLE');
+  return {
+    resolved: await resolveModel({
+      modelString: `${credential.providerId}:${modelId}`,
+      apiKey: credential.apiKey,
+    }),
+    byok: true,
+  };
+}
+
 /**
  * Resolve a language model from explicit parameters.
  *

@@ -1,6 +1,7 @@
 import { createLogger } from '@/lib/logger';
 import { generateClassroom, type GenerateClassroomInput } from '@/lib/server/classroom-generation';
 import { runWithPlatformAiUsage } from '@/lib/server/platform-ai-usage';
+import { advanceSchoolGeneration } from './school-generation-runner';
 import {
   markClassroomGenerationJobFailed,
   markClassroomGenerationJobRunning,
@@ -17,6 +18,9 @@ export function runClassroomGenerationJob(
   baseUrl: string,
   options: { billingUserId?: string } = {},
 ): Promise<void> {
+  if (input.resumableSchoolLesson && input.curriculumLessonCache && options.billingUserId) {
+    return advanceSchoolGeneration(jobId, options.billingUserId, baseUrl);
+  }
   const existing = runningJobs.get(jobId);
   if (existing) {
     return existing;

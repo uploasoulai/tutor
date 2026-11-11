@@ -26,13 +26,14 @@ export function mapStudentSession(row: Record<string, unknown>): StudentSessionL
           hybridLessonId?: string;
           curriculumTopicId?: string;
           curriculumEditionId?: string;
+          classroomJobId?: string;
         })
       : null;
   const openPath =
     payload?.hybridLessonId === FRACTIONS_HYBRID.id && payload.curriculumTrack === 'china'
       ? `/school-learning/china/fractions-lab?sessionId=${encodeURIComponent(String(row.id))}`
       : payload?.curriculumTrack === 'china'
-        ? `/school-learning/china${payload.curriculumTopicId ? `?topicId=${encodeURIComponent(payload.curriculumTopicId)}${payload.curriculumEditionId && payload.curriculumEditionId !== 'pep' ? `&edition=${encodeURIComponent(payload.curriculumEditionId)}` : ''}` : ''}`
+        ? `/school-learning/china${payload.curriculumTopicId ? `?topicId=${encodeURIComponent(payload.curriculumTopicId)}${payload.curriculumEditionId && payload.curriculumEditionId !== 'pep' ? `&edition=${encodeURIComponent(payload.curriculumEditionId)}` : ''}${payload.classroomJobId ? `&sessionId=${encodeURIComponent(String(row.id))}` : ''}` : ''}`
         : `/student/lesson?sessionId=${encodeURIComponent(String(row.id))}`;
 
   return {

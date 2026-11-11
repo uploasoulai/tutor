@@ -13,6 +13,7 @@ import {
   writeJsonFileAtomic,
 } from '@/lib/server/classroom-storage';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { initialSchoolGeneration, type SchoolGenerationState } from './school-generation-state';
 
 export type ClassroomGenerationJobStatus = 'queued' | 'running' | 'succeeded' | 'failed';
 
@@ -40,6 +41,8 @@ export interface ClassroomGenerationJob {
     scenesCount: number;
   };
   error?: string;
+  providerStatus?: number;
+  schoolGeneration?: SchoolGenerationState;
 }
 
 function jobFilePath(jobId: string) {
@@ -91,6 +94,8 @@ async function withJobLock<T>(jobId: string, fn: () => Promise<T>): Promise<T> {
 const STALE_JOB_TIMEOUT_MS = 6 * 60 * 1000; // Allow margin after Vercel's 5-minute Hobby limit.
 
 function markStaleIfNeeded(job: ClassroomGenerationJob): ClassroomGenerationJob {
+  // Durable School steps recover through their database lease, not a synthetic failure.
+  if (job.schoolGeneration) return job;
   if (job.status !== 'running') return job;
   const updatedAt = new Date(job.updatedAt).getTime();
   if (Date.now() - updatedAt > STALE_JOB_TIMEOUT_MS) {
@@ -127,6 +132,9 @@ export async function createClassroomGenerationJob(
     updatedAt: now,
     inputSummary: buildInputSummary(input),
     scenesGenerated: 0,
+    ...(input.resumableSchoolLesson && input.curriculumLessonCache && ownerId
+      ? { schoolGeneration: initialSchoolGeneration(ownerId, input) }
+      : {}),
   };
 
   if (usesPersistentClassroomStore()) {
@@ -162,6 +170,7 @@ export async function readClassroomGenerationJob(
     }
     const content = await fs.readFile(jobFilePath(jobId), 'utf-8');
     const job = JSON.parse(content) as ClassroomGenerationJob;
+    if (job.schoolGeneration && job.schoolGeneration.ownerId !== ownerId && ownerId) return null;
     return markStaleIfNeeded(job);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
@@ -169,6 +178,35 @@ export async function readClassroomGenerationJob(
     }
     throw error;
   }
+}
+
+/** Owner-scoped revision compare-and-swap: polling in two tabs cannot buy two steps. */
+export async function compareAndSwapSchoolJob(
+  previous: ClassroomGenerationJob,
+  next: ClassroomGenerationJob,
+  ownerId: string,
+): Promise<boolean> {
+  const state = previous.schoolGeneration;
+  if (!state || state.ownerId !== ownerId || !next.schoolGeneration) return false;
+  next.schoolGeneration = { ...next.schoolGeneration, revision: state.revision + 1 };
+  next.updatedAt = new Date().toISOString();
+  if (usesPersistentClassroomStore()) {
+    const { data, error } = await createSupabaseAdminClient()
+      .from('classroom_generation_jobs')
+      .update({ job_data: next, updated_at: next.updatedAt })
+      .eq('id', previous.id)
+      .eq('owner_id', ownerId)
+      .eq('job_data->schoolGeneration->>revision', String(state.revision))
+      .select('id');
+    if (error) throw error;
+    return !!data?.length;
+  }
+  return withJobLock(previous.id, async () => {
+    const current = await readClassroomGenerationJob(previous.id, ownerId);
+    if (current?.schoolGeneration?.revision !== state.revision) return false;
+    await persistJob(previous.id, next);
+    return true;
+  });
 }
 
 export async function updateClassroomGenerationJob(

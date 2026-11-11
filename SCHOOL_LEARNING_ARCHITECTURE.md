@@ -45,7 +45,7 @@
 - The route records lesson sessions in `learning_sessions` and curriculum attempts/mastery against the same Supabase learner UUID.
 - Private runtime data files live in `curriculum_data/china`; do not move the answer-bearing bank back under `public/`.
 - Data provenance and the source-declared license are recorded in `THIRD_PARTY_NOTICES.md` and `public/curriculum/china/NOTICE.md`. The consumer-facing product name remains CoastalTutor.
-- Classroom generation currently resolves the platform/server-configured model through the legacy generation service. It does not yet use one per-learner BYOK vault shared with DeepTutor; that remains a separate provider-integration milestone.
+- New resumable text-only curriculum generation resolves the shared per-learner BYOK vault at each step, using only verified provider/default-model entries; otherwise it resolves Platform AI. Credentials are never persisted in course jobs. Legacy/media-enabled generator paths retain their existing model resolution.
 
 ## Moodle decision: defer as a runtime platform
 
@@ -60,3 +60,9 @@ Moodle provides both an LTI tool consumer and LTI 1.3 provider route, plus exter
 ## Approved hybrid lesson direction
 
 The user approved combining short Video Lesson segments with interaction in one School Learning course. Use a single curriculum-grounded teaching blueprint with per-segment renderers and a single narration owner. Do not duplicate complete course planning in both engines. The first delivery is the grade-3 fraction exploration pilot described in `HYBRID_LESSON_PLAN.md`; it uses a reviewed native compiled clip, a controlled manipulative, existing question-bank grading, and owner-scoped session checkpoints. It is not yet general automatic hybrid generation or voiced synchronization. Personal AI Tutor and Interactive Classroom remain full native modules.
+
+## Durable School generation
+
+New text-only BC/China course jobs share one persisted outline and separate content/actions checkpoints in the existing jobs table. A database revision/lease prevents concurrent tabs from running the same step. One model call per invocation, a finite attempt/call reservation budget, and explicit retries replace a single full-course request. Total course preparation can exceed 300 seconds while each invocation remains bounded. Page polling drives continuation; there is no independent queue worker. Shared compressed successful artifacts remain reusable, independent of learner progress.
+
+School-only reviewed manipulatives can replace unreliable generated JS for explicitly matched graph topics, beginning with introductory multiplication `cnm_p038`. The native classroom still owns scene layout, teaching actions and playback. Other topics/apps are not silently mapped to the same activity. This is a quality/resource measure, not a second full course planner. General native video mixing and narration acceptance remain separate open gates.
