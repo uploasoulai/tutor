@@ -1,5 +1,7 @@
 # School illustration decision — 2026-11-13
 
+**Later explicit decision:** the user subsequently authorized actual SiliconFlow image, speech and video generation for one investor demonstration. That prepared multiplication course is delivered in `INVESTOR_DEMO_LESSON.md`; the zero-generation evidence below refers to the earlier read-only audit. Ordinary automatic course image generation remains disabled.
+
 Latest user decision: continue improving course quality and elementary pre-class UI; the project lead chooses whether image generation helps. Do not confuse an illustration model with a teaching-quality fix.
 
 ## Evidence

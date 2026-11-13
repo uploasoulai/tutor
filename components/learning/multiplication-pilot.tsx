@@ -7,6 +7,7 @@ import story from '@/lib/curriculum/multiplication-storyboard.json';
 import { MULTIPLICATION_PILOT, hasReviewedAssessment } from '@/lib/curriculum/reviewed-lessons';
 import { HYBRID_PHASES, type HybridPhase } from '@/lib/curriculum/hybrid-fractions';
 import { GROUPING_ACTIVITY_HTML } from '@/lib/curriculum/grouping-activity';
+import { MultiplicationWelcome } from './multiplication-welcome';
 
 type Question = { id: string; prompt: string };
 const endpoint = '/api/china-curriculum/multiplication-pilot';
@@ -176,7 +177,7 @@ export function MultiplicationPilot({
         >
           {preview ? '← 回到平台首页' : '← 回到二年级课程'}
         </Link>
-        <p className="mt-5 text-sm font-semibold text-[#52716e]">二年级数学 · 配音互动试课</p>
+        <p className="mt-5 text-sm font-semibold text-[#52716e]">二年级数学 · 海边数学乐园</p>
         <h1 className="mt-2 text-2xl font-bold sm:text-3xl">乘法的初步认识</h1>
         <p className="mt-3 leading-7 text-[#52716e]">
           从几个相同的“小组”出发，摆一摆、数一数，说清楚“几个几”。
@@ -211,6 +212,7 @@ export function MultiplicationPilot({
             <p role="status">正在保存试课、读取你的学习档案…</p>
           ) : phase === 'intro' ? (
             <>
+              <MultiplicationWelcome />
               <h2 className="text-xl font-bold">
                 {preview
                   ? '欢迎来到小海老师的数学教室'

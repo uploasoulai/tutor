@@ -13,14 +13,7 @@ const manifest = JSON.parse(
 const story = JSON.parse(
   readFileSync(join(root, `lib/curriculum/${lesson}-storyboard.json`), 'utf8'),
 );
-const html = readFileSync(
-  join(
-    root,
-    lesson === 'multiplication'
-      ? 'public/lessons/multiplication-narrated-v2.html'
-      : 'public/lessons/fractions-narrated-v2.html',
-  ),
-);
+const html = readFileSync(join(root, 'public', manifest.asset));
 const server = createServer((_req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.end(html);

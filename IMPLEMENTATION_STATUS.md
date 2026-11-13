@@ -2,6 +2,13 @@
 
 This short file is the working index. **The latest user-approved decisions in chat take precedence over older design documents.** Detailed audits and architecture notes remain historical references unless this file or a later chat confirms them.
 
+## Latest delivery — 2026-11-13 investor multimedia lesson
+
+- User explicitly authorized concentrated SiliconFlow image/speech/video spending for one reusable Grade-2 demonstration. The existing multiplication lesson now uses one generated contextual illustration, one five-second generated opener, nine measured voice clips, and the native three-chapter narrated player with exact mathematical diagrams. Full six-step interaction/assessment, same learner identity, wrong-answer Tutor handoff and read-only replay remain. Old media versions and stable lesson ID are retained.
+- Route: `/school-learning/china/multiplication-lab`, already linked from School Learning. Assets are prepared once (~5.8 MB shared), not regenerated or copied per learner. Opening sound requires a click, pauses with the animation, stops on lesson entry and has reduced-motion/media-error fallbacks. Ordinary course media defaults remain off; no runtime image/video gateway, server, package or database change.
+- Actual models, bounded call counts, hashes, replay instructions and acceptance limits: `INVESTOR_DEMO_LESSON.md`. Earlier zero-paid-image statements describe the earlier audit, before this explicit one-course authorization.
+- Validation: 511 unit tests across 89 files, four existing E2E flows, production build, 25 native frame samples, three-chapter real-audio playback checks and the complete Grade-2 browser harness pass. The harness also verifies decoded opening video, synchronized pause, reduced motion, media failures and mobile layout. This is local acceptance with mocked learner APIs, not a claim of production student-record verification.
+
 ## Product map
 
 - **School Learning / China K–12:** CoastalTutor course path and knowledge graph drive sequential learning; generate interactive classroom lessons through the integrated OpenMAIC classroom engine. China is the first delivery priority.

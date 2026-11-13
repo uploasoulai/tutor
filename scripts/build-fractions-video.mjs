@@ -5,10 +5,11 @@ import { copyFileSync, mkdirSync, readFileSync, writeFileSync, statSync } from '
 import { join, resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
 const name = process.argv.includes('--multiplication') ? 'multiplication' : 'fractions';
-const work = join(root, 'data/narrated-' + name);
+const premium = name === 'multiplication' && process.argv.includes('--siliconflow');
+const work = join(root, 'data/narrated-' + name + (premium ? '-siliconflow' : ''));
 const asset =
   name === 'multiplication'
-    ? '/lessons/multiplication-narrated-v2.html'
+    ? `/lessons/multiplication-narrated-v${premium ? 3 : 2}.html`
     : '/lessons/fractions-narrated-v2.html';
 const kit = join(
   root,
@@ -42,7 +43,7 @@ const chapters = story.chapters.map((chapter) => {
   return { id: chapter.id, title: chapter.title, start, end: offset - 1 };
 });
 const manifest = {
-  version: 2,
+  version: premium ? 3 : 2,
   asset,
   fps: story.fps,
   durationInFrames: offset,
@@ -66,6 +67,20 @@ const groupingPicture = `function Picture({shot}){const counts=shot.groupSizes??
 <div style={{position:'absolute',left:70,right:70,top:220,display:'flex',justifyContent:'center',gap:20}}>{counts.map((count,i)=><div key={i} style={{width:Math.min(220,760/counts.length),height:170,border:'3px solid #126e75',borderRadius:20,background:shot.groupSizes&&count!==shot.each?'#fff1d9':'#fff',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12}}><span style={{fontSize:24}}>第 {i+1} 组</span><div style={{display:'grid',gridTemplateColumns:'repeat(2,44px)',gap:10}}>{Array.from({length:count},(_,j)=><span key={j} style={{width:42,height:42,borderRadius:'50%',background:'#65cbb0',border:'2px solid #126e75'}}/>)}</div></div>)}</div>
 <p style={{position:'absolute',left:70,right:70,top:408,margin:0,textAlign:'center',fontSize:40,fontWeight:700}}>{shot.formula}</p></AbsoluteFill>}
 `;
+const adventurePicture = premium
+  ? `const ART='data:image/webp;base64,${readFileSync(join(root, 'public/lessons/multiplication-demo-v3/welcome.webp')).toString('base64')}';
+function Picture({shot}){const counts=shot.groupSizes??Array(shot.groups).fill(shot.each);return <AbsoluteFill style={{background:'#fff8e6',fontFamily:'system-ui,sans-serif',color:'#173e49'}}>
+<img src={ART} style={{position:'absolute',width:'100%',height:'100%',objectFit:'cover',opacity:0.12}}/>
+<div style={{position:'absolute',inset:'22px 30px 152px',borderRadius:30,background:'rgba(255,255,255,0.95)',boxShadow:'0 10px 35px #173e4910'}}/>
+<div style={{position:'absolute',top:40,left:64,fontSize:22,color:'#126e75',fontWeight:700}}>CoastalTutor · 海边数学乐园</div>
+<h1 style={{position:'absolute',top:82,left:64,right:64,margin:0,fontSize:40}}>{shot.title}</h1>
+<p style={{position:'absolute',top:145,left:64,right:64,margin:0,fontSize:29,color:'#52716e'}}>{shot.cue}</p>
+<div style={{position:'absolute',left:64,right:64,top:216,display:'flex',justifyContent:'center',gap:18}}>{counts.map((count,i)=><div key={i} style={{width:Math.min(220,760/counts.length),height:174,border:'3px solid '+(shot.groupSizes&&count!==shot.each?'#db9744':'#23948e'),borderRadius:24,background:shot.groupSizes&&count!==shot.each?'#fff0cc':['#e7f7f1','#eaf4ff','#fff4da','#faeef3'][i%4],display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,boxShadow:'0 5px 0 #173e4910'}}><span style={{fontSize:24,fontWeight:600}}>第 {i+1} 组</span><div style={{display:'grid',gridTemplateColumns:'repeat(2,46px)',gap:10}}>{Array.from({length:count},(_,j)=><span key={j} style={{width:44,height:44,borderRadius:'50%',background:'radial-gradient(circle at 32% 28%,#b3f2d8,#39ad97)',border:'2px solid #126e75',boxShadow:'0 3px 0 #126e7530'}}/>)}</div></div>)}</div>
+<div style={{position:'absolute',left:64,right:64,top:416,borderRadius:20,background:'#fff4ce',padding:14,textAlign:'center',fontSize:40,fontWeight:800}}>{shot.formula}</div>
+<p style={{position:'absolute',left:64,right:64,top:503,fontSize:22,color:'#52716e',textAlign:'center'}}>看每组有几个 · 数一数有几组 · 暂停说说你的发现</p>
+</AbsoluteFill>}
+`
+  : groupingPicture;
 let source = `import React from 'react';import {AbsoluteFill} from 'remotion';import {Scenes,lessonLength} from './kit';
 const SHOTS=${JSON.stringify(shots)};
 function Picture({shot}){return <AbsoluteFill style={{background:'#f2f8f5',fontFamily:'system-ui,sans-serif',color:'#173e49'}}>
@@ -83,7 +98,7 @@ export const Lesson=()=> <Scenes scenes={SCENES}/>;`;
 if (name === 'multiplication') {
   const a = source.indexOf('function Picture');
   const b = source.indexOf('const SCENES=');
-  source = source.slice(0, a) + groupingPicture + source.slice(b);
+  source = source.slice(0, a) + adventurePicture + source.slice(b);
 }
 writeFileSync(join(work, 'Lesson.tsx'), source);
 const report = execFileSync(

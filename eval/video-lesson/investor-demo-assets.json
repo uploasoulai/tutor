@@ -1,0 +1,41 @@
+{
+  "version": 3,
+  "grade": 2,
+  "topicId": "cnm_p038",
+  "generationCalls": {
+    "image": 1,
+    "speech": 9,
+    "video": 1
+  },
+  "models": {
+    "image": "Qwen/Qwen-Image",
+    "speech": "FunAudioLLM/CosyVoice2-0.5B",
+    "voice": "diana",
+    "video": "MiniMaxAI/MiniMax-H3"
+  },
+  "narratedSeconds": 144.26666666666668,
+  "videoSeconds": 5,
+  "actualCostUsd": null,
+  "assets": [
+    {
+      "path": "/lessons/multiplication-narrated-v3.html",
+      "bytes": 3644732,
+      "sha256": "90348c0ba21a5401aa9fa3aa4e4bfb842dca7a5a1d521f9f3278014f9c3ffe0e"
+    },
+    {
+      "path": "/lessons/multiplication-demo-v3/opening.mp4",
+      "bytes": 1836628,
+      "sha256": "240b300765827f63eeabb8791862ae3df3e6fae069f308d6a1bef9da9c864e88"
+    },
+    {
+      "path": "/lessons/multiplication-demo-v3/welcome.mp3",
+      "bytes": 231992,
+      "sha256": "13cb47e391c92c545b4b7bea969d2819748b5f0ea80ed70d5513907841e8f9ba"
+    },
+    {
+      "path": "/lessons/multiplication-demo-v3/welcome.webp",
+      "bytes": 88274,
+      "sha256": "9eb83581082de6000b50684e25ab72ae4fc6619880dd1a3b7b4cebbaf856f8ec"
+    }
+  ]
+}

@@ -54,7 +54,17 @@ const server = createServer((request, response) => {
     response.setHeader('Content-Type', 'text/css');
     response.end(css);
   } else if (
-    path === '/lessons/multiplication-narrated-v2.html' ||
+    ['/opening.mp4', '/welcome.webp', '/welcome.mp3'].some(
+      (file) => path === '/lessons/multiplication-demo-v3' + file,
+    )
+  ) {
+    response.setHeader(
+      'Content-Type',
+      path.endsWith('.mp4') ? 'video/mp4' : path.endsWith('.mp3') ? 'audio/mpeg' : 'image/webp',
+    );
+    response.end(readFileSync(join(root, 'public', path)));
+  } else if (
+    path === '/lessons/multiplication-narrated-v3.html' ||
     path === '/lessons/fractions-narrated-v2.html'
   ) {
     response.setHeader('Content-Type', 'text/html');
@@ -116,14 +126,34 @@ try {
   await page.goto(address);
   await expect(page.getByRole('heading', { name: '这节试课已存入你的学习档案' })).toBeVisible();
   if (recordCreates !== 1) throw new Error('Repeated opening duplicated profile record');
+  const opening = page.locator('video[data-demo-opening]');
+  if (!(await opening.evaluate((v) => v.paused))) throw new Error('Opening autoplayed');
+  await page.getByRole('button', { name: '播放欢迎动画和声音' }).click();
+  await expect(page.getByRole('button', { name: '暂停开场', exact: true })).toBeVisible();
+  await expect.poll(() => opening.evaluate((v) => v.currentTime)).toBeGreaterThan(0);
+  const openingInfo = await opening.evaluate((v) => ({
+    duration: v.duration,
+    width: v.videoWidth,
+    height: v.videoHeight,
+    muted: v.muted,
+  }));
+  if (openingInfo.duration < 4 || openingInfo.width < 1000 || !openingInfo.muted)
+    throw new Error('Opening video was not decoded or competes with the narration');
+  await page
+    .getByRole('complementary', { name: '海边数学乐园开场' })
+    .screenshot({ path: join(work, 'investor-opening.png') });
+  await page.getByRole('button', { name: '暂停开场', exact: true }).click();
+  await expect.poll(() => opening.evaluate((v) => v.paused)).toBe(true);
+  await page.getByRole('button', { name: '播放欢迎动画和声音' }).click();
   await page.getByRole('button', { name: '开始二年级试课' }).click();
+  await expect(page.locator('audio, video')).toHaveCount(0);
   await page.getByRole('button', { name: '图形二', exact: true }).click();
   await expect(page.getByRole('button', { name: '看老师讲一讲' })).toBeDisabled();
   await page.getByRole('button', { name: '图形一', exact: true }).click();
   await page.getByRole('button', { name: '看老师讲一讲' }).click();
   await expect(page.locator('iframe')).toHaveAttribute(
     'src',
-    /multiplication-narrated-v2.html#chapter=explain$/,
+    /multiplication-narrated-v3.html#chapter=explain$/,
   );
   await page.frameLocator('iframe').getByRole('button', { name: '播放讲解', exact: true }).click();
   await expect(
@@ -222,6 +252,14 @@ try {
     return route.fulfill({ status: 500, json: { success: false } });
   });
   await page.goto(address + '?preview=1');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: '播放欢迎动画和声音' }).click();
+  await expect(page.getByRole('button', { name: '暂停开场', exact: true })).toBeVisible();
+  if (!(await page.locator('video').evaluate((v) => v.paused)))
+    throw new Error('Reduced-motion opening moved');
+  await page.screenshot({ path: join(work, 'investor-intro-mobile.png'), fullPage: true });
+  if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth))
+    throw new Error('Opening phone overflow');
   await page.getByRole('button', { name: '开始二年级体验' }).click();
   await page.getByRole('button', { name: '图形一', exact: true }).click();
   await page.getByRole('button', { name: '看老师讲一讲' }).click();
@@ -240,6 +278,7 @@ try {
   if (previewCalls !== 0) throw new Error('Preview touched a learner API');
   // Device fallback keeps teaching usable without a graphics context.
   const fallbackPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await fallbackPage.route('**/lessons/multiplication-demo-v3/*.mp*', (route) => route.abort());
   await fallbackPage.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (type, ...args) {
@@ -247,6 +286,8 @@ try {
     };
   });
   await fallbackPage.goto(address + '?preview=1');
+  await fallbackPage.getByRole('button', { name: '播放欢迎动画和声音' }).click();
+  await expect(fallbackPage.getByRole('button', { name: '播放欢迎动画和声音' })).toBeDisabled();
   await fallbackPage.getByRole('button', { name: '开始二年级体验' }).click();
   await fallbackPage.getByRole('button', { name: '图形一', exact: true }).click();
   await fallbackPage.getByRole('button', { name: '看老师讲一讲' }).click();

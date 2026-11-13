@@ -1,5 +1,9 @@
 # School Learning architecture decisions
 
+## Prepared investor demonstration exception — 2026-11-13
+
+The user approved one curated Grade-2 SiliconFlow image/speech/video lesson. Generate offline as an explicit operator action, review and persist assets, then serve them as shared versioned website files. Keep all mathematical quantities native and learner progress private. This deliberately public authored sample contains no learner uploads. Existing private-object-store plans still govern general learner-generated media. Do not enable legacy runtime filesystem media generation or add automatic paid-media calls to ordinary School courses. See `INVESTOR_DEMO_LESSON.md`.
+
 ## Product responsibilities
 
 - CoastalTutor owns the learner identity, curriculum route, course sequence, mastery progress, and family-facing learning experience.
