@@ -86,71 +86,91 @@ export function ReviewedLessonVideo({
           </button>
         </div>
       )}
-      {playful && room && (
-        <Suspense
-          fallback={<p className="mb-4 rounded-2xl bg-[#fff5db] p-4">小海老师正在准备教室…</p>}
+      <div
+        data-classroom-screen={playful && room ? 'integrated' : 'focus'}
+        className={
+          playful && room
+            ? 'overflow-hidden rounded-3xl border-4 border-[#b98b54] bg-[linear-gradient(150deg,#fff5db,#e1efea)] p-3 shadow-lg lg:grid lg:grid-cols-[210px_minmax(0,1fr)] lg:items-start lg:gap-3'
+            : ''
+        }
+      >
+        {playful && room && (
+          <Suspense
+            fallback={<p className="mb-4 rounded-2xl bg-[#fff5db] p-4">小海老师正在准备教室…</p>}
+          >
+            <LittleClassroom compact speaking={status === 'play' && !fallback} />
+          </Suspense>
+        )}
+        <div
+          className={
+            playful && room
+              ? 'min-w-0 overflow-hidden rounded-xl border-[6px] border-[#326c67] bg-[#f2f8f5] shadow-inner'
+              : ''
+          }
         >
-          <LittleClassroom speaking={status === 'play' && !fallback} />
-        </Suspense>
-      )}
-      {!fallback ? (
-        <iframe
-          ref={frame}
-          src={`${media.asset}#chapter=${chapter}`}
-          title={`${content.title}：配音动态讲解`}
-          sandbox="allow-scripts"
-          allow="autoplay; fullscreen"
-          allowFullScreen
-          onError={() => setStatus('error')}
-          className="h-[520px] w-full rounded-2xl border-0 bg-[#f2f8f5] sm:h-[620px] lg:h-[760px]"
-        />
-      ) : (
-        <div className="space-y-5 rounded-2xl bg-[#f2f8f5] p-4 sm:p-6">
-          {content.shots.map((shot) => (
-            <div key={shot.id}>
-              <h3 className="font-bold">{shot.title}</h3>
-              {shot.groups ? (
-                <div className="my-3 grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label={shot.cue}>
-                  {(shot.groupSizes ?? Array(shot.groups).fill(shot.each ?? 2)).map(
-                    (count: number, i: number) => (
-                      <div
-                        key={i}
-                        className="rounded-xl border-2 border-[#126e75] bg-white p-3 text-center"
-                      >
-                        <span>第 {i + 1} 组</span>
-                        <div className="my-2 flex flex-wrap justify-center gap-2">
-                          {Array.from({ length: count }, (_, j) => (
-                            <span
-                              key={j}
-                              className="size-6 rounded-full border border-[#126e75] bg-[#65cbb0]"
-                            />
-                          ))}
-                        </div>
-                        <span>{count} 个</span>
-                      </div>
-                    ),
-                  )}
-                </div>
-              ) : (
-                <div
-                  aria-label={`四个相等部分，${shot.shaded} 份涂色`}
-                  className="my-3 grid grid-cols-4 overflow-hidden rounded-xl border-2 border-[#126e75]"
-                >
-                  {[0, 1, 2, 3].map((part) => (
+          {!fallback ? (
+            <iframe
+              ref={frame}
+              src={`${media.asset}#chapter=${chapter}`}
+              title={`${content.title}：配音动态讲解`}
+              sandbox="allow-scripts"
+              allow="autoplay; fullscreen"
+              allowFullScreen
+              onError={() => setStatus('error')}
+              className="h-[520px] w-full rounded-2xl border-0 bg-[#f2f8f5] sm:h-[620px] lg:h-[760px]"
+            />
+          ) : (
+            <div className="space-y-5 rounded-2xl bg-[#f2f8f5] p-4 sm:p-6">
+              {content.shots.map((shot) => (
+                <div key={shot.id}>
+                  <h3 className="font-bold">{shot.title}</h3>
+                  {shot.groups ? (
                     <div
-                      key={part}
-                      className={`flex min-h-16 items-center justify-center border-r border-[#126e75] text-lg last:border-r-0 ${part < (shot.shaded ?? 0) ? 'bg-[#65cbb0]' : 'bg-white'}`}
+                      className="my-3 grid grid-cols-2 gap-3 sm:grid-cols-4"
+                      aria-label={shot.cue}
                     >
-                      1/4
+                      {(shot.groupSizes ?? Array(shot.groups).fill(shot.each ?? 2)).map(
+                        (count: number, i: number) => (
+                          <div
+                            key={i}
+                            className="rounded-xl border-2 border-[#126e75] bg-white p-3 text-center"
+                          >
+                            <span>第 {i + 1} 组</span>
+                            <div className="my-2 flex flex-wrap justify-center gap-2">
+                              {Array.from({ length: count }, (_, j) => (
+                                <span
+                                  key={j}
+                                  className="size-6 rounded-full border border-[#126e75] bg-[#65cbb0]"
+                                />
+                              ))}
+                            </div>
+                            <span>{count} 个</span>
+                          </div>
+                        ),
+                      )}
                     </div>
-                  ))}
+                  ) : (
+                    <div
+                      aria-label={`四个相等部分，${shot.shaded} 份涂色`}
+                      className="my-3 grid grid-cols-4 overflow-hidden rounded-xl border-2 border-[#126e75]"
+                    >
+                      {[0, 1, 2, 3].map((part) => (
+                        <div
+                          key={part}
+                          className={`flex min-h-16 items-center justify-center border-r border-[#126e75] text-lg last:border-r-0 ${part < (shot.shaded ?? 0) ? 'bg-[#65cbb0]' : 'bg-white'}`}
+                        >
+                          1/4
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="leading-7">{shot.text}</p>
                 </div>
-              )}
-              <p className="leading-7">{shot.text}</p>
+              ))}
             </div>
-          ))}
+          )}
         </div>
-      )}
+      </div>
       {!fallback && ['error', 'slow'].includes(status) && (
         <p role="status" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm">
           讲解暂时无法播放？可以先查看图解，课程仍能继续。

@@ -17,9 +17,9 @@ const cross = (a: Vec, b: Vec): Vec => [
   a[2] * b[0] - a[0] * b[2],
   a[0] * b[1] - a[1] * b[0],
 ];
-function camera(aspect: number) {
-  const eye: Vec = [4.5, 3.6, 8.5],
-    target: Vec = [0, 1.7, 0];
+function camera(aspect: number, teacherOnly = false) {
+  const eye: Vec = teacherOnly ? [-1.2, 2.3, 6.8] : [4.5, 3.6, 8.5],
+    target: Vec = teacherOnly ? [-1.3, 1.7, 0] : [0, 1.7, 0];
   const z = normalize(eye.map((n, i) => n - target[i]) as Vec),
     x = normalize(cross([0, 1, 0], z)),
     y = cross(z, x);
@@ -150,7 +150,7 @@ function cube() {
   for (const face of faces) for (const i of [0, 1, 2, 0, 2, 3]) data.push(...face.p[i], ...face.n);
   return data;
 }
-export function createClassroom3D(canvas: HTMLCanvasElement) {
+export function createClassroom3D(canvas: HTMLCanvasElement, teacherOnly = false) {
   const gl = canvas.getContext('webgl', {
     antialias: true,
     alpha: false,
@@ -221,7 +221,7 @@ export function createClassroom3D(canvas: HTMLCanvasElement) {
     gl!.clear(gl!.COLOR_BUFFER_BIT | gl!.DEPTH_BUFFER_BIT);
     gl!.enable(gl!.DEPTH_TEST);
     gl!.useProgram(program);
-    gl!.uniformMatrix4fv(uniforms.vp, false, camera(width / height));
+    gl!.uniformMatrix4fv(uniforms.vp, false, camera(width / height, teacherOnly));
     function object(shape: keyof typeof meshes, pos: Vec, size: Vec, color: Vec, angle = 0) {
       const m = identity(),
         s = Math.sin(angle),
@@ -262,16 +262,18 @@ export function createClassroom3D(canvas: HTMLCanvasElement) {
     object('cube', [0, -0.1, 0], [5, 0.1, 3], [0.91, 0.78, 0.56]);
     object('cube', [0, 2.1, -3], [5, 2.2, 0.08], [0.98, 0.87, 0.76]);
     object('cube', [-5, 2.1, 0], [0.08, 2.2, 3], [0.8, 0.9, 0.93]);
-    object('cube', [1.4, 2.4, -2.85], [2, 1.08, 0.08], wood);
-    object('cube', [1.4, 2.4, -2.72], [1.88, 0.96, 0.06], [0.12, 0.39, 0.4]);
-    for (let col = 0; col < 3; col++)
-      for (let row = 0; row < 2; row++)
-        object(
-          'sphere',
-          [0.6 + col * 0.75, 2.15 + row * 0.5, -2.62],
-          [0.13, 0.13, 0.035],
-          [1, 0.87, 0.34],
-        );
+    if (!teacherOnly) {
+      object('cube', [1.4, 2.4, -2.85], [2, 1.08, 0.08], wood);
+      object('cube', [1.4, 2.4, -2.72], [1.88, 0.96, 0.06], [0.12, 0.39, 0.4]);
+      for (let col = 0; col < 3; col++)
+        for (let row = 0; row < 2; row++)
+          object(
+            'sphere',
+            [0.6 + col * 0.75, 2.15 + row * 0.5, -2.62],
+            [0.13, 0.13, 0.035],
+            [1, 0.87, 0.34],
+          );
+    }
     object('cube', [-3.4, 3.05, -2.82], [0.85, 0.72, 0.1], [1, 0.99, 0.89]);
     object('cube', [-3.4, 3.05, -2.68], [0.73, 0.6, 0.05], [0.48, 0.79, 0.93]);
     object('cube', [-3.4, 3.05, -2.57], [0.04, 0.6, 0.025], [1, 0.99, 0.89]);

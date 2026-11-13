@@ -1,84 +1,84 @@
 {
   "version": 2,
-  "asset": "/lessons/multiplication-narrated-v1.html",
+  "asset": "/lessons/multiplication-narrated-v2.html",
   "fps": 30,
-  "durationInFrames": 2123,
+  "durationInFrames": 4129,
   "chapters": [
     {
       "id": "explain",
       "title": "从一组到几组",
       "start": 0,
-      "end": 646
+      "end": 1342
     },
     {
       "id": "reason",
       "title": "乘法为什么更方便",
-      "start": 647,
-      "end": 1505
+      "start": 1343,
+      "end": 3022
     },
     {
       "id": "recap",
       "title": "把乘法带到生活中",
-      "start": 1506,
-      "end": 2122
+      "start": 3023,
+      "end": 4128
     }
   ],
   "shots": [
     {
       "id": "one-group",
       "start": 0,
-      "end": 202,
+      "end": 433,
       "audioStart": 10,
-      "audioEnd": 182
+      "audioEnd": 413
     },
     {
       "id": "two-groups",
-      "start": 203,
-      "end": 401,
-      "audioStart": 213,
-      "audioEnd": 381
+      "start": 434,
+      "end": 849,
+      "audioStart": 444,
+      "audioEnd": 829
     },
     {
       "id": "three-groups",
-      "start": 402,
-      "end": 646,
-      "audioStart": 412,
-      "audioEnd": 626
+      "start": 850,
+      "end": 1342,
+      "audioStart": 860,
+      "audioEnd": 1322
     },
     {
       "id": "shorter",
-      "start": 647,
-      "end": 905,
-      "audioStart": 657,
-      "audioEnd": 885
+      "start": 1343,
+      "end": 1902,
+      "audioStart": 1353,
+      "audioEnd": 1882
     },
     {
       "id": "meaning",
-      "start": 906,
-      "end": 1203,
-      "audioStart": 916,
-      "audioEnd": 1183
+      "start": 1903,
+      "end": 2472,
+      "audioStart": 1913,
+      "audioEnd": 2452
     },
     {
       "id": "unequal",
-      "start": 1204,
-      "end": 1505,
-      "audioStart": 1214,
-      "audioEnd": 1485
+      "start": 2473,
+      "end": 3022,
+      "audioStart": 2483,
+      "audioEnd": 3002
     },
     {
       "id": "remember-groups",
-      "start": 1506,
-      "end": 1812,
-      "audioStart": 1516,
-      "audioEnd": 1792
+      "start": 3023,
+      "end": 3571,
+      "audioStart": 3033,
+      "audioEnd": 3551
     },
     {
       "id": "new-groups",
-      "start": 1813,
-      "end": 2122,
-      "audioStart": 1823,
-      "audioEnd": 2102
+      "start": 3572,
+      "end": 4128,
+      "audioStart": 3582,
+      "audioEnd": 4108
     }
   ]
 }

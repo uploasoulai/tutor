@@ -4,6 +4,14 @@ import type { SceneOutline } from '@/lib/types/generation';
 import type { generateSceneContent } from '@/lib/generation/scene-generator';
 
 export type SchoolSceneContent = NonNullable<Awaited<ReturnType<typeof generateSceneContent>>>;
+export interface SchoolCallMetric {
+  providerId: string;
+  modelId: string;
+  durationMs: number;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  finishReason: string;
+}
 export interface SchoolGenerationState {
   version: 1;
   revision: number;
@@ -21,6 +29,8 @@ export interface SchoolGenerationState {
   stage?: Stage;
   scenes: Scene[];
   pendingContent?: SchoolSceneContent;
+  qualityReports?: Record<string, import('./school-teaching-policy').SchoolQualityReport>;
+  callMetrics?: Record<string, SchoolCallMetric>;
 }
 
 function configuredLimit(name: string, fallback: number, maximum: number) {

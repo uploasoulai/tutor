@@ -129,11 +129,19 @@ describe('durable school generation', () => {
     mock.ai.mockResolvedValue({ text: 'valid', finishReason: 'stop' });
     mock.content.mockImplementation(async (outline, ai) => {
       await ai('system', 'content');
-      return outline.type === 'interactive' ? { html: '<button>try</button>' } : { elements: [] };
+      return outline.type === 'interactive'
+        ? { html: '<button>try</button>' }
+        : { elements: [{ id: 'model', type: 'text', content: 'Visible example' }] };
     });
     mock.actions.mockImplementation(async (_outline, _content, ai) => {
       await ai('system', 'actions');
-      return [{ type: 'speech' }];
+      return [
+        {
+          id: 'speech',
+          type: 'speech',
+          text: 'We explain the visible example step by step and connect it to the learning goal.',
+        },
+      ];
     });
     mock.publish.mockImplementation(async (value) => ({
       ...value,
@@ -146,6 +154,48 @@ describe('durable school generation', () => {
     expect(mock.ai).toHaveBeenCalledTimes(1);
     expect(mock.job?.schoolGeneration?.phase).toBe('content');
     expect(mock.job?.schoolGeneration?.reservedCalls).toBe(1);
+  });
+  it('keeps a quality failure local and retains content for an explicit action retry', async () => {
+    await run();
+    await run();
+    mock.actions.mockResolvedValueOnce([{ id: 's', type: 'speech', text: ' ' }]);
+    await run();
+    expect(mock.job?.error).toBe('lesson_quality_check_failed');
+    expect(mock.job?.schoolGeneration?.pendingContent).toBeDefined();
+    expect(mock.job?.schoolGeneration?.qualityReports?.['0'].pass).toBe(false);
+    await run(true);
+    expect(mock.content).toHaveBeenCalledTimes(1);
+    expect(mock.job?.schoolGeneration?.sceneIndex).toBe(1);
+  });
+  it('stores actual step usage and keeps unavailable usage unknown', async () => {
+    mock.ai.mockResolvedValueOnce({
+      text: 'valid',
+      finishReason: 'stop',
+      usage: { inputTokens: 21, outputTokens: 8 },
+    });
+    await run();
+    await run();
+    expect(mock.job?.schoolGeneration?.callMetrics?.['outline:0:1']).toMatchObject({
+      inputTokens: 21,
+      outputTokens: 8,
+      finishReason: 'stop',
+    });
+    expect(mock.job?.schoolGeneration?.callMetrics?.['content:0:1'].inputTokens).toBeNull();
+  });
+  it('retries an empty visual at the content checkpoint rather than repeatedly replacing its narration', async () => {
+    await run();
+    mock.content.mockImplementationOnce(async (_outline, ai) => {
+      await ai('system', 'content');
+      return { elements: [] };
+    });
+    await run();
+    await run();
+    expect(mock.job?.schoolGeneration?.phase).toBe('content');
+    expect(mock.job?.schoolGeneration?.pendingContent).toBeUndefined();
+    await run(true);
+    expect(mock.content).toHaveBeenCalledTimes(2);
+    expect(mock.job?.schoolGeneration?.phase).toBe('actions');
+    expect(mock.job?.schoolGeneration?.attempts['outline:0']).toBe(1);
   });
   it('continues from the previous saved narration after a step resumes', async () => {
     await run();
@@ -190,7 +240,9 @@ describe('durable school generation', () => {
     mock.actions.mockRejectedValueOnce(new Error('private provider payload API_KEY=secret'));
     await run();
     expect(mock.job?.status).toBe('failed');
-    expect(mock.job?.schoolGeneration?.pendingContent).toEqual({ elements: [] });
+    expect(mock.job?.schoolGeneration?.pendingContent).toEqual({
+      elements: [{ id: 'model', type: 'text', content: 'Visible example' }],
+    });
     expect(JSON.stringify(mock.job)).not.toContain('secret');
     await run();
     expect(mock.actions).toHaveBeenCalledTimes(1);

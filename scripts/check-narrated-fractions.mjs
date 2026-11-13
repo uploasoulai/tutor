@@ -17,7 +17,7 @@ const html = readFileSync(
   join(
     root,
     lesson === 'multiplication'
-      ? 'public/lessons/multiplication-narrated-v1.html'
+      ? 'public/lessons/multiplication-narrated-v2.html'
       : 'public/lessons/fractions-narrated-v2.html',
   ),
 );

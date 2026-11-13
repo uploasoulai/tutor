@@ -2,7 +2,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { createClassroom3D } from '@/lib/learning/classroom-webgl';
 
-export function LittleClassroom({ speaking }: { speaking: boolean }) {
+export function LittleClassroom({
+  speaking,
+  compact = false,
+}: {
+  speaking: boolean;
+  compact?: boolean;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const painter = useRef<{ update: (speaking: boolean) => void } | null>(null);
   const [available, setAvailable] = useState<boolean | null>(null);
@@ -45,7 +51,7 @@ export function LittleClassroom({ speaking }: { speaking: boolean }) {
     frame = requestAnimationFrame(() => {
       if (disposed) return;
       try {
-        renderer = createClassroom3D(node);
+        renderer = createClassroom3D(node, compact);
       } catch {
         renderer = null;
       }
@@ -70,13 +76,13 @@ export function LittleClassroom({ speaking }: { speaking: boolean }) {
       document.removeEventListener('visibilitychange', visibility);
       motion.removeEventListener('change', visibility);
     };
-  }, []);
+  }, [compact]);
   useEffect(() => {
     painter.current?.update(speaking);
   }, [speaking, available]);
   return (
     <aside
-      className="mb-4 overflow-hidden rounded-3xl border-2 border-[#f0cf8a] bg-[#fff5db]"
+      className="overflow-hidden rounded-2xl bg-[#fff5db]/80"
       aria-label="小海老师的立体教室"
       data-speaking={speaking}
       data-renderer={available === true ? 'webgl' : available === false ? 'static' : 'loading'}
@@ -90,7 +96,7 @@ export function LittleClassroom({ speaking }: { speaking: boolean }) {
       <canvas
         ref={canvas}
         aria-label="3D 虚拟老师、黑板、课桌和明亮的教室"
-        className={`h-[190px] w-full sm:h-[260px] ${available === false ? 'hidden' : ''}`}
+        className={`${compact ? 'h-[150px] w-full lg:h-[400px]' : 'h-[190px] w-full sm:h-[260px]'} ${available === false ? 'hidden' : ''}`}
       />
       {available === false && (
         <div className="flex min-h-36 items-center gap-5 px-6 pb-5">

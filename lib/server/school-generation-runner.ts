@@ -27,6 +27,12 @@ import { resolveLearnerJobModel } from './resolve-model';
 import { runWithPlatformAiUsage, assertPlatformAiWithinLimit } from './platform-ai-usage';
 import { persistClassroom } from './classroom-storage';
 import {
+  schoolTeachingPrompt,
+  schoolStepTokenBudget,
+  checkSchoolScene,
+  SchoolQualityError,
+} from './school-teaching-policy';
+import {
   reviewedSchoolActivity,
   bindReviewedActivity,
 } from '@/lib/curriculum/reviewed-school-activities';
@@ -37,6 +43,7 @@ export async function assertSchoolAiAvailable(ownerId: string) {
 }
 
 export function schoolGenerationError(error: unknown) {
+  if (error instanceof SchoolQualityError) return 'lesson_quality_check_failed';
   const value = error as { statusCode?: number; status?: number; name?: string; message?: string };
   const status = value?.statusCode ?? value?.status;
   // Do not persist provider response bodies, headers, credentials, or raw learner prompts.
@@ -53,6 +60,7 @@ export function schoolGenerationError(error: unknown) {
 
 export function schoolGenerationMessage(code?: string) {
   const messages: Record<string, string> = {
+    lesson_quality_check_failed: '这个环节的讲解还不完整，已保留前面的内容，可以只重试当前环节。',
     provider_authentication_failed: '你的 AI 服务认证未通过，请检查 AI 设置。已完成内容仍保留。',
     provider_balance_required: '你的 AI 服务账户余额不足，请检查供应商账户。已完成内容仍保留。',
     provider_rate_limited: 'AI 服务暂时繁忙，请稍等后从断点继续。',
@@ -67,6 +75,7 @@ export function schoolGenerationMessage(code?: string) {
 }
 
 export function schoolGenerationUserPrompt(state: SchoolGenerationState, user: string) {
+  user += schoolTeachingPrompt(state);
   const activity = reviewedSchoolActivity(
     state.input.curriculumLessonCache?.track,
     state.input.curriculumLessonCache?.canonicalId,
@@ -129,6 +138,7 @@ export async function advanceSchoolGeneration(
   };
   if (!(await compareAndSwapSchoolJob(previous, locked, ownerId))) return;
   let providerFailure: unknown;
+  let callMetric: import('./school-generation-state').SchoolCallMetric | undefined;
   try {
     const next = structuredClone(locked.schoolGeneration!);
     let result: ClassroomGenerationJob['result'];
@@ -150,6 +160,7 @@ export async function advanceSchoolGeneration(
       let calls = 0;
       const aiCall: AICallFn = async (system, user) => {
         if (++calls > 1) throw new Error('School step call budget exceeded');
+        const started = Date.now();
         const response = await callLLM(
           {
             model: resolved.model,
@@ -157,20 +168,31 @@ export async function advanceSchoolGeneration(
               { role: 'system', content: system },
               { role: 'user', content: schoolGenerationUserPrompt(next, user) },
             ],
-            maxOutputTokens: Math.min(
-              next.input.maxOutputTokens ?? 4096,
-              next.phase === 'content' && next.outlines?.[next.sceneIndex]?.type === 'interactive'
-                ? 2400
-                : 4096,
-            ),
+            maxOutputTokens: schoolStepTokenBudget(next),
             maxRetries: 0,
             abortSignal: AbortSignal.timeout(120_000),
           },
           'school-lesson-step',
         ).catch((error: unknown) => {
           providerFailure = error;
+          callMetric = {
+            providerId: resolved.providerId ?? 'unknown',
+            modelId: resolved.modelId ?? 'unknown',
+            durationMs: Date.now() - started,
+            inputTokens: null,
+            outputTokens: null,
+            finishReason: 'error',
+          };
           throw error;
         });
+        callMetric = {
+          providerId: resolved.providerId ?? 'unknown',
+          modelId: resolved.modelId ?? 'unknown',
+          durationMs: Date.now() - started,
+          inputTokens: response.usage?.inputTokens ?? null,
+          outputTokens: response.usage?.outputTokens ?? null,
+          finishReason: response.finishReason,
+        };
         if (response.finishReason === 'length') throw new Error('Incomplete model output');
         return response.text;
       };
@@ -182,6 +204,8 @@ export async function advanceSchoolGeneration(
           generate,
         );
     }
+    if (callMetric)
+      next.callMetrics = { ...next.callMetrics, [`${key}:${next.attempts[key]}`]: callMetric };
     next.leaseUntil = undefined;
     const count = result?.scenesCount ?? next.scenes.length;
     const saved = await compareAndSwapSchoolJob(
@@ -221,7 +245,30 @@ export async function advanceSchoolGeneration(
         providerStatus:
           Number.isInteger(status) && status! >= 400 && status! <= 599 ? status : undefined,
         message: schoolGenerationMessage(code),
-        schoolGeneration: { ...locked.schoolGeneration!, leaseUntil: undefined },
+        schoolGeneration: {
+          ...locked.schoolGeneration!,
+          leaseUntil: undefined,
+          ...(error instanceof SchoolQualityError &&
+          error.report.issues.some((issue) => issue.code === 'empty_visual_content')
+            ? { phase: 'content' as const, pendingContent: undefined }
+            : {}),
+          ...(callMetric
+            ? {
+                callMetrics: {
+                  ...locked.schoolGeneration!.callMetrics,
+                  [`${key}:${locked.schoolGeneration!.attempts[key]}`]: callMetric,
+                },
+              }
+            : {}),
+          ...(error instanceof SchoolQualityError
+            ? {
+                qualityReports: {
+                  ...locked.schoolGeneration!.qualityReports,
+                  [String(locked.schoolGeneration!.sceneIndex)]: error.report,
+                },
+              }
+            : {}),
+        },
       },
       ownerId,
     );
@@ -360,6 +407,9 @@ export async function generateSchoolStep(state: SchoolGenerationState, aiCall: A
     },
   });
   if (!actions.length) throw new Error('Teaching actions unavailable');
+  const quality = checkSchoolScene(state.pendingContent, actions);
+  state.qualityReports = { ...state.qualityReports, [String(state.sceneIndex)]: quality };
+  if (!quality.pass) throw new SchoolQualityError(quality);
   const store = createInMemoryStore(state.stage);
   store.setState({ scenes: state.scenes });
   if (!createSceneWithActions(outline, state.pendingContent, actions, createStageAPI(store)))

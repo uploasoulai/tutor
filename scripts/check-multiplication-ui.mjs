@@ -54,7 +54,7 @@ const server = createServer((request, response) => {
     response.setHeader('Content-Type', 'text/css');
     response.end(css);
   } else if (
-    path === '/lessons/multiplication-narrated-v1.html' ||
+    path === '/lessons/multiplication-narrated-v2.html' ||
     path === '/lessons/fractions-narrated-v2.html'
   ) {
     response.setHeader('Content-Type', 'text/html');
@@ -123,7 +123,7 @@ try {
   await page.getByRole('button', { name: '看老师讲一讲' }).click();
   await expect(page.locator('iframe')).toHaveAttribute(
     'src',
-    /multiplication-narrated-v1.html#chapter=explain$/,
+    /multiplication-narrated-v2.html#chapter=explain$/,
   );
   await page.frameLocator('iframe').getByRole('button', { name: '播放讲解', exact: true }).click();
   await expect(
@@ -132,6 +132,10 @@ try {
   const room = page.getByRole('complementary', { name: '小海老师的立体教室' });
   await expect(room).toHaveAttribute('data-renderer', 'webgl');
   await expect(room).toHaveAttribute('data-speaking', 'true');
+  await expect(page.locator('[data-classroom-screen="integrated"] iframe')).toHaveCount(1);
+  await page
+    .locator('[data-classroom-screen="integrated"]')
+    .screenshot({ path: join(work, 'integrated-classroom.png') });
   await room.screenshot({ path: join(work, '3d-room.png') });
   await page.getByRole('button', { name: '切换专注模式' }).click();
   await expect(room).toHaveCount(0);

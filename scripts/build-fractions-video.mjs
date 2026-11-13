@@ -8,7 +8,7 @@ const name = process.argv.includes('--multiplication') ? 'multiplication' : 'fra
 const work = join(root, 'data/narrated-' + name);
 const asset =
   name === 'multiplication'
-    ? '/lessons/multiplication-narrated-v1.html'
+    ? '/lessons/multiplication-narrated-v2.html'
     : '/lessons/fractions-narrated-v2.html';
 const kit = join(
   root,
