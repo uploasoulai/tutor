@@ -35,7 +35,7 @@ export function ReviewedLessonVideo({
   playful = false,
 }: {
   chapter: FractionChapter;
-  media: { asset: string };
+  media: { asset: string; captionLayout?: string };
   story: ReviewedVideoStory;
   playful?: boolean;
 }) {
@@ -43,6 +43,7 @@ export function ReviewedLessonVideo({
   const [fallback, setFallback] = useState(false);
   const [status, setStatus] = useState('loading');
   const [room, setRoom] = useState(true);
+  const [frameHeight, setFrameHeight] = useState<number | null>(null);
   const content = story.chapters.find((item) => item.id === chapter)!;
   useEffect(() => {
     if (fallback) return;
@@ -55,6 +56,16 @@ export function ReviewedLessonVideo({
         event.data?.chapter !== chapter
       )
         return;
+      if (event.data.event === 'resize') {
+        if (
+          media.captionLayout === 'below-player' &&
+          Number.isFinite(event.data.height) &&
+          event.data.height >= 200 &&
+          event.data.height <= 1800
+        )
+          setFrameHeight(Math.ceil(event.data.height));
+        return;
+      }
       if (!['ready', 'play', 'pause', 'ended', 'error'].includes(event.data.event)) return;
       window.clearTimeout(timer);
       setStatus(event.data.event);
@@ -64,7 +75,7 @@ export function ReviewedLessonVideo({
       window.clearTimeout(timer);
       window.removeEventListener('message', message);
     };
-  }, [chapter, fallback]);
+  }, [chapter, fallback, media.captionLayout]);
   return (
     <div>
       <h2 className="text-xl font-bold">{content.title}</h2>
@@ -117,6 +128,7 @@ export function ReviewedLessonVideo({
               allow="autoplay; fullscreen"
               allowFullScreen
               onError={() => setStatus('error')}
+              style={frameHeight ? { height: frameHeight } : undefined}
               className="h-[520px] w-full rounded-2xl border-0 bg-[#f2f8f5] sm:h-[620px] lg:h-[760px]"
             />
           ) : (

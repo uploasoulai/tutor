@@ -76,6 +76,23 @@ try {
       await expect(page.locator('output')).toHaveAttribute('data-frame', String(target));
       await expect(page.getByRole('heading', { name: shot.title, exact: true })).toBeVisible();
       await expect(page.getByText(shot.text, { exact: true }).first()).toBeVisible();
+      if (manifest.captionLayout === 'below-player') {
+        for (const width of [960, 640, 390]) {
+          await page.setViewportSize({ width, height: 900 });
+          const layout = await page.locator('[data-lesson-caption]').evaluate((caption) => {
+            const board = caption.previousElementSibling.getBoundingClientRect();
+            const text = caption.getBoundingClientRect();
+            return {
+              below: text.top >= board.bottom - 1,
+              fits: caption.scrollHeight <= caption.clientHeight + 1,
+              overflow: document.documentElement.scrollWidth > innerWidth,
+            };
+          });
+          if (!layout.below || !layout.fits || layout.overflow)
+            throw new Error(`Caption overlaps or clips: ${shot.id} at ${width}px`);
+        }
+        await page.setViewportSize({ width: 960, height: 840 });
+      }
       await page.screenshot({ path: join(work, `${shot.id}.png`) });
     }
     await page.getByRole('button', { name: '播放讲解', exact: true }).click();

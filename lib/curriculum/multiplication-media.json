@@ -1,6 +1,7 @@
 {
-  "version": 3,
-  "asset": "/lessons/multiplication-narrated-v3.html",
+  "version": 4,
+  "captionLayout": "below-player",
+  "asset": "/lessons/multiplication-narrated-v4.html",
   "fps": 30,
   "durationInFrames": 4328,
   "chapters": [

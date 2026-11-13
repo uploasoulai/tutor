@@ -64,7 +64,7 @@ const server = createServer((request, response) => {
     );
     response.end(readFileSync(join(root, 'public', path)));
   } else if (
-    path === '/lessons/multiplication-narrated-v3.html' ||
+    path === '/lessons/multiplication-narrated-v4.html' ||
     path === '/lessons/fractions-narrated-v2.html'
   ) {
     response.setHeader('Content-Type', 'text/html');
@@ -153,7 +153,7 @@ try {
   await page.getByRole('button', { name: '看老师讲一讲' }).click();
   await expect(page.locator('iframe')).toHaveAttribute(
     'src',
-    /multiplication-narrated-v3.html#chapter=explain$/,
+    /multiplication-narrated-v4.html#chapter=explain$/,
   );
   await page.frameLocator('iframe').getByRole('button', { name: '播放讲解', exact: true }).click();
   await expect(
@@ -162,6 +162,22 @@ try {
   const room = page.getByRole('complementary', { name: '小海老师的立体教室' });
   await expect(room).toHaveAttribute('data-renderer', 'webgl');
   await expect(room).toHaveAttribute('data-speaking', 'true');
+  await expect
+    .poll(async () => {
+      const contentHeight = await page
+        .frameLocator('iframe')
+        .locator('#player')
+        .evaluate((node) => Math.ceil(node.getBoundingClientRect().height));
+      const viewportHeight = await page.locator('iframe').evaluate((node) => node.clientHeight);
+      return Math.abs(contentHeight - viewportHeight);
+    })
+    .toBeLessThanOrEqual(2);
+  const friends = room.getByRole('region', { name: '陪你学习的虚拟同学' });
+  await expect(friends).toBeVisible();
+  for (const name of ['朵朵', '小宇', '乐乐']) {
+    await expect(friends.getByRole('img', { name: `${name}的虚拟同学头像` })).toBeVisible();
+    await expect(friends.getByText(name, { exact: true })).toBeVisible();
+  }
   await expect(page.locator('[data-classroom-screen="integrated"] iframe')).toHaveCount(1);
   await page
     .locator('[data-classroom-screen="integrated"]')
@@ -240,6 +256,11 @@ try {
   await expect(
     page.frameLocator('iframe').getByRole('button', { name: '播放讲解', exact: true }),
   ).toBeVisible();
+  await page.locator('iframe').scrollIntoViewIfNeeded();
+  await expect(
+    page.frameLocator('iframe').getByRole('heading', { name: '先看一组', exact: true }),
+  ).toBeVisible();
+  await page.locator('iframe').screenshot({ path: join(work, 'mobile-player.png') });
   await page.screenshot({ path: join(work, 'mobile-video.png'), fullPage: true });
   await page.unroute('**/api/**');
   await page.route('**/api/**', (route) =>

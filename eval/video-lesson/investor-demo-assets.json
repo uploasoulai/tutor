@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "grade": 2,
   "topicId": "cnm_p038",
   "generationCalls": {
@@ -18,9 +18,9 @@
   "actualCostUsd": null,
   "assets": [
     {
-      "path": "/lessons/multiplication-narrated-v3.html",
-      "bytes": 3644732,
-      "sha256": "90348c0ba21a5401aa9fa3aa4e4bfb842dca7a5a1d521f9f3278014f9c3ffe0e"
+      "path": "/lessons/multiplication-narrated-v4.html",
+      "bytes": 3641705,
+      "sha256": "6f74910b4a7b3f24ca1d059e7a24593117aec8475820cd9ae6cbbed0023b27f0"
     },
     {
       "path": "/lessons/multiplication-demo-v3/opening.mp4",

@@ -9,7 +9,7 @@ const premium = name === 'multiplication' && process.argv.includes('--siliconflo
 const work = join(root, 'data/narrated-' + name + (premium ? '-siliconflow' : ''));
 const asset =
   name === 'multiplication'
-    ? `/lessons/multiplication-narrated-v${premium ? 3 : 2}.html`
+    ? `/lessons/multiplication-narrated-v${premium ? 4 : 2}.html`
     : '/lessons/fractions-narrated-v2.html';
 const kit = join(
   root,
@@ -25,6 +25,12 @@ const voice = JSON.parse(
     .trim()
     .replace(/;$/, ''),
 );
+// Native captions are sized for a larger canvas. Keep the measured voice and
+// timing, but render this lesson's full transcript in normal flow below the player.
+if (premium) {
+  for (const clip of Object.values(voice)) clip.captions = [];
+  writeFileSync(join(work, 'voice.ts'), `export const VOICE = ${JSON.stringify(voice)};\n`);
+}
 let offset = 0;
 const shots = [];
 const chapters = story.chapters.map((chapter) => {
@@ -43,7 +49,8 @@ const chapters = story.chapters.map((chapter) => {
   return { id: chapter.id, title: chapter.title, start, end: offset - 1 };
 });
 const manifest = {
-  version: premium ? 3 : 2,
+  version: premium ? 4 : 2,
+  ...(premium ? { captionLayout: 'below-player' } : {}),
   asset,
   fps: story.fps,
   durationInFrames: offset,
@@ -133,7 +140,7 @@ require('esbuild').buildSync({
 const js = readFileSync(join(work, 'player.js'), 'utf8').replaceAll('</script', '<\\/script');
 const html = `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; media-src data: blob:; connect-src data: blob:; base-uri 'none'; form-action 'none'">
-<title>CoastalTutor 数学讲解</title><style>*{box-sizing:border-box}body{margin:0;background:#f2f8f5;color:#173e49;font:16px system-ui,sans-serif}#player{max-width:960px;margin:auto}.readable-caption{display:none}@media(max-width:600px){.readable-caption{display:block;margin:0;padding:10px 14px;background:#e7f1ec;font-size:16px;line-height:1.65}}.tools{padding:8px 12px;background:white}.seek{display:flex;align-items:center;gap:10px;font-size:14px}.seek input{flex:1;min-width:60px;min-height:28px}.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}button{min-height:44px;border:1px solid #126e75;border-radius:10px;color:#173e49;background:#f2f8f5;font:600 14px system-ui,sans-serif;cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #d38d19;outline-offset:1px}output{display:block;font-size:12px;margin-top:3px;color:#52716e}</style><div id="player"></div><script>${js}</script></html>`;
+<title>CoastalTutor 数学讲解</title><style>*{box-sizing:border-box}body{margin:0;background:#f2f8f5;color:#173e49;font:16px system-ui,sans-serif}#player{max-width:960px;margin:auto}.readable-caption{display:none}.readable-caption.external-caption{display:block;margin:0;padding:16px 18px;background:#fff8e6;color:#173e49;font-size:18px;line-height:1.8;overflow-wrap:anywhere;border-top:1px solid #e5d4b0}@media(max-width:600px){.readable-caption{display:block;margin:0;padding:10px 14px;background:#e7f1ec;font-size:16px;line-height:1.65}}.tools{padding:8px 12px;background:white}.seek{display:flex;align-items:center;gap:10px;font-size:14px}.seek input{flex:1;min-width:60px;min-height:28px}.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}button{min-height:44px;border:1px solid #126e75;border-radius:10px;color:#173e49;background:#f2f8f5;font:600 14px system-ui,sans-serif;cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #d38d19;outline-offset:1px}output{display:block;font-size:12px;margin-top:3px;color:#52716e}</style><div id="player"></div><script>${js}</script></html>`;
 // Native kit CSS templates contain trailing spaces; normalize this generated asset.
 const cleanHtml = html
   .split('\n')

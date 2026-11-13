@@ -24,8 +24,11 @@ function App() {
     p.addEventListener('play',onPlay);p.addEventListener('pause',onPause);p.addEventListener('ended',onEnded);
     p.addEventListener('frameupdate',onFrame);p.addEventListener('error',onError);
     document.addEventListener('visibilitychange',onHidden);
+    const reportSize=()=>parent.postMessage({channel:'coastaltutor-reviewed-video',version:2,chapter:chapter.id,event:'resize',height:Math.ceil(document.getElementById('player')!.getBoundingClientRect().height)},'*');
+    const sizeObserver=new ResizeObserver(reportSize);
+    sizeObserver.observe(document.getElementById('player')!);
     notify('ready');
-    return ()=>{p.pause();p.removeEventListener('play',onPlay);p.removeEventListener('pause',onPause);
+    return ()=>{sizeObserver.disconnect();p.pause();p.removeEventListener('play',onPlay);p.removeEventListener('pause',onPause);
       p.removeEventListener('ended',onEnded);p.removeEventListener('frameupdate',onFrame);p.removeEventListener('error',onError);
       document.removeEventListener('visibilitychange',onHidden)};
   },[]);
@@ -37,7 +40,7 @@ function App() {
       autoPlay={false} loop={false} moveToBeginningWhenEnded={false} controls={false} clickToPlay={false}
       errorFallback={()=> <p role="alert">讲解暂时无法播放，请返回课程查看图解。</p>}
       style={{width:'100%',aspectRatio:'4/3',maxHeight:'calc(100vh - 100px)'}}/>
-    <p className="readable-caption" aria-live="off">{frame>=(current?.audioStart??0)?caption:"点击播放，听听老师怎么解释。"}</p>
+    <p data-lesson-caption className={'readable-caption'+(('captionLayout' in manifest && manifest.captionLayout==='below-player')?' external-caption':'')} aria-live="off">{frame>=(current?.audioStart??0)?caption:"点击播放，听听老师怎么解释。"}</p>
     <div className="tools" aria-label="讲解播放控制">
       <label className="seek">讲解进度<input aria-label="讲解进度" type="range" aria-valuetext={"已讲解 "+Math.round((frame-chapter.start)/30)+" 秒，共 "+Math.ceil((chapter.end-chapter.start+1)/30)+" 秒"} min={chapter.start} max={chapter.end} value={frame}
         onChange={e=>{player.current?.pause();player.current?.seekTo(Number(e.target.value))}}/></label>

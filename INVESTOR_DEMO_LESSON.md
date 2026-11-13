@@ -18,7 +18,7 @@ Already-completed accounts can choose **重看欢迎动画 → 从头回看这�
 - Image: one successful `Qwen/Qwen-Image` request, reviewed coastal classroom/otter illustration, provider watermark retained, converted locally to an 88 KB WebP.
 - Speech: nine successful `FunAudioLLM/CosyVoice2-0.5B` requests, preset `diana`, warm primary-school delivery instruction, measured MP3 durations. Eight teaching clips are embedded in the native compiled player; one is the welcome.
 - Video: one successful `MiniMaxAI/MiniMax-H3` request, five seconds, requested 768p / 16:9. Saved MP4 is ~1.84 MB. No retired Wan model was called.
-- Shared player, MP4, welcome MP3 and WebP total **5,801,626 bytes**. See `eval/video-lesson/investor-demo-assets.json` for hashes and exact file sizes. No claim about actual dollar cost is made; provider billing must supply it.
+- Shared v4 player, MP4, welcome MP3 and WebP total **5,798,599 bytes**. See `eval/video-lesson/investor-demo-assets.json` for hashes and exact file sizes. No claim about actual dollar cost is made; provider billing must supply it.
 
 The imagery supplies context and appeal. All teaching quantities, groups and equations are code-native, not generated image assertions. The short cinematic opening is not presented as the entire lesson or an AI teacher with generated lip synchronization. This is a curated best-effort demonstration, not evidence that arbitrary topics will automatically attain the same quality.
 
@@ -26,7 +26,7 @@ The imagery supplies context and appeal. All teaching quantities, groups and equ
 
 `scripts/prepare-investor-lesson.py --generate` is an explicit operator action using the existing local temporary platform key. It caches successful calls, persists submissions before requests and refuses automatic paid resubmission after ambiguous failure. `--poll-video` retrieves the existing job without submitting a new one. No learner information is sent. Key, signed URLs and provider response bodies are not published.
 
-Build the verified cached narration with `node scripts/build-fractions-video.mjs --multiplication --siliconflow`. Normal non-SiliconFlow builds still produce v2 assets; the new v3 player is deliberate and separate. No package, GPU, worker, Supabase migration or ECS change is required. The local image-conversion dependency was corrected after the original download; the same image was reused without a second API call.
+Build the verified cached narration with `node scripts/build-fractions-video.mjs --multiplication --siliconflow`. Normal non-SiliconFlow builds still produce v2 assets; the current v4 player is deliberate and separate. It fixes the reported text overlap by moving narration below the canvas, with responsive iframe sizing; original named classmate portraits sit below the teacher. Earlier media versions remain available. This follow-up reuses all recordings and makes no generation calls. No package, GPU, worker, Supabase migration or ECS change is required. The local image-conversion dependency was corrected after the original download; the same image was reused without a second API call.
 
 These authored demonstration assets are deliberately shareable static website files served from the existing deployment. They contain no private uploaded materials or learner records. General generated/student media still needs the separate private-object-store path; this single demonstration does not replace that storage architecture.
 

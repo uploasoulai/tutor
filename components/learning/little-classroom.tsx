@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { createClassroom3D } from '@/lib/learning/classroom-webgl';
+import { ClassroomFriends } from './classroom-friends';
 
 export function LittleClassroom({
   speaking,
@@ -118,6 +119,7 @@ export function LittleClassroom({
           </p>
         </div>
       )}
+      {compact && <ClassroomFriends />}
     </aside>
   );
 }
