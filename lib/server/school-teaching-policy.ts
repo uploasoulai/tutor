@@ -26,7 +26,7 @@ export function schoolTeachingPrompt(state: SchoolGenerationState) {
     recap:
       'Connect the example, representation and key idea in a short recap. Ask the learner to explain the idea in their own words and suggest one next practice step. Do not introduce a new unexplained concept.',
   };
-  return `\n\nSchool teaching focus (${schoolTeachingRole(state)}): ${moves[schoolTeachingRole(state)]} Use the grade, prerequisites and objective already supplied. For early elementary learners use short warm turns and familiar objects; for older learners keep the vocabulary precise and tone age-appropriate. The visible screen needs concise labels, while teacher speech carries the reasoning. Do not merely read the slide. Do not add decorative paragraphs or repeat earlier sections to make the output longer.`;
+  return `\n\nSchool teaching focus (${schoolTeachingRole(state)}): ${moves[schoolTeachingRole(state)]} Use the grade, prerequisites and objective already supplied. For early elementary learners use short warm turns and familiar objects; for older learners keep the vocabulary precise and tone age-appropriate. The visible screen needs concise labels, while teacher speech carries the reasoning. Do not merely read the slide. Do not add decorative paragraphs or repeat earlier sections to make the output longer.${state.phase === 'content' ? ' Build the teaching example from actual native shapes, charts, mathematical notation or the real supplied activity. Show the quantities and relationships you explain. No image-generation service is configured for this text-only step: do not invent remote image URLs or gen_img placeholders. Prefer one large readable model over a wall of bullets or tiny decorative objects.' : ''}`;
 }
 export function schoolStepTokenBudget(state: SchoolGenerationState) {
   const cap = state.input.maxOutputTokens ?? 4096;
@@ -39,13 +39,29 @@ export interface SchoolQualityReport {
   pass: boolean;
   issues: { severity: 'error' | 'warning'; code: string }[];
 }
+export function checkSchoolVisual(content: SchoolSceneContent): SchoolQualityReport {
+  const issues: SchoolQualityReport['issues'] = [];
+  if ('elements' in content) {
+    if (content.elements.length === 0)
+      issues.push({ severity: 'error', code: 'empty_visual_content' });
+    if (
+      content.elements.some(
+        (element) =>
+          element.type === 'image' &&
+          (typeof element.src !== 'string' ||
+            !element.src.trim() ||
+            /^(?:gen_img_|img_\d+$)/i.test(element.src.trim())),
+      )
+    )
+      issues.push({ severity: 'error', code: 'unresolved_teaching_image' });
+  }
+  return { pass: !issues.length, issues };
+}
 export function checkSchoolScene(
   content: SchoolSceneContent,
   actions: Action[],
 ): SchoolQualityReport {
-  const issues: SchoolQualityReport['issues'] = [];
-  if ('elements' in content && content.elements.length === 0)
-    issues.push({ severity: 'error', code: 'empty_visual_content' });
+  const issues: SchoolQualityReport['issues'] = [...checkSchoolVisual(content).issues];
   const speech = actions.filter(
     (a) => a.type === 'speech' && typeof a.text === 'string' && a.text.trim(),
   );

@@ -13,6 +13,7 @@ import {
   Map,
 } from 'lucide-react';
 
+import { LearningAdventure } from '@/components/learning/learning-adventure';
 import { getDevPreviewUser } from '@/lib/auth/dev-preview';
 import { createClient } from '@/lib/supabase/client';
 
@@ -103,13 +104,15 @@ export default function SchoolLearningPage() {
                 School Learning
               </p>
               <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">
-                选择你的课程路线
+                选一条路线，开始今天的发现
               </h1>
               <p className="mt-3 max-w-2xl text-base leading-7 text-[#607286]">
                 课程学习会跟着所选大纲或知识图谱一步一步前进。每个知识点都可以进入互动课堂、动手练习，再回来看自己的学习进度。
               </p>
             </div>
           </div>
+
+          <LearningAdventure />
 
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
             {tracks.map(
@@ -142,7 +145,7 @@ export default function SchoolLearningPage() {
                             : '/student',
                       )
                     }
-                    className="mt-auto inline-flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-left text-sm font-bold shadow-sm transition hover:-translate-y-0.5 hover:shadow disabled:cursor-not-allowed disabled:shadow-none"
+                    className="mt-auto inline-flex min-h-14 items-center justify-between gap-3 rounded-2xl border-b-4 border-black/10 bg-white px-4 py-3 text-left text-base font-bold shadow-sm transition motion-safe:hover:-translate-y-0.5 hover:shadow disabled:cursor-not-allowed disabled:shadow-none"
                   >
                     {action}
                     {available && <ChevronRight className="h-4 w-4" />}

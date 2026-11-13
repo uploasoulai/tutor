@@ -23,6 +23,7 @@ await build({
     {
       name: 'local-platform',
       setup(api) {
+        api.onResolve({ filter: /^next\/link$/ }, () => ({ path: 'link', namespace: 'local' }));
         api.onResolve({ filter: /^next\/navigation$/ }, () => ({
           path: 'navigation',
           namespace: 'local',
@@ -33,10 +34,13 @@ await build({
         }));
         api.onLoad({ filter: /.*/, namespace: 'local' }, (arg) => ({
           loader: 'js',
+          resolveDir: root,
           contents:
-            arg.path === 'auth'
-              ? 'export function createClient(){return {auth:{getUser:async()=>({data:{user:{id:"test",user_metadata:{grade:2}}}})}}}'
-              : 'export const useRouter=()=>({push:()=>{}});',
+            arg.path === 'link'
+              ? 'import React from "react";export default function Link({children,prefetch,...props}){return React.createElement("a",props,children)}'
+              : arg.path === 'auth'
+                ? 'export function createClient(){return {auth:{getUser:async()=>({data:{user:{id:"test",user_metadata:{grade:2}}}})}}}'
+                : 'export const useRouter=()=>({push:()=>{}});',
         }));
       },
     },
@@ -142,6 +146,18 @@ try {
   );
   if (starts !== 0 || retries !== 1 || reads < 2)
     throw new Error('Resume unexpectedly started a new course');
+  await page.getByRole('button', { name: '关闭', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '今天，和小海老师一起探索吧！' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /二年级 · 乘法探索课/ })).toHaveAttribute(
+    'href',
+    '/school-learning/china/multiplication-lab',
+  );
+  if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth))
+    throw new Error('Learning entry mobile overflow');
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.screenshot({ path: join(work, 'learning-entry-mobile.png'), fullPage: true });
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.screenshot({ path: join(work, 'learning-entry-desktop.png'), fullPage: true });
   console.log(
     'School resume UI passed: saved URL, one retry, reload, ready link, no new course request.',
   );

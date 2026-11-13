@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 
+import { LearningAdventure } from '@/components/learning/learning-adventure';
 import { createClient } from '@/lib/supabase/client';
 
 type Topic = {
@@ -564,6 +565,8 @@ export default function ChinaSchoolLearningPage() {
           <ArrowLeft className="h-4 w-4" /> 选择课程路线
         </button>
 
+        {grade <= 3 && <LearningAdventure />}
+
         <header className="mt-5 rounded-[2rem] border border-white/90 bg-white/85 p-5 shadow-sm sm:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex items-start gap-4">
@@ -735,15 +738,21 @@ export default function ChinaSchoolLearningPage() {
                   </span>
                 </div>
                 <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
-                  {topics.map((topic) => {
+                  {topics.map((topic, topicIndex) => {
                     const progress = topic.progress?.mastery_level ?? 0;
                     return (
                       <button
                         key={topic.id}
                         onClick={() => void openTopic(topic.id)}
-                        className="group flex min-h-[150px] flex-col rounded-2xl border border-[#e7edf3] bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-[#a9c7e1] hover:shadow-md sm:p-5"
+                        className={`group flex min-h-[170px] flex-col rounded-3xl border-2 p-4 text-left transition motion-safe:hover:-translate-y-1 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#127888] sm:p-5 ${grade <= 3 ? ['border-[#eed3a5] bg-[#fff8e8] shadow-[0_4px_0_#ecd9b9]', 'border-[#b7dcd0] bg-[#eef9f1] shadow-[0_4px_0_#c8e2d6]', 'border-[#cbdaf0] bg-[#f0f6ff] shadow-[0_4px_0_#d7e2f0]'][topicIndex % 3] : 'border-[#e7edf3] bg-white hover:border-[#a9c7e1] hover:shadow-md'}`}
                       >
                         <span className="flex w-full items-center gap-2 text-xs font-semibold text-[#8290a2]">
+                          <span
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/85 text-sm font-extrabold text-[#38776f]"
+                            aria-hidden="true"
+                          >
+                            {topicIndex + 1}
+                          </span>
                           <span>{topic.domain}</span>
                           {(topic.prerequisiteCount ?? 0) > 0 && (
                             <span className="inline-flex items-center gap-1">
@@ -824,9 +833,9 @@ export default function ChinaSchoolLearningPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="topic-title"
-            className="flex h-full w-full max-w-2xl flex-col overflow-y-auto bg-[#fbfcfe] shadow-2xl"
+            className="flex h-full w-full max-w-2xl flex-col overflow-y-auto bg-[#fffaf1] shadow-2xl"
           >
-            <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-[#e6ebf1] bg-white/95 px-5 py-4 backdrop-blur sm:px-7">
+            <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-[#e6ebf1] bg-[#fff8e9]/95 px-5 py-4 backdrop-blur sm:px-7">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#edf4fc] text-[#52789d]">
                 <BookOpen className="h-5 w-5" />
               </span>
@@ -1137,7 +1146,9 @@ export default function ChinaSchoolLearningPage() {
                 </section>
               )}
 
-              <section className="rounded-3xl bg-[#203c5d] p-5 text-white sm:p-6">
+              <section
+                className={`rounded-3xl p-5 text-white sm:p-6 ${selected.topic.grade <= 3 ? 'bg-[linear-gradient(135deg,#127888,#185e6b)] shadow-[0_5px_0_#cde4d6]' : 'bg-[#203c5d]'}`}
+              >
                 <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
                     <Sparkles className="h-5 w-5" />
@@ -1152,7 +1163,7 @@ export default function ChinaSchoolLearningPage() {
                 {!generation && (
                   <button
                     onClick={() => void startClassroom()}
-                    className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 font-bold text-[#203c5d] hover:bg-[#edf5fd]"
+                    className="mt-5 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl border-b-4 border-[#d8b45c] bg-[#ffe59a] px-4 text-base font-extrabold text-[#405743] transition hover:bg-[#ffedb7] focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-white"
                   >
                     <Sparkles className="h-4 w-4" />
                     生成这节互动课

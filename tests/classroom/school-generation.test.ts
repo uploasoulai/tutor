@@ -192,6 +192,7 @@ describe('durable school generation', () => {
     await run();
     expect(mock.job?.schoolGeneration?.phase).toBe('content');
     expect(mock.job?.schoolGeneration?.pendingContent).toBeUndefined();
+    expect(mock.actions).not.toHaveBeenCalled();
     await run(true);
     expect(mock.content).toHaveBeenCalledTimes(2);
     expect(mock.job?.schoolGeneration?.phase).toBe('actions');

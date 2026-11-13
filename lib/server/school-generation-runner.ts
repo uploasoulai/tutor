@@ -30,6 +30,7 @@ import {
   schoolTeachingPrompt,
   schoolStepTokenBudget,
   checkSchoolScene,
+  checkSchoolVisual,
   SchoolQualityError,
 } from './school-teaching-policy';
 import {
@@ -249,7 +250,9 @@ export async function advanceSchoolGeneration(
           ...locked.schoolGeneration!,
           leaseUntil: undefined,
           ...(error instanceof SchoolQualityError &&
-          error.report.issues.some((issue) => issue.code === 'empty_visual_content')
+          error.report.issues.some((issue) =>
+            ['empty_visual_content', 'unresolved_teaching_image'].includes(issue.code),
+          )
             ? { phase: 'content' as const, pendingContent: undefined }
             : {}),
           ...(callMetric
@@ -371,6 +374,8 @@ export async function generateSchoolStep(state: SchoolGenerationState, aiCall: A
         }
       : await generateSceneContent(outline, aiCall, options);
     if (!content) throw new Error('Scene unavailable');
+    const visual = checkSchoolVisual(content);
+    if (!visual.pass) throw new SchoolQualityError(visual);
     if (
       outline.type === 'interactive' &&
       (!('html' in content) ||

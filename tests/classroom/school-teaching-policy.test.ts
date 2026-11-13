@@ -4,6 +4,7 @@ import {
   schoolStepTokenBudget,
   schoolTeachingPrompt,
   checkSchoolScene,
+  checkSchoolVisual,
 } from '@/lib/server/school-teaching-policy';
 import { initialSchoolGeneration } from '@/lib/server/school-generation-state';
 import type { SceneOutline } from '@/lib/types/generation';
@@ -24,6 +25,15 @@ function fixture(index: number) {
   return state;
 }
 describe('School teaching depth and safe budgets', () => {
+  it('rejects unresolved picture promises while accepting an actual supplied image source', () => {
+    const image = (src: string) => ({ elements: [{ type: 'image', id: 'picture', src }] }) as never;
+    expect(checkSchoolVisual(image('gen_img_missing')).pass).toBe(false);
+    expect(checkSchoolVisual(image('')).pass).toBe(false);
+    expect(checkSchoolVisual(image('data:image/png;base64,AAAA')).pass).toBe(true);
+    const state = fixture(1);
+    state.phase = 'content';
+    expect(schoolTeachingPrompt(state)).toContain('do not invent remote image URLs');
+  });
   it('protects explanatory budget while keeping opening and recap concise', () => {
     expect(schoolTeachingRole(fixture(1))).toBe('concept');
     expect(schoolTeachingRole(fixture(3))).toBe('worked-example');
