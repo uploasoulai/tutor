@@ -223,6 +223,10 @@ try {
   await page.getByRole('button', { name: '回看今天的发现' }).click();
   await page.getByRole('button', { name: '结束回看' }).click();
   if (writes !== previousWrites) throw new Error('Review created new attempts or progress writes');
+  await page.getByRole('button', { name: '重看欢迎动画', exact: true }).click();
+  await expect(page.getByRole('complementary', { name: '海边数学乐园开场' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '从头回看这节课', exact: true })).toBeVisible();
+  if (writes !== previousWrites) throw new Error('Reopening the welcome changed learner records');
   status = 'started';
   phase = 'practice';
   await page.setViewportSize({ width: 390, height: 844 });

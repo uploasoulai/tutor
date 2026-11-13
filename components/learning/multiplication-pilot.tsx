@@ -214,18 +214,22 @@ export function MultiplicationPilot({
             <>
               <MultiplicationWelcome />
               <h2 className="text-xl font-bold">
-                {preview
-                  ? '欢迎来到小海老师的数学教室'
-                  : sessionId.current
-                    ? '这节试课已存入你的学习档案'
-                    : '暂时还没有保存这节试课'}
+                {reviewOnly
+                  ? '再去海边数学乐园探索一次'
+                  : preview
+                    ? '欢迎来到小海老师的数学教室'
+                    : sessionId.current
+                      ? '这节试课已存入你的学习档案'
+                      : '暂时还没有保存这节试课'}
               </h2>
               <p className="my-4 leading-8">
-                {preview
-                  ? '讲解和练习都已经准备好，跟着小海老师看一看、摆一摆吧。这是体验模式，不会写入任何学生的学习档案；学生账号进入后会保存自己的进度。'
-                  : sessionId.current
-                    ? '目前标记为“已保存、未开始”。点开始以后，才会记录学习和答题进度。讲解已经准备好，反复观看不需要重新生成。'
-                    : '请重新读取学习档案。保存成功后就可以开始，已有的学习记录仍会保留。'}
+                {reviewOnly
+                  ? '这是回看模式：可以重新看开场、听讲解、动手摆一摆，不会新增答题记录或改动原来的成绩。'
+                  : preview
+                    ? '讲解和练习都已经准备好，跟着小海老师看一看、摆一摆吧。这是体验模式，不会写入任何学生的学习档案；学生账号进入后会保存自己的进度。'
+                    : sessionId.current
+                      ? '目前标记为“已保存、未开始”。点开始以后，才会记录学习和答题进度。讲解已经准备好，反复观看不需要重新生成。'
+                      : '请重新读取学习档案。保存成功后就可以开始，已有的学习记录仍会保留。'}
               </p>
               {!preview && questions.length !== 2 && (
                 <p role="alert" className="mb-4 text-amber-800">
@@ -237,7 +241,7 @@ export function MultiplicationPilot({
                 disabled={busy || (!preview && (!sessionId.current || questions.length !== 2))}
                 onClick={() => void advance('question')}
               >
-                {preview ? '开始二年级体验' : '开始二年级试课'}
+                {reviewOnly ? '从头回看这节课' : preview ? '开始二年级体验' : '开始二年级试课'}
               </button>
             </>
           ) : phase === 'question' ? (
@@ -483,6 +487,15 @@ export function MultiplicationPilot({
                   : '这节课和两道理解检查已经保存在你的学习档案中。以后可以从学习空间再次打开。'}
               </p>
               <div className="flex flex-wrap gap-3">
+                <button
+                  className="min-h-12 rounded-2xl border-2 border-[#e9bf58] bg-[#ffdc79] px-5 py-3 font-bold text-[#593f13]"
+                  onClick={() => {
+                    setReviewOnly(true);
+                    setPhase('intro');
+                  }}
+                >
+                  重看欢迎动画
+                </button>
                 <button
                   className={button}
                   onClick={() => {

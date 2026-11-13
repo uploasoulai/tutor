@@ -6,6 +6,8 @@ Latest explicit user decision authorizes one concentrated SiliconFlow image/spee
 
 After signing in, open **School Learning → 二年级 · 乘法探索课**, or `/school-learning/china/multiplication-lab`.
 
+Already-completed accounts can choose **重看欢迎动画 → 从头回看这节课** on the completion page. This preserves the existing grades and adds no learner writes.
+
 1. Click **播放欢迎动画和声音**: a five-second generated, silent coastal-classroom animation loops underneath a 14.4-second welcome narration. Pause controls both. Reduced-motion devices retain the illustration and speech without starting the animation. Starting the lesson removes/stops the opener.
 2. Start the lesson and identify equal groups. The three narrated chapters provide 144.27 seconds of authored teaching, linked to matching exact diagrams and subtitles, alongside the existing real WebGL teacher. Play, pause, seek, focus and phone controls remain available.
 3. Place six counters into three equal groups, explain repeated addition, distinguish unequal groups, answer the two canonical curriculum questions, then recap. Watching a video never grants mastery. Wrong answers still offer the same-learner Personal AI Tutor coaching handoff.
