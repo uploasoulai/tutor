@@ -612,6 +612,33 @@ export default function StudentDashboard({ view = 'home' }: { view?: 'home' | 'b
                 </section>
               )}
 
+              {activeNav === 'dashboard' && (
+                <section
+                  aria-label="Practice and shared lessons"
+                  className="grid gap-4 sm:grid-cols-2"
+                >
+                  <button
+                    onClick={() => router.push('/school-learning/assessments')}
+                    className="rounded-2xl border border-orange-200 bg-orange-50 p-6 text-left text-[#493922]"
+                  >
+                    <h2 className="text-xl font-bold">小测验 · 错题与家教</h2>
+                    <p className="mt-2 text-sm leading-6">
+                      选择年级，做单元、期中或期末范围练习。看看哪里还需要帮助，再请私人家教陪你想明白。
+                    </p>
+                    <span className="mt-4 inline-block font-semibold">开始练习 / 查看错题 →</span>
+                  </button>
+                  <button
+                    onClick={() => router.push('/school-learning/library')}
+                    className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-left text-[#214c42]"
+                  >
+                    <h2 className="text-xl font-bold">大家的课程书架</h2>
+                    <p className="mt-2 text-sm leading-6">
+                      打开已经准备好的互动课，直接开始学习。测试阶段，所有用户都可以复用共享课程。
+                    </p>
+                    <span className="mt-4 inline-block font-semibold">去选一堂课 →</span>
+                  </button>
+                </section>
+              )}
               {activeNav === 'dashboard' && <LearningSupportGuide />}
             </>
           )}

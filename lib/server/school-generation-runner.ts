@@ -1,4 +1,5 @@
 import { createStageAPI } from '@/lib/api/stage-api';
+import { nanoid } from 'nanoid';
 import { callLLM } from '@/lib/ai/llm';
 import { selectCurriculumOutlines } from '@/lib/curriculum/select-lesson-outlines';
 import {
@@ -334,7 +335,7 @@ export async function generateSchoolStep(state: SchoolGenerationState, aiCall: A
       );
     state.languageDirective = result.data.languageDirective;
     state.stage = {
-      id: `course-${state.input.curriculumLessonCache!.cacheKey.slice(0, 32)}`,
+      id: `course-${nanoid(20)}`,
       name: state.outlines[0].title,
       style: 'interactive',
       languageDirective: state.languageDirective,

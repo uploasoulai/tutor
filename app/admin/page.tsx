@@ -419,6 +419,12 @@ export default function AdminDashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => router.push('/admin/course-library')}
+            className="min-h-10 rounded-md border px-3 text-sm font-semibold"
+          >
+            课程库审核
+          </button>
+          <button
             onClick={() => window.location.reload()}
             className="inline-flex h-9 items-center gap-2 rounded-md border border-[#e7e8e9] px-3 text-sm font-semibold text-[#424750] hover:bg-[#f0f4ff]"
           >

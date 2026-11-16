@@ -94,9 +94,27 @@ async function createLaunchResponse(request: NextRequest, mode: string, handoffP
 
     const now = Math.floor(Date.now() / 1000);
     const allowedModes: Record<string, string[]> = {
-      student: ['personal', 'school', 'practice', 'mastery', 'progress', 'profile'],
+      student: [
+        'personal',
+        'school',
+        'practice',
+        'mistakes',
+        'question-bank',
+        'mastery',
+        'progress',
+        'profile',
+      ],
       parent: ['personal', 'guardian'],
-      admin: ['personal', 'school'],
+      admin: [
+        'personal',
+        'school',
+        'practice',
+        'mistakes',
+        'question-bank',
+        'mastery',
+        'progress',
+        'profile',
+      ],
     };
     if (!allowedModes[role]?.includes(mode)) {
       return NextResponse.json(

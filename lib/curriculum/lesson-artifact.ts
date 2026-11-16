@@ -157,7 +157,7 @@ Duration and structure:
 - Animate the manipulatives: counters should appear one by one, number lines should slide, base-ten blocks should build, and matching cards should flip or glow on success
 
 BC curriculum context:
-${context || 'Use the selected BC outcome and Grade 2 Math expectations as source of truth.'}
+${context || `Use the selected BC outcome and ${payload.bc_context.grade} ${payload.bc_context.subject} expectations as source of truth.`}
 
 Instructional design blueprint:
 - Child objective: ${blueprint.childFriendlyObjective}
@@ -289,7 +289,7 @@ export function buildLessonPayloadFromMatches({
         outcomeCode: selectedOutcomeCode,
         choices: ['Draw it', 'Skip it', 'Guess silently'],
         correctChoice: 'Draw it',
-        hint: 'Grade 2 math is easier when the idea is visible.',
+        hint: 'This idea is easier when we can see it.',
         gameType: 'choice-card',
       },
       {

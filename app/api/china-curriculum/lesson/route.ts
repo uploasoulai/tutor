@@ -17,6 +17,7 @@ import { buildRequestOrigin } from '@/lib/server/classroom-storage';
 import {
   describeCurriculumLesson,
   findCurriculumLessonArtifact,
+  findSelectedLibraryArtifact,
 } from '@/lib/server/curriculum-lesson-cache';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
@@ -102,6 +103,7 @@ export async function POST(request: NextRequest) {
       topicId?: string;
       editionId?: string;
       forceRegenerate?: boolean;
+      libraryClassroomId?: string;
     };
     if (!body.topicId) return apiError('MISSING_REQUIRED_FIELD', 400, 'topicId is required');
     const details = await getChinaTopicDetails(
@@ -136,9 +138,21 @@ export async function POST(request: NextRequest) {
     await ensureStudentRecord(user);
 
     failedStage = 'curriculum_lesson_cache';
-    const reusableLesson = body.forceRegenerate
-      ? null
-      : await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey);
+    const reusableLesson = body.libraryClassroomId
+      ? await findSelectedLibraryArtifact(
+          body.libraryClassroomId,
+          curriculumLessonCache.cacheKey,
+          user.id,
+        )
+      : body.forceRegenerate
+        ? null
+        : await findCurriculumLessonArtifact(curriculumLessonCache.cacheKey);
+    if (body.libraryClassroomId && !reusableLesson)
+      return apiError(
+        'INVALID_REQUEST',
+        404,
+        '这堂课与当前课纲版本不一致，或尚未开放。请返回课程库重新选择。',
+      );
     if (!reusableLesson) {
       failedStage = 'platform_ai_check';
       await assertSchoolAiAvailable(user.id);

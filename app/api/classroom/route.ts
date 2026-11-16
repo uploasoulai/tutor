@@ -9,6 +9,8 @@ import {
 } from '@/lib/server/classroom-storage';
 import { createLogger } from '@/lib/logger';
 import { createClient } from '@/lib/supabase/server';
+import { hasAccountRole } from '@/lib/auth/account-role';
+import { libraryCourse } from '@/lib/server/course-library';
 
 const log = createLogger('Classroom API');
 
@@ -38,6 +40,9 @@ export async function POST(request: NextRequest) {
 
     const id = stage.id || randomUUID();
     if (!isValidClassroomId(id)) return apiError('INVALID_REQUEST', 400, 'Invalid classroom id');
+    const library = await libraryCourse(id);
+    if (library.row)
+      return apiError('INVALID_REQUEST', 409, '请保存为新版本，课程库原版本会继续保留');
     const baseUrl = buildRequestOrigin(request);
 
     const persisted = await persistClassroom(
@@ -83,7 +88,9 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
     if (!user) return apiError('INVALID_REQUEST', 401, 'Authentication required');
 
-    const classroom = await readClassroom(id, user.id);
+    const review =
+      request.nextUrl.searchParams.get('review') === '1' && (await hasAccountRole(user, 'admin'));
+    const classroom = await readClassroom(id, user.id, review);
     if (!classroom) {
       return apiError(API_ERROR_CODES.INVALID_REQUEST, 404, 'Classroom not found');
     }

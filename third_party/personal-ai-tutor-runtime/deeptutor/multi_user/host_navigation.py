@@ -10,6 +10,8 @@ def host_learning_destination(mode: str, *, has_handoff: bool = False) -> str:
         "personal": "/learning",
         "school": "/learning",
         "practice": "/learning/practice",
+        "mistakes": "/space/questions?view=mistakes",
+        "question-bank": "/space/questions",
         "mastery": "/learning/mastery",
         "progress": "/settings/progress",
         "profile": "/settings#learner-profile",

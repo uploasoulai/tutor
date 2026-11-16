@@ -3,6 +3,12 @@ import { gunzipSync, gzipSync } from 'node:zlib';
 import type { Scene, Stage } from '@/lib/types/stage';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { reviewedSchoolActivity } from '@/lib/curriculum/reviewed-school-activities';
+import {
+  canReadLibraryCourse,
+  libraryCourse,
+  recommendedLibraryCourse,
+  registerLibraryCandidate,
+} from './course-library';
 
 const BUCKET = 'curriculum-lessons';
 // Includes the School-only teaching delivery policy, not just JSON shape.
@@ -146,14 +152,38 @@ export async function findCurriculumLessonArtifact(
   cacheKey: string,
 ): Promise<CurriculumLessonArtifact | null> {
   if (!usesPersistentClassroomStore()) return null;
+  const library = await recommendedLibraryCourse(cacheKey);
+  if (library.available)
+    return library.row?.storage_path
+      ? readArtifactAtPath(library.row.storage_path, library.row.artifact_sha256 ?? undefined)
+      : null;
   const row = await findReadyArtifactByKey(cacheKey);
   return row ? readArtifactAtPath(row.storage_path, row.artifact_sha256) : null;
 }
 
+export async function findSelectedLibraryArtifact(
+  classroomId: string,
+  cacheKey: string,
+  userId: string,
+) {
+  const { row } = await libraryCourse(classroomId);
+  if (!row || row.cache_key !== cacheKey || !canReadLibraryCourse(row, userId) || !row.storage_path)
+    return null;
+  return readArtifactAtPath(row.storage_path, row.artifact_sha256 ?? undefined);
+}
+
 export async function readCachedClassroomById(
   classroomId: string,
+  ownerId = '',
+  allowReview = false,
 ): Promise<CurriculumLessonArtifact | null> {
   if (!usesPersistentClassroomStore()) return null;
+  const library = await libraryCourse(classroomId);
+  if (library.row) {
+    return canReadLibraryCourse(library.row, ownerId, allowReview) && library.row.storage_path
+      ? readArtifactAtPath(library.row.storage_path, library.row.artifact_sha256 ?? undefined)
+      : null;
+  }
   const { data, error } = await createSupabaseAdminClient()
     .from('curriculum_lesson_artifacts')
     .select('storage_path,artifact_sha256')
@@ -171,6 +201,7 @@ export async function readCachedClassroomById(
 export async function saveCurriculumLessonArtifact(
   descriptor: CurriculumLessonCacheDescriptor,
   artifact: CurriculumLessonArtifact,
+  ownerId?: string,
 ): Promise<boolean> {
   if (!usesPersistentClassroomStore() || !isValidArtifact(artifact)) return false;
 
@@ -187,26 +218,34 @@ export async function saveCurriculumLessonArtifact(
     cacheControl: '31536000',
   });
   if (uploadError) throw uploadError;
+  if (
+    ownerId &&
+    (await registerLibraryCandidate(descriptor, artifact, ownerId, storagePath, checksum))
+  )
+    return true;
+  // During rollout, keep the old shared pointer stable even before the library
+  // migration is applied. A new personal version falls back to owner storage.
+  const existing = await findReadyArtifactByKey(descriptor.cacheKey);
+  if (existing && existing.classroom_id !== artifact.id) return false;
 
-  const { error: indexError } = await supabase.from('curriculum_lesson_artifacts').upsert(
-    {
-      cache_key: descriptor.cacheKey,
-      classroom_id: artifact.id,
-      storage_path: storagePath,
-      curriculum_track: descriptor.track,
-      canonical_id: descriptor.canonicalId,
-      source_revision: descriptor.sourceRevision,
-      schema_version: descriptor.schemaVersion,
-      artifact_bytes: bytes.byteLength,
-      artifact_sha256: checksum,
-      status: 'ready',
-      metadata: { sceneCount: artifact.scenes.length },
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'cache_key' },
-  );
+  const { error: indexError } = await supabase.from('curriculum_lesson_artifacts').insert({
+    cache_key: descriptor.cacheKey,
+    classroom_id: artifact.id,
+    storage_path: storagePath,
+    curriculum_track: descriptor.track,
+    canonical_id: descriptor.canonicalId,
+    source_revision: descriptor.sourceRevision,
+    schema_version: descriptor.schemaVersion,
+    artifact_bytes: bytes.byteLength,
+    artifact_sha256: checksum,
+    status: 'ready',
+    metadata: { sceneCount: artifact.scenes.length },
+    updated_at: new Date().toISOString(),
+  });
 
   if (indexError) {
+    if (indexError.code === '23505')
+      return (await findReadyArtifactByKey(descriptor.cacheKey))?.classroom_id === artifact.id;
     if (isMissingCacheSchema(indexError)) return false;
     throw indexError;
   }

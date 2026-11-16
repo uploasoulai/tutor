@@ -357,9 +357,7 @@ export async function generateClassroom(
     agents = getDefaultAgents();
   }
 
-  const stageId = input.curriculumLessonCache
-    ? `course-${input.curriculumLessonCache.cacheKey.slice(0, 32)}`
-    : nanoid(10);
+  const stageId = input.curriculumLessonCache ? `course-${nanoid(20)}` : nanoid(10);
   const stage: Stage = {
     id: stageId,
     name: outlines[0]?.title || requirement.slice(0, 50),

@@ -427,9 +427,9 @@ async def exchange_host_sso(ticket: str = Form(...)) -> Response:
             raise ValueError("Invalid learner profiles")
         mode = str(claims.get("mode") or "personal")
         allowed_modes = {
-            "student": {"personal", "school", "practice", "mastery", "progress", "profile"},
+            "student": {"personal", "school", "practice", "mistakes", "question-bank", "mastery", "progress", "profile"},
             "parent": {"personal", "guardian"},
-            "admin": {"personal", "school"},
+            "admin": {"personal", "school", "practice", "mistakes", "question-bank", "mastery", "progress", "profile"},
         }
         if role not in allowed_modes or mode not in allowed_modes[role]:
             raise ValueError("Invalid learning mode")

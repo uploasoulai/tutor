@@ -8,6 +8,7 @@ import { MULTIPLICATION_PILOT, hasReviewedAssessment } from '@/lib/curriculum/re
 import { HYBRID_PHASES, type HybridPhase } from '@/lib/curriculum/hybrid-fractions';
 import { GROUPING_ACTIVITY_HTML } from '@/lib/curriculum/grouping-activity';
 import { MultiplicationWelcome } from './multiplication-welcome';
+import { CourseLibraryFeedback } from './course-library-feedback';
 
 type Question = { id: string; prompt: string };
 const endpoint = '/api/china-curriculum/multiplication-pilot';
@@ -515,6 +516,11 @@ export function MultiplicationPilot({
             </>
           )}
         </section>
+        {!preview && phase === 'completed' && (
+          <div className="mt-5">
+            <CourseLibraryFeedback courseId="prepared-multiplication-v5" />
+          </div>
+        )}
         <p className="mt-5 text-sm leading-6 text-[#52716e]">
           本课为已审校测试内容，练习使用现有课程题库。观看讲解本身不会自动记为掌握。
         </p>

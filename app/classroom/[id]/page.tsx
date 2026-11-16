@@ -12,6 +12,7 @@ import { useWhiteboardHistoryStore } from '@/lib/store/whiteboard-history';
 import { createLogger } from '@/lib/logger';
 import { MediaStageProvider } from '@/lib/contexts/media-stage-context';
 import { generateMediaForOutlines } from '@/lib/media/media-orchestrator';
+import { CourseLibraryFeedback } from '@/components/learning/course-library-feedback';
 
 const log = createLogger('Classroom');
 
@@ -40,7 +41,9 @@ export default function ClassroomDetailPage() {
       if (!useStageStore.getState().stage) {
         log.info('No IndexedDB data, trying server-side storage for:', classroomId);
         try {
-          const res = await fetch(`/api/classroom?id=${encodeURIComponent(classroomId)}`);
+          const review =
+            new URLSearchParams(location.search).get('review') === '1' ? '&review=1' : '';
+          const res = await fetch(`/api/classroom?id=${encodeURIComponent(classroomId)}${review}`);
           if (res.ok) {
             const json = await res.json();
             if (json.success && json.classroom) {
@@ -204,7 +207,14 @@ export default function ClassroomDetailPage() {
               </div>
             </div>
           ) : (
-            <Stage onRetryOutline={retrySingleOutline} />
+            <>
+              <div className="shrink-0 px-3 py-1">
+                <CourseLibraryFeedback courseId={classroomId} />
+              </div>
+              <div className="flex min-h-0 flex-1 overflow-hidden">
+                <Stage onRetryOutline={retrySingleOutline} />
+              </div>
+            </>
           )}
         </div>
       </MediaStageProvider>

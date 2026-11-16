@@ -113,6 +113,18 @@ export default function SchoolLearningPage() {
           </div>
 
           <LearningAdventure />
+          <button
+            onClick={() => router.push('/school-learning/assessments')}
+            className="mt-6 mr-3 min-h-14 rounded-2xl border-2 border-[#efd49c] bg-[#fff2cf] px-5 py-3 text-left font-bold text-[#72531d]"
+          >
+            小测验、错题与我的家教 →
+          </button>
+          <button
+            onClick={() => router.push('/school-learning/library')}
+            className="mt-6 min-h-14 rounded-2xl border-2 border-[#c6dfd3] bg-[#edf8f1] px-5 py-3 text-left font-bold text-[#236e76]"
+          >
+            大家的课程书架 → 已准备好的课程，直接学习
+          </button>
 
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
             {tracks.map(

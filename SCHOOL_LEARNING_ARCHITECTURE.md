@@ -1,5 +1,11 @@
 # School Learning architecture decisions
 
+## Shared library and assessment ownership — 2026-11-16
+
+Latest testing policy shares official curriculum trial editions with all authenticated learners, alongside the already approved demonstration. New regeneration is a separate immutable edition. The default edition is manually recommended or the first available trial; other explanations are optional. Learner feedback is lightweight and merged, never an automatic quality verdict. The authenticated service retains access checks and private compressed storage. See `COURSE_LIBRARY_AND_ASSESSMENTS.md` for the publication/review lifecycle and future private-candidate switch.
+
+School now organizes curriculum-based unit/midterm/final objective practice and server-side scoring, using its existing learner sessions and curriculum mastery. Private answer snapshots and transactional first submission prevent browser answer leakage, partial writes and double counting. Reports show this paper's knowledge-point performance, not a permanent ability diagnosis. Parents/admins preview without learner writes. Native Tutor remains the owner of Socratic explanation, question notebook/mistake coaching, spaced review and mastery paths; direct SSO shortcuts make those existing features discoverable. A School exam error is retained in its report and can be explicitly handed to that same workspace; native notebook insertion is not falsely claimed to have happened automatically.
+
 ## Low-grade teaching pace — 2026-11-15
 
 School-only prompts request one concrete idea in short conversational turns, followed by real learner-controlled activity. The prepared multiplication v5 enforces eight automatic pause points and two local counter games. Three authored, prerecorded virtual-classmate turns are offered after a learner attempt; the main teacher stays paused and the learner explicitly continues. Room portraits reflect only known storyboard events from the validated lesson iframe. This requires no live multi-agent service or copied student history. Formative interactions never replace canonical assessment or mark mastery. General generated courses receive the prompt improvements on fresh preparation/regeneration; cached artifacts are not automatically rebuilt and generic slide playback is not claimed to have v5's deterministic pause controller.

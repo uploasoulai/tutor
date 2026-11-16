@@ -66,6 +66,7 @@ export function isValidClassroomId(id: string): boolean {
 export async function readClassroom(
   id: string,
   ownerId: string,
+  allowLibraryReview = false,
 ): Promise<PersistedClassroomData | null> {
   if (!ownerId || !isValidClassroomId(id)) return null;
   if (usesPersistentClassroomStore()) {
@@ -77,7 +78,7 @@ export async function readClassroom(
     if (error) throw error;
     const classroom = (data?.classroom_data as PersistedClassroomData | undefined) ?? null;
     if (data) return data.owner_id === ownerId ? classroom : null;
-    return readCachedClassroomById(id);
+    return readCachedClassroomById(id, ownerId, allowLibraryReview);
   }
   const filePath = path.join(CLASSROOMS_DIR, `${id}.json`);
   try {
@@ -117,8 +118,14 @@ export async function persistClassroom(
     let savedToCurriculumStore = false;
     if (cacheDescriptor) {
       try {
-        savedToCurriculumStore = await saveCurriculumLessonArtifact(cacheDescriptor, classroomData);
+        savedToCurriculumStore = await saveCurriculumLessonArtifact(
+          cacheDescriptor,
+          classroomData,
+          ownerId,
+        );
       } catch (cacheError) {
+        if (cacheError instanceof Error && cacheError.message === 'Course versions are immutable')
+          throw cacheError;
         log.warn(
           'Could not save reusable curriculum lesson; falling back to learner classroom storage:',
           cacheError,
