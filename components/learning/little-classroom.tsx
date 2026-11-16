@@ -1,14 +1,16 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { createClassroom3D } from '@/lib/learning/classroom-webgl';
-import { ClassroomFriends } from './classroom-friends';
+import { ClassroomFriends, type ClassmateTurn } from './classroom-friends';
 
 export function LittleClassroom({
   speaking,
   compact = false,
+  classmateTurn,
 }: {
   speaking: boolean;
   compact?: boolean;
+  classmateTurn?: ClassmateTurn | null;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const painter = useRef<{ update: (speaking: boolean) => void } | null>(null);
@@ -119,7 +121,7 @@ export function LittleClassroom({
           </p>
         </div>
       )}
-      {compact && <ClassroomFriends />}
+      {compact && <ClassroomFriends turn={classmateTurn} />}
     </aside>
   );
 }

@@ -1,26 +1,27 @@
 {
-  "version": 4,
+  "version": 5,
   "grade": 2,
   "topicId": "cnm_p038",
   "generationCalls": {
     "image": 1,
-    "speech": 9,
+    "speech": 20,
     "video": 1
   },
   "models": {
     "image": "Qwen/Qwen-Image",
     "speech": "FunAudioLLM/CosyVoice2-0.5B",
     "voice": "diana",
-    "video": "MiniMaxAI/MiniMax-H3"
+    "video": "MiniMaxAI/MiniMax-H3",
+    "companionVoices": ["claire", "david"]
   },
-  "narratedSeconds": 144.26666666666668,
+  "narratedSeconds": 56.43333333333333,
   "videoSeconds": 5,
   "actualCostUsd": null,
   "assets": [
     {
-      "path": "/lessons/multiplication-narrated-v4.html",
-      "bytes": 3641705,
-      "sha256": "6f74910b4a7b3f24ca1d059e7a24593117aec8475820cd9ae6cbbed0023b27f0"
+      "path": "/lessons/multiplication-narrated-v5.html",
+      "bytes": 2227802,
+      "sha256": "d9fb974201a75913a3d97c9267bf69c9e884ccf6c9d1c2668668b963cd97efc5"
     },
     {
       "path": "/lessons/multiplication-demo-v3/opening.mp4",
@@ -37,5 +38,15 @@
       "bytes": 88274,
       "sha256": "9eb83581082de6000b50684e25ab72ae4fc6619880dd1a3b7b4cebbaf856f8ec"
     }
-  ]
+  ],
+  "defaultPlaybackRate": 0.85,
+  "thinkingStops": 8,
+  "counterGames": 2,
+  "voicedCompanions": 3,
+  "activeSpeechClips": 12,
+  "editionGenerationCalls": {
+    "image": 0,
+    "speech": 11,
+    "video": 0
+  }
 }

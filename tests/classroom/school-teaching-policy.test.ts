@@ -55,6 +55,13 @@ describe('School teaching depth and safe budgets', () => {
     expect(schoolTeachingPrompt(fixture(3))).toContain('older learners');
     expect(schoolTeachingPrompt(fixture(4))).toContain('before the learner tries');
   });
+  it('requires short child-friendly turns and actual learner-controlled practice, without invented pause actions', () => {
+    const prompt = schoolTeachingPrompt(fixture(1));
+    expect(prompt).toContain('ONE small idea');
+    expect(prompt).toContain('Do not immediately reveal its answer');
+    expect(prompt).toContain('reset/retry and no timer');
+    expect(prompt).toContain('do not invent wait/pause actions');
+  });
   it('blocks an empty visual or absent explanation, but does not equate short content with incorrect content', () => {
     expect(
       checkSchoolScene({ elements: [] }, [{ id: 's', type: 'speech', text: 'Explanation' }]).pass,

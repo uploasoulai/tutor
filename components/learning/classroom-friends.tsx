@@ -1,5 +1,10 @@
 /** Original lightweight portraits; these are fictional companions, not learner accounts. */
-export function ClassroomFriends() {
+export interface ClassmateTurn {
+  name: string;
+  text: string;
+  answering: boolean;
+}
+export function ClassroomFriends({ turn }: { turn?: ClassmateTurn | null }) {
   const friends = [
     {
       name: '朵朵',
@@ -28,6 +33,7 @@ export function ClassroomFriends() {
   ];
   return (
     <section aria-label="陪你学习的虚拟同学" className="border-t border-[#e5d4b0] px-3 py-4">
+      <style>{`@keyframes coastal-classmate-wave{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(9deg)}}@media(prefers-reduced-motion:no-preference){.coastal-classmate-hand{transform-origin:64px 72px;animation:coastal-classmate-wave 1.8s ease-in-out infinite}}`}</style>
       <h3 className="mb-3 text-center text-xs font-bold text-[#72531d]">虚拟同学 · 一起学习</h3>
       <ul className="grid grid-cols-3 gap-2">
         {friends.map((friend) => (
@@ -80,11 +86,36 @@ export function ClassroomFriends() {
                 strokeWidth="4"
                 strokeLinejoin="round"
               />
+              {turn?.name === friend.name && (
+                <g className="coastal-classmate-hand" data-raised-hand>
+                  <path
+                    d="M62 77L69 61L69 46"
+                    fill="none"
+                    stroke={friend.shirt}
+                    strokeWidth="9"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="69" cy="41" r="6" fill={friend.skin} />
+                </g>
+              )}
             </svg>
             <p className="mt-1 text-sm font-bold text-[#52716e]">{friend.name}</p>
+            {turn?.name === friend.name && (
+              <p className="text-xs font-bold text-[#9a5a21]">
+                {turn.answering ? '在分享' : '举手啦'}
+              </p>
+            )}
           </li>
         ))}
       </ul>
+      {turn && (
+        <p
+          role="status"
+          className="mt-3 rounded-xl bg-white/90 p-3 text-sm leading-6 text-[#52716e]"
+        >
+          {turn.name}：{turn.text}
+        </p>
+      )}
     </section>
   );
 }

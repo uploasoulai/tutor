@@ -148,6 +148,84 @@ try {
       shots: story.chapters.find((c) => c.id === chapter.id).shots.length,
     });
   }
+  if (manifest.version >= 5) {
+    for (const chapter of story.chapters)
+      for (const shot of chapter.shots) {
+        const timing = manifest.shots.find((item) => item.id === shot.id);
+        await page.goto('about:blank');
+        await page.goto(`${address}#chapter=${chapter.id}`);
+        await page.getByRole('slider', { name: '讲解进度' }).evaluate((input, value) => {
+          Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(
+            input,
+            String(value),
+          );
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }, timing.audioEnd - 4);
+        await page.getByRole('button', { name: '播放讲解', exact: true }).click();
+        const turn = page.getByRole('region', { name: '停下来想一想' });
+        await expect(turn).toBeVisible();
+        const stopped = await page.locator('output').getAttribute('data-frame');
+        await page.waitForTimeout(650);
+        await expect(page.locator('output')).toHaveAttribute('data-frame', stopped);
+        if (await page.locator('audio').evaluateAll((nodes) => nodes.some((node) => !node.paused)))
+          throw new Error('Teacher kept talking at a thinking stop');
+        await expect(turn.getByRole('button', { name: '准备好啦，继续' })).toBeDisabled();
+        const prompt = shot.pause;
+        if (prompt.kind === 'groups') {
+          await turn.getByRole('button', { name: '我摆好啦' }).click();
+          await expect(turn.getByText(prompt.hint, { exact: true })).toBeVisible();
+          for (let i = 1; i <= prompt.groups; i++)
+            for (let j = 0; j < prompt.each; j++)
+              await turn.getByRole('button', { name: new RegExp(`^小盒${i}，`) }).click();
+          await turn.getByRole('button', { name: '我摆好啦' }).click();
+        } else {
+          await turn
+            .getByRole('button', {
+              name: prompt.options[(prompt.answer + 1) % prompt.options.length],
+              exact: true,
+            })
+            .click();
+          await expect(turn.getByText(prompt.hint, { exact: true })).toBeVisible();
+          if (prompt.friend) {
+            await turn
+              .getByRole('button', { name: `听${prompt.friend.name}怎么想`, exact: true })
+              .click();
+            await expect(
+              turn.getByText(`${prompt.friend.name}：${prompt.friend.text}`, { exact: true }),
+            ).toBeVisible();
+            await expect
+              .poll(() =>
+                turn.locator('audio').evaluate((node) => !node.paused && node.currentTime > 0),
+              )
+              .toBe(true);
+          }
+          await turn
+            .getByRole('button', { name: prompt.options[prompt.answer], exact: true })
+            .click();
+        }
+        await expect(turn.getByText(prompt.success, { exact: true })).toBeVisible();
+        await page.setViewportSize({ width: 390, height: 844 });
+        if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth))
+          throw new Error('Thinking game phone overflow');
+        await page.screenshot({
+          path: join(work, `${shot.id}-thinking-mobile.png`),
+          fullPage: true,
+        });
+        await turn.getByRole('button', { name: '准备好啦，继续' }).click();
+        await expect(turn).toHaveCount(0);
+        if (
+          await page
+            .locator('audio')
+            .evaluateAll((nodes) =>
+              nodes.some((node) => !node.paused && node.closest('.thinking-turn')),
+            )
+        )
+          throw new Error('Companion voice continued over teaching');
+      }
+    console.log(
+      'All eight automatic stops, gentle retries, two counter games and three recorded companion replies passed.',
+    );
+  }
   if (errors.length) throw new Error('Native player runtime errors: ' + errors.join(';'));
   console.log(JSON.stringify({ passed: true, results }));
 } catch (error) {

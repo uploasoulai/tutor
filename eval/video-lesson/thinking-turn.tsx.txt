@@ -1,0 +1,31 @@
+import React, {useEffect, useRef, useState} from 'react';
+export type ThinkingPrompt = {
+  kind: 'choice' | 'groups'; question: string; options?: string[]; answer?: number;
+  groups?: number; each?: number; hint: string; success: string;
+  friend?: {name: string; text: string};
+};
+export function ThinkingTurn({prompt, audio, onFriend, onContinue}: {
+  prompt: ThinkingPrompt; audio?: string; onFriend: ()=>void; onContinue: ()=>void;
+}) {
+  const [attempted,setAttempted]=useState(false), [solved,setSolved]=useState(false), [revealed,setRevealed]=useState(false);
+  const [boxes,setBoxes]=useState(()=>Array(prompt.groups??0).fill(0));
+  const voice=useRef<HTMLAudioElement>(null);
+  useEffect(()=>{const clip=voice.current;const hide=()=>{if(document.hidden)clip?.pause()};document.addEventListener('visibilitychange',hide);return()=>{clip?.pause();document.removeEventListener('visibilitychange',hide)}},[]);
+  const check=(correct:boolean)=>{setAttempted(true);setSolved(correct)};
+  return <section className="thinking-turn" aria-label="停下来想一想">
+    <h2>轮到你啦！不用着急</h2><p>{prompt.question}</p>
+    {prompt.kind==='choice' ? <div className="turn-choices">{prompt.options?.map((option,i)=><button key={option} disabled={solved} onClick={()=>check(i===prompt.answer)}>{option}</button>)}</div> : <>
+      <div className="turn-choices">{boxes.map((count,i)=><button key={i} disabled={solved} aria-label={`小盒${i+1}，有${count}个圆片，点击加一个`} onClick={()=>{setAttempted(false);setBoxes(values=>values.map((n,j)=>j===i?(n+1)%4:n))}}>
+        第{i+1}盒<span className="turn-counters" aria-hidden="true">{Array.from({length:count},(_,j)=><span key={j}>●</span>)}</span><span>{count}个 · 点一点</span>
+      </button>)}</div><button disabled={solved} onClick={()=>check(boxes.every(n=>n===prompt.each))}>我摆好啦</button>
+    </>}
+    {attempted && <p role="status">{solved?prompt.success:prompt.hint}</p>}
+    {prompt.friend && <>
+      <button disabled={!attempted} onClick={()=>{setRevealed(true);onFriend();const clip=voice.current;if(clip){clip.currentTime=0;void clip.play().catch(()=>{})}}}>听{prompt.friend.name}怎么想</button>
+      {!attempted && <p className="turn-note">同学也举手啦！你先试一试，再请同学帮忙。</p>}
+      {revealed && <p role="status" className="friend-reply">{prompt.friend.name}：{prompt.friend.text}</p>}
+      {audio && <audio ref={voice} src={audio} preload="none"/>}
+    </>}
+    <button className="turn-continue" disabled={!solved&&!revealed} onClick={()=>{voice.current?.pause();onContinue()}}>准备好啦，继续</button>
+  </section>;
+}

@@ -64,7 +64,7 @@ const server = createServer((request, response) => {
     );
     response.end(readFileSync(join(root, 'public', path)));
   } else if (
-    path === '/lessons/multiplication-narrated-v4.html' ||
+    path === '/lessons/multiplication-narrated-v5.html' ||
     path === '/lessons/fractions-narrated-v2.html'
   ) {
     response.setHeader('Content-Type', 'text/html');
@@ -153,7 +153,7 @@ try {
   await page.getByRole('button', { name: '看老师讲一讲' }).click();
   await expect(page.locator('iframe')).toHaveAttribute(
     'src',
-    /multiplication-narrated-v4.html#chapter=explain$/,
+    /multiplication-narrated-v5.html#chapter=explain$/,
   );
   await page.frameLocator('iframe').getByRole('button', { name: '播放讲解', exact: true }).click();
   await expect(
@@ -219,6 +219,34 @@ try {
   await page.screenshot({ path: join(work, 'desktop-practice.png'), fullPage: true });
   await page.getByRole('button', { name: '看看为什么这样写' }).click();
   await expect(page.locator('iframe')).toHaveAttribute('src', /chapter=reason$/);
+  const reasoningTiming = JSON.parse(
+    readFileSync(join(root, 'lib/curriculum/multiplication-media.json'), 'utf8'),
+  ).shots.find((shot) => shot.id === 'meaning');
+  await page
+    .frameLocator('iframe')
+    .getByRole('slider', { name: '讲解进度' })
+    .evaluate((input, value) => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(
+        input,
+        String(value),
+      );
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }, reasoningTiming.audioEnd - 4);
+  await page.frameLocator('iframe').getByRole('button', { name: '播放讲解', exact: true }).click();
+  const thinking = page.frameLocator('iframe').getByRole('region', { name: '停下来想一想' });
+  await expect(thinking).toBeVisible();
+  await expect(room).toHaveAttribute('data-speaking', 'false');
+  await expect(room.locator('[data-raised-hand]')).toHaveCount(1);
+  await expect(room.getByText('举手啦', { exact: true })).toBeVisible();
+  await thinking.getByRole('button', { name: '每盒3个', exact: true }).click();
+  await thinking.getByRole('button', { name: '听小宇怎么想', exact: true }).click();
+  await expect(room.getByText('在分享', { exact: true })).toBeVisible();
+  await expect(room.getByText(/小宇：我先看一盒/)).toBeVisible();
+  await page
+    .locator('[data-classroom-screen="integrated"]')
+    .screenshot({ path: join(work, 'classmate-thinking-turn.png') });
+  await thinking.getByRole('button', { name: '准备好啦，继续', exact: true }).click();
+  await expect(room.locator('[data-raised-hand]')).toHaveCount(0);
   await page.getByRole('button', { name: '试试两个新问题' }).click();
   await expect(page.locator('iframe')).toHaveCount(0);
   await page.getByLabel(questions[0].prompt).fill('5');
@@ -258,7 +286,7 @@ try {
   ).toBeVisible();
   await page.locator('iframe').scrollIntoViewIfNeeded();
   await expect(
-    page.frameLocator('iframe').getByRole('heading', { name: '先看一组', exact: true }),
+    page.frameLocator('iframe').getByRole('heading', { name: '先看一个小盒', exact: true }),
   ).toBeVisible();
   await page.locator('iframe').screenshot({ path: join(work, 'mobile-player.png') });
   await page.screenshot({ path: join(work, 'mobile-video.png'), fullPage: true });

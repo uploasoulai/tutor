@@ -4,6 +4,8 @@ import {Player, type PlayerRef} from '@remotion/player';
 import {Lesson, LESSON} from './Lesson';
 import manifest from './manifest.json';
 import story from './storyboard.json';
+import {ThinkingTurn, type ThinkingPrompt} from './thinking-turn';
+import companionAudio from './companion-audio.json';
 const query = new URLSearchParams(location.hash.slice(1) || location.search);
 const chapter = manifest.chapters.find(c => c.id === query.get('chapter')) ?? manifest.chapters[0];
 const notify = (event: string) => parent.postMessage({channel:'coastaltutor-reviewed-video',version:2,chapter:chapter.id,event}, '*');
@@ -12,13 +14,24 @@ function App() {
   const [playing,setPlaying] = useState(false);
   const [frame,setFrame] = useState(chapter.start);
   const [failed,setFailed] = useState(false);
+  const [thinking,setThinking] = useState<string|null>(null);
+  const [speed,setSpeed] = useState(manifest.version>=5?0.85:1);
+  const pending=useRef<string|null>(null), lastFrame=useRef(chapter.start), cleared=useRef(new Set<string>());
+  const prompts=Object.fromEntries(story.chapters.flatMap(c=>c.shots).filter(s=>'pause' in s).map(s=>[s.id,(s as typeof s & {pause:ThinkingPrompt}).pause]));
+  const turn=thinking?prompts[thinking]:null;
+  const activity=(shotId:string,stage:'thinking'|'answer'|'done')=>parent.postMessage({channel:'coastaltutor-reviewed-video',version:2,chapter:chapter.id,event:'activity',shotId,stage},'*');
   useEffect(() => {
     const p=player.current;
     if (!p) return;
     const onPlay=()=>{setPlaying(true);notify('play')};
     const onPause=()=>{setPlaying(false);notify('pause')};
     const onEnded=()=>{setPlaying(false);notify('ended')};
-    const onFrame=(e:{detail:{frame:number}})=>setFrame(e.detail.frame);
+    const onFrame=(e:{detail:{frame:number}})=>{
+      const next=e.detail.frame, previous=lastFrame.current;lastFrame.current=next;
+      const stop=manifest.shots.find(s=>s.start>=chapter.start&&s.end<=chapter.end&&prompts[s.id]&&!cleared.current.has(s.id)&&previous<s.audioEnd+2&&next>=s.audioEnd+2);
+      if(stop&&!pending.current){pending.current=stop.id;p.pause();setFrame(stop.audioEnd+2);p.seekTo(stop.audioEnd+2);setThinking(stop.id);activity(stop.id,'thinking');return;}
+      setFrame(next);
+    };
     const onError=()=>{p.pause();setFailed(true);notify('error')};
     const onHidden=()=>{if(document.hidden)p.pause()};
     p.addEventListener('play',onPlay);p.addEventListener('pause',onPause);p.addEventListener('ended',onEnded);
@@ -38,15 +51,22 @@ function App() {
     <Player ref={player} component={Lesson} {...LESSON} compositionWidth={LESSON.width} compositionHeight={LESSON.height}
       inFrame={chapter.start} outFrame={chapter.end} initialFrame={chapter.start}
       autoPlay={false} loop={false} moveToBeginningWhenEnded={false} controls={false} clickToPlay={false}
+      playbackRate={speed}
       errorFallback={()=> <p role="alert">讲解暂时无法播放，请返回课程查看图解。</p>}
       style={{width:'100%',aspectRatio:'4/3',maxHeight:'calc(100vh - 100px)'}}/>
     <p data-lesson-caption className={'readable-caption'+(('captionLayout' in manifest && manifest.captionLayout==='below-player')?' external-caption':'')} aria-live="off">{frame>=(current?.audioStart??0)?caption:"点击播放，听听老师怎么解释。"}</p>
+    {turn&&thinking&&<ThinkingTurn key={thinking} prompt={turn} audio={(companionAudio as Record<string,{src:string}>)[thinking]?.src} onFriend={()=>activity(thinking,'answer')} onContinue={()=>{
+      const timing=manifest.shots.find(s=>s.id===thinking)!;cleared.current.add(thinking);activity(thinking,'done');pending.current=null;setThinking(null);
+      const next=Math.min(chapter.end,timing.end+1);lastFrame.current=next;player.current?.seekTo(next);setFrame(next);
+      if(next<chapter.end)player.current?.play();else notify('ended');
+    }}/>}
     <div className="tools" aria-label="讲解播放控制">
+      {manifest.version>=5&&<button onClick={()=>setSpeed(speed===0.85?1:0.85)}>{speed===0.85?'现在慢慢讲 · 换普通速度':'现在普通速度 · 换慢慢讲'}</button>}
       <label className="seek">讲解进度<input aria-label="讲解进度" type="range" aria-valuetext={"已讲解 "+Math.round((frame-chapter.start)/30)+" 秒，共 "+Math.ceil((chapter.end-chapter.start+1)/30)+" 秒"} min={chapter.start} max={chapter.end} value={frame}
-        onChange={e=>{player.current?.pause();player.current?.seekTo(Number(e.target.value))}}/></label>
+        onChange={e=>{player.current?.pause();if(pending.current)activity(pending.current,'done');pending.current=null;setThinking(null);lastFrame.current=Number(e.target.value);player.current?.seekTo(Number(e.target.value))}}/></label>
       <div className="buttons">
-        <button disabled={failed} onClick={()=>{const p=player.current;if(!p)return;if(!p.isPlaying()&&p.getCurrentFrame()>=chapter.end)p.seekTo(chapter.start);p.toggle()}}>{playing?'暂停讲解':'播放讲解'}</button>
-        <button onClick={()=>{player.current?.pause();player.current?.seekTo(chapter.start)}}>从头再看</button>
+        <button disabled={failed||!!thinking} onClick={()=>{const p=player.current;if(!p)return;if(!p.isPlaying()&&p.getCurrentFrame()>=chapter.end){cleared.current.clear();lastFrame.current=chapter.start;p.seekTo(chapter.start)}p.toggle()}}>{thinking?'先来试一试':playing?'暂停讲解':'播放讲解'}</button>
+        <button onClick={()=>{player.current?.pause();if(pending.current)activity(pending.current,'done');pending.current=null;setThinking(null);cleared.current.clear();lastFrame.current=chapter.start;player.current?.seekTo(chapter.start)}}>从头再看</button>
         <button onClick={()=>document.documentElement.requestFullscreen?.().catch(()=>{})}>全屏观看</button>
       </div>
       <output data-frame={frame} aria-label="播放状态">{failed?'播放遇到问题':playing?'正在讲解':'已暂停'}</output>

@@ -3,6 +3,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import media from '@/lib/curriculum/fractions-media.json';
 import story from '@/lib/curriculum/fractions-storyboard.json';
+import type { ClassmateTurn } from './classroom-friends';
 const LittleClassroom = lazy(() =>
   import('./little-classroom').then((module) => ({ default: module.LittleClassroom })),
 );
@@ -22,6 +23,7 @@ export interface ReviewedVideoStory {
       each?: number;
       groupSizes?: number[];
       formula?: string;
+      pause?: { friend?: { name: string; text: string } };
     }[];
   }[];
 }
@@ -44,6 +46,7 @@ export function ReviewedLessonVideo({
   const [status, setStatus] = useState('loading');
   const [room, setRoom] = useState(true);
   const [frameHeight, setFrameHeight] = useState<number | null>(null);
+  const [classmateTurn, setClassmateTurn] = useState<ClassmateTurn | null>(null);
   const content = story.chapters.find((item) => item.id === chapter)!;
   useEffect(() => {
     if (fallback) return;
@@ -66,16 +69,33 @@ export function ReviewedLessonVideo({
           setFrameHeight(Math.ceil(event.data.height));
         return;
       }
+      if (event.data.event === 'activity') {
+        const shot = content.shots.find((shot) => shot.id === event.data.shotId);
+        if (!shot?.pause || !['thinking', 'answer', 'done'].includes(event.data.stage)) return;
+        const friend = shot.pause.friend;
+        setClassmateTurn(
+          friend && event.data.stage !== 'done'
+            ? {
+                name: friend.name,
+                text:
+                  event.data.stage === 'answer' ? friend.text : '我有个想法，想和你一起试一试！',
+                answering: event.data.stage === 'answer',
+              }
+            : null,
+        );
+        return;
+      }
       if (!['ready', 'play', 'pause', 'ended', 'error'].includes(event.data.event)) return;
       window.clearTimeout(timer);
       setStatus(event.data.event);
+      if (event.data.event === 'play') setClassmateTurn(null);
     };
     window.addEventListener('message', message);
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener('message', message);
     };
-  }, [chapter, fallback, media.captionLayout]);
+  }, [chapter, fallback, media.captionLayout, content.shots]);
   return (
     <div>
       <h2 className="text-xl font-bold">{content.title}</h2>
@@ -109,7 +129,11 @@ export function ReviewedLessonVideo({
           <Suspense
             fallback={<p className="mb-4 rounded-2xl bg-[#fff5db] p-4">小海老师正在准备教室…</p>}
           >
-            <LittleClassroom compact speaking={status === 'play' && !fallback} />
+            <LittleClassroom
+              compact
+              speaking={status === 'play' && !fallback}
+              classmateTurn={classmateTurn}
+            />
           </Suspense>
         )}
         <div

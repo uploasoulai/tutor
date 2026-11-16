@@ -2,7 +2,16 @@
 
 This short file is the working index. **The latest user-approved decisions in chat take precedence over older design documents.** Detailed audits and architecture notes remain historical references unless this file or a later chat confirms them.
 
-## Latest delivery — 2026-11-13 investor multimedia lesson
+## Latest delivery — 2026-11-15 child-paced Grade-2 classroom
+
+- Real Grade-2 tester feedback drove v5: eight short, conversational teacher turns; default slower playback with a simple speed toggle; eight automatic, untimed thinking stops; two tap-to-fill counter games with retry feedback. Playback stops after each short turn and resumes only after the learner's explicit continue. Seeking/replay remains available and never grants mastery.
+- Three scripted virtual classmates now raise/wave a hand at selected stops and share a prerecorded explanation after the child first tries and explicitly asks for help. Teacher narration stays paused during the reply. Parent-room events are bound to the actual lesson iframe/chapter/known shot. Reduced-motion devices retain a static raised hand. They are fictional companions, not accounts, live students or autonomous agents.
+- Prepared 11 new short SiliconFlow speech clips (eight teacher, three classmates); reused the existing image, opening video and welcome. No per-learner generation, new server, schema change or student-history copy. Stable lesson/session IDs and the two canonical assessment checks are unchanged; the mini-games are formative, not mastery records.
+- School-only generation prompts now request Grade 1–3 concrete vocabulary, one idea per short turn, real child-controlled practice, gentle feedback and no invented pause actions. These influence fresh generation/explicit regeneration; existing cached courses are preserved. Personal AI Tutor and Interactive Classroom retain their own pipelines.
+- Native/browser checks pass for all eight real pauses, retries, two games, three decoded classmate replies, subtitle layouts, named hand-raising and return to teaching, plus the complete existing Grade-2 learner/review/preview flow. See `INVESTOR_DEMO_LESSON.md` for the current demo and preparation paths.
+- Delivery checks: 512 unit tests, four existing E2E flows and production build pass. No existing curriculum cache revision was changed; compatibility tests retain prior reusable artifacts and learner history.
+
+## Prior delivery — 2026-11-13 investor multimedia lesson
 
 - Follow-up from real tester feedback: the v4 multiplication player moves long narration into a wrapping transcript below the mathematical canvas, with source-validated bounded iframe sizing. This removes the native fixed-canvas subtitle overlap without new media calls. The compact teacher panel now includes original named virtual classmates 朵朵、小宇、乐乐, including the static teacher fallback. Existing generated image/voice/video and learner records are reused. Browser checks inspect all eight shot captions at 960/640/390px and the named portraits.
 

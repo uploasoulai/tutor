@@ -1,5 +1,9 @@
 # School Learning architecture decisions
 
+## Low-grade teaching pace — 2026-11-15
+
+School-only prompts request one concrete idea in short conversational turns, followed by real learner-controlled activity. The prepared multiplication v5 enforces eight automatic pause points and two local counter games. Three authored, prerecorded virtual-classmate turns are offered after a learner attempt; the main teacher stays paused and the learner explicitly continues. Room portraits reflect only known storyboard events from the validated lesson iframe. This requires no live multi-agent service or copied student history. Formative interactions never replace canonical assessment or mark mastery. General generated courses receive the prompt improvements on fresh preparation/regeneration; cached artifacts are not automatically rebuilt and generic slide playback is not claimed to have v5's deterministic pause controller.
+
 ## Prepared investor demonstration exception — 2026-11-13
 
 The prepared multiplication v4 player renders full narration in normal document flow below its exact mathematical canvas. A same-iframe, validated height message fits longer transcripts without overlaying diagrams; fictional named classmate portraits are lightweight original SVG, not student accounts or additional model calls.
