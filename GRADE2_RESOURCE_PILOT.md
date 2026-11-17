@@ -31,6 +31,15 @@ Audio uses one player with `preload=none`; changing a teaching segment pauses it
 
 ## Operator steps and acceptance
 
+### Production handoff status — 2026-11-16
+
+- Commit `bf9f34d` is pushed. Local validation passed: 541 unit tests, four existing E2E flows, production build and the real-component pilot harness with prerecorded audio.
+- The one trial is registered and read back from the existing library in Supabase project `xattfglcjiojuozvqsjw`, with its publication fingerprint verified. The other five candidates remain unpublished.
+- All four R2 configuration values were saved as **Secret / Production** in Vercel's verified `UploadSoul AI → tutor` project. The account token permits **Object Read only**, restricted to `coastaltutor-course-media`.
+- Redeploying the current main release reached Vercel's identity-verification prompt. The user must complete that prompt in Chrome; configuration save alone does not activate the new values.
+- The 23-file upload remains pending. The native file-selection workflow was blocked by the computer-operation tool in earlier attempts, so the user was given the exact staging folder below. Keep `sha256/` as the object prefix. No read/write token was created to work around the chooser.
+- Signed-in production audio, game and assessment acceptance remains pending. Text/game fallback exists, but this is not a claim of completed live audio verification or teacher approval.
+
 `node scripts/publish-prepared-pilot.mjs` is a dry run that verifies and stages **only 23 files** in `data/resource-audit-20261116/pilot-upload/sha256`. Upload the `sha256` folder into the dedicated bucket. Do not select the older 119-file candidate folder; the dashboard limit is 100 files. No Wrangler or upload-capable website key is needed for this small batch.
 
 Configure the server-only `COASTALTUTOR_R2_ACCOUNT_ID`, `COASTALTUTOR_R2_BUCKET`, `COASTALTUTOR_R2_ACCESS_KEY_ID`, `COASTALTUTOR_R2_SECRET_ACCESS_KEY` in the verified Vercel project. Use the authorized read-only bucket token, never an admin token. Then `node scripts/publish-prepared-pilot.mjs --apply` registers this one trial without overwriting an existing edition. A retry verifies the same publication fingerprint.
