@@ -6,6 +6,8 @@ This short file is the working index. **The latest user-approved decisions in ch
 
 ### Child-friendly classroom v6 and homepage
 
+- **Published 2026-11-17:** release `281b4e6` is pushed and Vercel Production Ready (observed in the correct Chrome project). Official-domain homepage and `/classroom-preview` return the new content; v6 lesson HTML, operation clip and three screenshots return 200 and match local hashes. User can test immediately. Child approval remains open.
+
 - Latest approved focus is one strong experimental class plus an understandable, visual homepage; billing and library expansion are deferred. The multiplication experiment reuses the existing teacher, room, learning records and assessment, adds two authored classmate misconceptions with teacher correction, chapter exploration stamps and richer activity colours. Final media uses thirteen plain-text speech clips, checked against transcripts after rejecting instruction-leaking drafts. v5 remains available. Full details and acceptance limits: `CLASSROOM_V6_AND_HOMEPAGE.md`.
 - Homepage now explains the three existing modes and steps in Chinese/English, uses actual privacy-safe classroom screenshots and a labelled silent operation clip, and links to an unauthenticated narrated interactive preview at `/classroom-preview`. The preview calls no learner API or model and writes no mastery. This is a curated lesson upgrade, not a claim that every generated course or resource-player route now shares all its features.
 

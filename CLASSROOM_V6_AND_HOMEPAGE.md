@@ -42,4 +42,6 @@ The main narration timeline is about 78.77 seconds, excluding all child thinking
 - Public showcase check verifies WebGL, hand-raising, correction speech, one active audio owner, three screenshots, decoded operation clip, language switch, mobile width and **zero learner API requests** from the public preview.
 - Final formatting, i18n key alignment and the original four E2E flows passed. Deployment publication is verified separately after push. Child testing remains the quality acceptance gate; do not mark all low-grade automatic generation or all School courses upgraded by this one edition.
 
+Production publication verified on 2026-11-17: code release `281b4e6` was observed **Ready / Production / main** in Chrome's verified Vercel `UploadSoul AI → tutor` project. The official domain returns HTTP 200 with the new homepage and public preview; the v6 HTML, recorded WebM and all three screenshots match the tested local files by SHA-256. This establishes publication, not a new signed-in student assessment or child quality signoff.
+
 Next work follows user feedback on this lesson/homepage, then returns to selecting public-library resources. No bulk source download or library rollout is needed before testing this delivery.
