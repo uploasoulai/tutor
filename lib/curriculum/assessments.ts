@@ -7,11 +7,12 @@ export type AssessmentConfig = {
   scope: 'unit' | 'midterm' | 'final';
   unit?: string;
   count: number;
+  preparedLessonId?: string;
 };
 export type PaperQuestion = Pick<
   ChinaQuestion,
   'id' | 'topicId' | 'type' | 'prompt' | 'answer' | 'accept' | 'choices'
-> & { topicName: string };
+> & { topicName: string; explanation?: string; explanationAudioId?: string };
 export function assessmentSubject(topic: ChinaTopic) {
   return topic.subject === 'cnm' || (!topic.subject && topic.id.startsWith('cnm'))
     ? 'math'
@@ -151,6 +152,9 @@ export function gradeAssessment(questions: PaperQuestion[], responses: Record<st
       response,
       answered: Boolean(response),
       correct: assessmentCorrect(q, response),
+      ...(q.explanation
+        ? { explanation: q.explanation, explanationAudioId: q.explanationAudioId }
+        : {}),
     };
   });
   const correct = results.filter((q) => q.correct).length,

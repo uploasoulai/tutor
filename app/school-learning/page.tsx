@@ -114,6 +114,12 @@ export default function SchoolLearningPage() {
 
           <LearningAdventure />
           <button
+            onClick={() => router.push('/school-learning/china/adventure')}
+            className="mt-6 min-h-16 w-full rounded-3xl border-2 border-[#e6c472] bg-[#ffedb2] px-6 py-4 text-left font-black text-[#65512d]"
+          >
+            二年级 · 乘法小岛 ★ 首堂试学，听一听、摆一摆、闯一闯 →
+          </button>
+          <button
             onClick={() => router.push('/school-learning/assessments')}
             className="mt-6 mr-3 min-h-14 rounded-2xl border-2 border-[#efd49c] bg-[#fff2cf] px-5 py-3 text-left font-bold text-[#72531d]"
           >

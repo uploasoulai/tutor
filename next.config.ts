@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   transpilePackages: ['mathml2omml', 'pptxgenjs'],
   serverExternalPackages: [],
   outputFileTracingIncludes: {
+    '/api/school-assessments': ['./curriculum_data/china/**/*'],
+    '/api/prepared-courses': ['./curriculum_data/china/prepared/**/*'],
+    '/api/prepared-course-media/**': ['./curriculum_data/china/prepared/**/*'],
+    '/school-learning/china/adventure/*': ['./curriculum_data/china/prepared/**/*'],
     '/api/china-curriculum': ['./curriculum_data/china/**/*'],
     '/api/china-curriculum/attempt': ['./curriculum_data/china/**/*'],
     '/api/china-curriculum/lesson': ['./curriculum_data/china/**/*'],

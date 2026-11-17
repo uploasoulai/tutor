@@ -28,11 +28,14 @@ export function mapStudentSession(row: Record<string, unknown>): StudentSessionL
           curriculumEditionId?: string;
           classroomJobId?: string;
           assessmentId?: string;
+          assessmentConfig?: { preparedLessonId?: string };
         })
       : null;
   const reviewed = reviewedLessonById(payload?.hybridLessonId);
   const openPath = payload?.assessmentId
-    ? `/school-learning/assessments?id=${encodeURIComponent(String(row.id))}`
+    ? payload.assessmentConfig?.preparedLessonId
+      ? `/school-learning/china/adventure/${encodeURIComponent(payload.assessmentConfig.preparedLessonId)}?paperId=${encodeURIComponent(String(row.id))}`
+      : `/school-learning/assessments?id=${encodeURIComponent(String(row.id))}`
     : reviewed && payload?.curriculumTrack === 'china'
       ? `${reviewed.path}?sessionId=${encodeURIComponent(String(row.id))}`
       : payload?.curriculumTrack === 'china'

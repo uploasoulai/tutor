@@ -15,6 +15,7 @@ import {
   type PaperQuestion,
 } from '@/lib/curriculum/assessments';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
+import { readablePreparedLesson } from '@/lib/curriculum/prepared-courses';
 
 export const dynamic = 'force-dynamic';
 function success(value: Record<string, unknown>) {
@@ -131,9 +132,29 @@ export async function POST(request: NextRequest) {
       body = await request.json(),
       db = createSupabaseAdminClient();
     if (body.action === 'start' || body.action === 'preview-grade') {
-      const config = configuration(body.config ?? {});
-      const [topics, bank] = await Promise.all([getChinaTopics(), getChinaQuestions()]);
-      const paper = buildAssessment(topics, bank, config);
+      const preparedId = body.preparedLessonId ?? body.config?.preparedLessonId;
+      const lesson =
+        typeof preparedId === 'string'
+          ? await readablePreparedLesson(preparedId, user.id, role === 'admin')
+          : null;
+      if (preparedId && !lesson) return apiError('INVALID_REQUEST', 404, '这节课暂未开放');
+      const config: AssessmentConfig = lesson
+        ? {
+            grade: lesson.grade,
+            subject: 'math',
+            term: '上',
+            scope: 'unit',
+            count: lesson.questions.length,
+            unit: lesson.title,
+            preparedLessonId: lesson.id,
+          }
+        : configuration(body.config ?? {});
+      const paper = lesson
+        ? { questions: lesson.questions, units: [lesson.title] }
+        : await (async () => {
+            const [topics, bank] = await Promise.all([getChinaTopics(), getChinaQuestions()]);
+            return buildAssessment(topics, bank, config);
+          })();
       if (body.action === 'preview-grade') {
         if (role === 'student') return apiError('INVALID_REQUEST', 403, '请提交你已开始的测验');
         return success({
@@ -148,7 +169,9 @@ export async function POST(request: NextRequest) {
           preview: true,
         });
       await ensureStudentRecord(user);
-      const title = `${config.grade}年级${CHINA_SUBJECTS[config.subject]} · ${config.scope === 'unit' ? '单元' : config.scope === 'midterm' ? '期中范围' : '期末范围'}小测`;
+      const title = lesson
+        ? `二年级数学 · ${lesson.title} · 小岛探索`
+        : `${config.grade}年级${CHINA_SUBJECTS[config.subject]} · ${config.scope === 'unit' ? '单元' : config.scope === 'midterm' ? '期中范围' : '期末范围'}小测`;
       const { data: id, error } = await db.rpc('create_school_assessment', {
         p_student_id: user.id,
         p_title: title,

@@ -14,6 +14,8 @@ These rules are the operating contract for work in this repository. Follow them 
 
 ## Decisions and documentation
 
+- Latest membership direction (2026-11-16): approved reusable education stays Free; personalized AI is Pro BYOK or Pro Managed with configurable visible Credits backed by the existing cost ledger. Preserve authorized testing AI access until all native and platform routes can enforce one verified entitlement policy. Do not claim working payments/subscriptions where none were found. Start the resource-reuse evaluation with one Grade-2 lesson; do not bulk-publish the remaining candidates. See `MEMBERSHIP_AND_FREE_CONTENT_PLAN.md` and `GRADE2_RESOURCE_PILOT.md`.
+
 - Read `IMPLEMENTATION_STATUS.md` and the relevant sections of `SCHOOL_LEARNING_ARCHITECTURE.md` before product or integration work. Read the applicable detailed requirements/provider matrix and the current pinned Personal AI Tutor runtime code/docs when the task touches those areas.
 - The latest explicit user decisions in the conversation override older plans and documents. Update the short status/architecture documents when decisions or implementation state change; do not ask the user to repeat approved requirements.
 - China K–12 and the student/parent testing path are the highest delivery priority. School Learning follows the selected curriculum/knowledge graph and generates an interactive virtual lesson. Personal AI Tutor is the branded learner workspace; Interactive Classroom is the branded classroom creation module. Never show underlying project names in product UI, menus, dialogs, settings, or help copy. Keep vendored sources under `third_party/personal-ai-tutor-runtime`, not in a vendor-named root folder, and preserve their upstream license/provenance notices.

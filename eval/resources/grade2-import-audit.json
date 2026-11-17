@@ -1,0 +1,964 @@
+{
+  "sourceCommit": "aca01f61446b8550b0215b7186b8df4740a97287",
+  "release": "v1.8.3",
+  "availableBooks": [
+    {
+      "sourceBookId": "chinese-g1down",
+      "grade": 1,
+      "metadataBytes": 43568776,
+      "audioPackageBytes": 56723852,
+      "audioReferences": 3447,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g1up",
+      "grade": 1,
+      "metadataBytes": 41570699,
+      "audioPackageBytes": 34102255,
+      "audioReferences": 2533,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g2down",
+      "grade": 2,
+      "metadataBytes": 48957879,
+      "audioPackageBytes": 81681972,
+      "audioReferences": 4282,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g2up-2026",
+      "grade": 2,
+      "metadataBytes": 48699761,
+      "audioPackageBytes": 32145200,
+      "audioReferences": 2020,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g2up",
+      "grade": 2,
+      "metadataBytes": 43953761,
+      "audioPackageBytes": 60179663,
+      "audioReferences": 3552,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g3down",
+      "grade": 3,
+      "metadataBytes": 48703026,
+      "audioPackageBytes": 114874232,
+      "audioReferences": 5321,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g3up-2026",
+      "grade": 3,
+      "metadataBytes": 47700625,
+      "audioPackageBytes": 38455985,
+      "audioReferences": 2237,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g3up",
+      "grade": 3,
+      "metadataBytes": 51383732,
+      "audioPackageBytes": 99953998,
+      "audioReferences": 4982,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g4down",
+      "grade": 4,
+      "metadataBytes": 46017883,
+      "audioPackageBytes": 108263063,
+      "audioReferences": 6069,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g4up",
+      "grade": 4,
+      "metadataBytes": 45560168,
+      "audioPackageBytes": 71654721,
+      "audioReferences": 3983,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g5down",
+      "grade": 5,
+      "metadataBytes": 50810154,
+      "audioPackageBytes": 113041970,
+      "audioReferences": 5257,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g5up-2026",
+      "grade": 5,
+      "metadataBytes": 63837812,
+      "audioPackageBytes": 51995625,
+      "audioReferences": 2573,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g5up",
+      "grade": 5,
+      "metadataBytes": 49061645,
+      "audioPackageBytes": 87323109,
+      "audioReferences": 4321,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g6down",
+      "grade": 6,
+      "metadataBytes": 40582291,
+      "audioPackageBytes": 76601549,
+      "audioReferences": 3788,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "chinese-g6up",
+      "grade": 6,
+      "metadataBytes": 47412168,
+      "audioPackageBytes": 86270951,
+      "audioReferences": 4439,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g3down",
+      "grade": 3,
+      "metadataBytes": 20263074,
+      "audioPackageBytes": 23386266,
+      "audioReferences": 1954,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g3up-2026",
+      "grade": 3,
+      "metadataBytes": 34739843,
+      "audioPackageBytes": 18317127,
+      "audioReferences": 1392,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g3up",
+      "grade": 3,
+      "metadataBytes": 21993731,
+      "audioPackageBytes": 30062513,
+      "audioReferences": 2140,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g4down",
+      "grade": 4,
+      "metadataBytes": 24821311,
+      "audioPackageBytes": 37365112,
+      "audioReferences": 2668,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g4up",
+      "grade": 4,
+      "metadataBytes": 25835317,
+      "audioPackageBytes": 51524296,
+      "audioReferences": 3340,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g5down",
+      "grade": 5,
+      "metadataBytes": 27695972,
+      "audioPackageBytes": 41726863,
+      "audioReferences": 2842,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g5up",
+      "grade": 5,
+      "metadataBytes": 26538334,
+      "audioPackageBytes": 27824629,
+      "audioReferences": 2192,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g6down",
+      "grade": 6,
+      "metadataBytes": 21671070,
+      "audioPackageBytes": 63865208,
+      "audioReferences": 3699,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g6up",
+      "grade": 6,
+      "metadataBytes": 30632291,
+      "audioPackageBytes": 78307026,
+      "audioReferences": 4618,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g1down-2026",
+      "grade": 1,
+      "metadataBytes": 130538,
+      "audioPackageBytes": 21306310,
+      "audioReferences": 1164,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g1down",
+      "grade": 1,
+      "metadataBytes": 105638,
+      "audioPackageBytes": 17622379,
+      "audioReferences": 1123,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g1up-2026",
+      "grade": 1,
+      "metadataBytes": 122808,
+      "audioPackageBytes": 19864712,
+      "audioReferences": 1140,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g1up",
+      "grade": 1,
+      "metadataBytes": 133656,
+      "audioPackageBytes": 23527122,
+      "audioReferences": 1390,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g2down-2026",
+      "grade": 2,
+      "metadataBytes": 143275,
+      "audioPackageBytes": 26584566,
+      "audioReferences": 1462,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g2down",
+      "grade": 2,
+      "metadataBytes": 154861,
+      "audioPackageBytes": 30493853,
+      "audioReferences": 1663,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g2up-2026",
+      "grade": 2,
+      "metadataBytes": 55363,
+      "audioPackageBytes": 6095621,
+      "audioReferences": 615,
+      "state": "six-lessons-selected",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g2up",
+      "grade": 2,
+      "metadataBytes": 129123,
+      "audioPackageBytes": 22993860,
+      "audioReferences": 1389,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g3down-2026",
+      "grade": 3,
+      "metadataBytes": 138453,
+      "audioPackageBytes": 26299227,
+      "audioReferences": 1362,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g3down",
+      "grade": 3,
+      "metadataBytes": 137468,
+      "audioPackageBytes": 28381612,
+      "audioReferences": 1506,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g3up-2026",
+      "grade": 3,
+      "metadataBytes": 100898,
+      "audioPackageBytes": 17762710,
+      "audioReferences": 971,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g3up",
+      "grade": 3,
+      "metadataBytes": 142867,
+      "audioPackageBytes": 27025034,
+      "audioReferences": 1570,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g4down",
+      "grade": 4,
+      "metadataBytes": 165844,
+      "audioPackageBytes": 37897331,
+      "audioReferences": 1769,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g4up-2026",
+      "grade": 4,
+      "metadataBytes": 145651,
+      "audioPackageBytes": 30291078,
+      "audioReferences": 1404,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g4up",
+      "grade": 4,
+      "metadataBytes": 133575,
+      "audioPackageBytes": 27600839,
+      "audioReferences": 1433,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g5down",
+      "grade": 5,
+      "metadataBytes": 150308,
+      "audioPackageBytes": 32994590,
+      "audioReferences": 1502,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g5up-2026",
+      "grade": 5,
+      "metadataBytes": 189587,
+      "audioPackageBytes": 39325080,
+      "audioReferences": 1848,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g5up",
+      "grade": 5,
+      "metadataBytes": 129067,
+      "audioPackageBytes": 27453324,
+      "audioReferences": 1354,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g6down",
+      "grade": 6,
+      "metadataBytes": 95579,
+      "audioPackageBytes": 19833547,
+      "audioReferences": 964,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g6up-2026",
+      "grade": 6,
+      "metadataBytes": 182104,
+      "audioPackageBytes": 35628335,
+      "audioReferences": 1746,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g6up",
+      "grade": 6,
+      "metadataBytes": 130881,
+      "audioPackageBytes": 26527316,
+      "audioReferences": 1415,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g1down",
+      "grade": 1,
+      "metadataBytes": 89837,
+      "audioPackageBytes": 15113132,
+      "audioReferences": 950,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g1up",
+      "grade": 1,
+      "metadataBytes": 102434,
+      "audioPackageBytes": 18285636,
+      "audioReferences": 1048,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g2down",
+      "grade": 2,
+      "metadataBytes": 42821,
+      "audioPackageBytes": 7315331,
+      "audioReferences": 471,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g2up",
+      "grade": 2,
+      "metadataBytes": 47070,
+      "audioPackageBytes": 7682072,
+      "audioReferences": 503,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g3down",
+      "grade": 3,
+      "metadataBytes": 108156,
+      "audioPackageBytes": 20172116,
+      "audioReferences": 1121,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g3up-2026",
+      "grade": 3,
+      "metadataBytes": 85230,
+      "audioPackageBytes": 13887701,
+      "audioReferences": 883,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g3up",
+      "grade": 3,
+      "metadataBytes": 109981,
+      "audioPackageBytes": 20296322,
+      "audioReferences": 1114,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g4down",
+      "grade": 4,
+      "metadataBytes": 153894,
+      "audioPackageBytes": 29676746,
+      "audioReferences": 1475,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g4up",
+      "grade": 4,
+      "metadataBytes": 174022,
+      "audioPackageBytes": 34254377,
+      "audioReferences": 1709,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g5down",
+      "grade": 5,
+      "metadataBytes": 239392,
+      "audioPackageBytes": 46985574,
+      "audioReferences": 2265,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g5up",
+      "grade": 5,
+      "metadataBytes": 168628,
+      "audioPackageBytes": 33376935,
+      "audioReferences": 1669,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g6down",
+      "grade": 6,
+      "metadataBytes": 119959,
+      "audioPackageBytes": 22525545,
+      "audioReferences": 1209,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g6up",
+      "grade": 6,
+      "metadataBytes": 140959,
+      "audioPackageBytes": 27347058,
+      "audioReferences": 1417,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g3down-54-luke",
+      "grade": 3,
+      "metadataBytes": 12726610,
+      "audioPackageBytes": 23300803,
+      "audioReferences": 1346,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g3up-54-luke",
+      "grade": 3,
+      "metadataBytes": 15468926,
+      "audioPackageBytes": 25013941,
+      "audioReferences": 1347,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g4down-54-luke",
+      "grade": 4,
+      "metadataBytes": 17368568,
+      "audioPackageBytes": 29691373,
+      "audioReferences": 1707,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g4up-54-luke",
+      "grade": 4,
+      "metadataBytes": 16321838,
+      "audioPackageBytes": 31528663,
+      "audioReferences": 1822,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g5down-54-luke",
+      "grade": 5,
+      "metadataBytes": 11948048,
+      "audioPackageBytes": 33617203,
+      "audioReferences": 2032,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g5up-54-luke",
+      "grade": 5,
+      "metadataBytes": 14899600,
+      "audioPackageBytes": 37246219,
+      "audioReferences": 2196,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g1down-54-qingdao",
+      "grade": 1,
+      "metadataBytes": 317947,
+      "audioPackageBytes": 60702036,
+      "audioReferences": 2684,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g1up-54-qingdao",
+      "grade": 1,
+      "metadataBytes": 307159,
+      "audioPackageBytes": 55422420,
+      "audioReferences": 2568,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g2down-54-qingdao",
+      "grade": 2,
+      "metadataBytes": 398961,
+      "audioPackageBytes": 81911014,
+      "audioReferences": 3358,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g2up-54-qingdao",
+      "grade": 2,
+      "metadataBytes": 339868,
+      "audioPackageBytes": 65124327,
+      "audioReferences": 2830,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g3down-54-qingdao",
+      "grade": 3,
+      "metadataBytes": 473103,
+      "audioPackageBytes": 100371178,
+      "audioReferences": 3978,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g3up-54-qingdao",
+      "grade": 3,
+      "metadataBytes": 438728,
+      "audioPackageBytes": 90527492,
+      "audioReferences": 3650,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g4down-54-qingdao",
+      "grade": 4,
+      "metadataBytes": 396686,
+      "audioPackageBytes": 84709611,
+      "audioReferences": 3319,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g4up-54-qingdao",
+      "grade": 4,
+      "metadataBytes": 446668,
+      "audioPackageBytes": 98674389,
+      "audioReferences": 3764,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g5down-54-qingdao",
+      "grade": 5,
+      "metadataBytes": 415706,
+      "audioPackageBytes": 94719572,
+      "audioReferences": 3417,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "g5up-54-qingdao",
+      "grade": 5,
+      "metadataBytes": 402453,
+      "audioPackageBytes": 91581699,
+      "audioReferences": 3254,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g1down-54-qingdao",
+      "grade": 1,
+      "metadataBytes": 94784,
+      "audioPackageBytes": 16066737,
+      "audioReferences": 847,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g1up-54-qingdao",
+      "grade": 1,
+      "metadataBytes": 93334,
+      "audioPackageBytes": 15542208,
+      "audioReferences": 815,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g2down-54-qingdao",
+      "grade": 2,
+      "metadataBytes": 97800,
+      "audioPackageBytes": 17387840,
+      "audioReferences": 827,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g2up-54-qingdao",
+      "grade": 2,
+      "metadataBytes": 92177,
+      "audioPackageBytes": 15800144,
+      "audioReferences": 811,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g3down-54-qingdao",
+      "grade": 3,
+      "metadataBytes": 166666,
+      "audioPackageBytes": 31029206,
+      "audioReferences": 1405,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g3up-54-qingdao",
+      "grade": 3,
+      "metadataBytes": 166327,
+      "audioPackageBytes": 31076883,
+      "audioReferences": 1415,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g4down-54-qingdao",
+      "grade": 4,
+      "metadataBytes": 163816,
+      "audioPackageBytes": 30939823,
+      "audioReferences": 1372,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g4up-54-qingdao",
+      "grade": 4,
+      "metadataBytes": 175683,
+      "audioPackageBytes": 32161754,
+      "audioReferences": 1518,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g5down-54-qingdao",
+      "grade": 5,
+      "metadataBytes": 185399,
+      "audioPackageBytes": 35287113,
+      "audioReferences": 1539,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "science-g5up-54-qingdao",
+      "grade": 5,
+      "metadataBytes": 190697,
+      "audioPackageBytes": 37105865,
+      "audioReferences": 1600,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    },
+    {
+      "sourceBookId": "english-g5up-jingtong-2026",
+      "grade": 5,
+      "metadataBytes": 91545,
+      "audioPackageBytes": 11641108,
+      "audioReferences": 1044,
+      "state": "not-imported",
+      "reason": "First Grade-2 math pilot; other content requires separate mapping and rights/content review."
+    }
+  ],
+  "lessonDecisions": [
+    {
+      "sourceLessonId": "g2up-2026-u1-kp1",
+      "title": "按一个标准分类",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u1-kp2",
+      "title": "不同标准与逐层分类",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u1-kp3",
+      "title": "记录和比较分类结果",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u2-kp1",
+      "title": "乘法的初步认识",
+      "decision": "accepted-trial",
+      "reason": "Bounded operator review, answer/option/graph/audio checks passed; real teacher/child acceptance remains open."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u2-kp2",
+      "title": "5的乘法口诀",
+      "decision": "accepted-trial",
+      "reason": "Bounded operator review, answer/option/graph/audio checks passed; real teacher/child acceptance remains open."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u2-kp3",
+      "title": "2、3、4的乘法口诀",
+      "decision": "accepted-trial",
+      "reason": "Bounded operator review, answer/option/graph/audio checks passed; real teacher/child acceptance remains open."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u2-kp4",
+      "title": "乘加、乘减",
+      "decision": "accepted-trial",
+      "reason": "Bounded operator review, answer/option/graph/audio checks passed; real teacher/child acceptance remains open."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u2-kp5",
+      "title": "6的乘法口诀",
+      "decision": "accepted-trial",
+      "reason": "Bounded operator review, answer/option/graph/audio checks passed; real teacher/child acceptance remains open."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u2-kp6",
+      "title": "1～6乘法整理和复习",
+      "decision": "accepted-trial",
+      "reason": "Bounded operator review, answer/option/graph/audio checks passed; real teacher/child acceptance remains open."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u3-kp1",
+      "title": "平均分：求每份多少",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u3-kp2",
+      "title": "平均分：求有几份",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u3-kp3",
+      "title": "除法的认识与口诀求商",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u3-kp4",
+      "title": "1～6除法整理和应用",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u101-kp1",
+      "title": "认识东、南、西、北",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u101-kp2",
+      "title": "校园导游与小讲堂",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u4-kp1",
+      "title": "厘米与直尺测量",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u4-kp2",
+      "title": "米的认识",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u4-kp3",
+      "title": "长度估测与整理复习",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u102-kp1",
+      "title": "身体上的长度",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u102-kp2",
+      "title": "身体尺的应用与小讲堂",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u5-kp1",
+      "title": "7～9的乘法口诀",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u5-kp2",
+      "title": "用7～9的乘法口诀求商",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u5-kp3",
+      "title": "7～9乘除法整理和应用",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u6-kp1",
+      "title": "数与运算的联系",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u6-kp2",
+      "title": "数量关系",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u6-kp3",
+      "title": "图形的位置与测量",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u6-kp4",
+      "title": "数据分类的联系",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    },
+    {
+      "sourceLessonId": "g2up-2026-u6-kp5",
+      "title": "应用提升",
+      "decision": "pending",
+      "reason": "Not yet semantically reviewed/mapped; not classified as bad."
+    }
+  ],
+  "knownHistory": {
+    "v1.4.2": "Historical content regression; restored in v1.4.3, not a permanent exclusion.",
+    "teacherReview": "Upstream reports pending teacher/child acceptance; machine checks are not a teacher sign-off."
+  },
+  "selectedLessons": 6,
+  "selectedQuestions": 36,
+  "uniqueAudioFiles": 119,
+  "selectedAudioBytes": 1087492,
+  "excluded": [
+    "textbook PDF/scans",
+    "textbook passages",
+    "unknown-rights illustrations",
+    "unrelated grades",
+    "historical duplicate audio formats"
+  ],
+  "manifestContentSha256": "3b7f36a16e44303d681eb4def836cceae2283712c9ccf78a31825181e6086416",
+  "firstPublication": {
+    "lessons": 1,
+    "questions": 6,
+    "audioFiles": 23,
+    "audioBytes": 217542,
+    "state": "awaiting-R2-upload-and-publication"
+  }
+}

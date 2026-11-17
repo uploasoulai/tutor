@@ -4,6 +4,11 @@ This short file is the working index. **The latest user-approved decisions in ch
 
 ## Latest delivery — 2026-11-16 shared library and assessments
 
+### Prepared-course pilot and Free/Pro direction (work in progress)
+
+- One Grade-2 multiplication resource trial is implemented with original story art, shell-group play, short matched prerecorded speech, six existing-source exercises, saved assessment reports and native Tutor handoff. Six inspected candidates remain versioned locally; only the first is intended for publication. First-course upload is 23 files / 217,542 bytes, not the older 119-file directory. R2 bucket creation is confirmed; media upload/server credential configuration and signed-in website acceptance still need completion. See `GRADE2_RESOURCE_PILOT.md`.
+- Latest business decision: approved public learning stays Free; personalized AI is Pro BYOK or Pro Managed. Visible Managed Credits are now requested, superseding the older no-credits assumption. Existing real-cost ledger/BYOK separation are reused; no working payment or subscription integration was found. Phased plan and license-aware resource shortlist: `MEMBERSHIP_AND_FREE_CONTENT_PLAN.md`. Access-decision contract is implemented/tested; payment, credit purchases and runtime membership enforcement are not falsely announced as active.
+
 - Production verification: commits `45cba5a` and `55aa279` both reached GitHub and Vercel Production Ready. The latest CI unit/lint/type checks passed (532 tests). E2E stopped before running tests because `ubuntu-latest` moved to Ubuntu 26.04, unsupported by pinned Playwright 1.58.2. Its runner is now explicitly Ubuntu 24.04; no application behavior or tests were removed to address the installation failure.
 
 - Latest testing decision: all users can reuse official curriculum course trials. New editions are immutable; the library defaults to one recommended/first-trial edition per exact key, with optional alternative explanations. Feedback is optional and merged by learner/edition; admin recommendation remains a human decision. Both library and assessment migrations are applied to the correct Supabase project.

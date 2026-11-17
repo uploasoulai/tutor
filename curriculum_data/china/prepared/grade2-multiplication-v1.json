@@ -1,0 +1,2829 @@
+{
+  "schemaVersion": 1,
+  "id": "coastaltutor-g2-multiplication-v1",
+  "source": {
+    "repository": "wuwangzhang1216/congcong-school",
+    "commit": "aca01f61446b8550b0215b7186b8df4740a97287",
+    "release": "v1.8.3",
+    "manifestSha256": "4ad974980f9be41f1ff24f8fcc3f24aa55f7d23a6cecc016689c3bd95b26e22f",
+    "dataPackage": {
+      "name": "data-g2up-2026.zip",
+      "bytes": 55363,
+      "sha256": "aad11a57c5ead8a3fb4f676956f2fb277eeea76e95cc5ff01aefa1c741aaf51e",
+      "release_tag": "v1.8.0-ios-resources"
+    },
+    "audioPackage": {
+      "name": "audio-ios-g2up-2026.zip",
+      "bytes": 6095621,
+      "sha256": "f212b1facb001afce11b8ad667b1bf1726f7020fe8727d8fa42c511284debcda",
+      "release_tag": "v1.8.0-ios-resources"
+    },
+    "contentScope": "AI-generated explanations/exercises and matched narration only; no textbook pages, passages, scans or third-party illustrations.",
+    "license": "MIT upstream notice retained; third-party textbook rights are not included."
+  },
+  "lessons": [
+    {
+      "id": "g2-multiply-01-v1",
+      "title": "乘法的初步认识",
+      "topicId": "cnm_p038",
+      "grade": 2,
+      "subject": "math",
+      "term": "上",
+      "sourceLessonId": "g2up-2026-u2-kp1",
+      "sourceContentSha256": "46755efd84b7ef16950190c05cc4e516979c5630a00965902d7fa26c19d4c180",
+      "mappingNote": "Concept-level match to existing graph; a sublesson does not assert completion of the entire graph topic.",
+      "activity": "groups",
+      "blocks": [
+        {
+          "id": "core_concept",
+          "label": "一起发现",
+          "text": "求几个相同加数的和，可以用乘法表示。乘号两边是乘数，结果是积。",
+          "audioId": "67709f78e3a103bc35bab6a3446a622160673fa2cdd0f2a71d572e19904644de"
+        },
+        {
+          "id": "key_formula",
+          "label": "小窍门",
+          "text": "相同加数×相同加数的个数=总数。",
+          "audioId": "2447c922a5eb2c81e58e2819b0837425c25fdcac32a745af1cd9624806f268c8"
+        },
+        {
+          "id": "tips",
+          "label": "试着这样想",
+          "text": "先找每份几个，再找有几份。",
+          "audioId": "51e3750f324be9f208bfa8557cb5542b5d5e98f83952aa5edcbd993ddbdb7117"
+        }
+      ],
+      "questions": [
+        {
+          "id": "g2-multiply-01-v1-q1",
+          "topicId": "cnm_p038",
+          "topicName": "乘法的初步认识",
+          "type": "numeric",
+          "prompt": "4+4+4的和是多少？",
+          "answer": "12",
+          "explanation": "3个4相加，4×3=12。",
+          "promptAudioId": "d9c1502d7f15e7f753c440d450980c3a9807e3812a4bb3326d36dae09f3ebfe6",
+          "explanationAudioId": "42c98d611879ff657ed69b4369d72f5916db2c2d0442d164199a66409dd17022"
+        },
+        {
+          "id": "g2-multiply-01-v1-q2",
+          "topicId": "cnm_p038",
+          "topicName": "乘法的初步认识",
+          "type": "choice",
+          "prompt": "3+3+3+3表示什么？",
+          "answer": "A",
+          "explanation": "加数3出现了4次。",
+          "promptAudioId": "cd4da8e198230ae4bf3e9d136b75c2a0636cd7eb50ad20749436405a607f3b08",
+          "explanationAudioId": "858c7e5716bd3f615ec64007c57a34dc2f59ca776b9a731266c24e7ec606bd93",
+          "choices": [
+            {
+              "key": "A",
+              "text": "4个3相加"
+            },
+            {
+              "key": "B",
+              "text": "3个4相加"
+            },
+            {
+              "key": "C",
+              "text": "4个4相加"
+            },
+            {
+              "key": "D",
+              "text": "3个3相加"
+            }
+          ],
+          "choiceAudioIds": [
+            "b47b298513d9bce6dfd4d440efd479ac910843f97e9b974f20e0a8ff0806fbd3",
+            "3b6266fb996a12f309f5118a944bbc3473466973b17efd2cf4ae52480b589de5",
+            "17ebf2e8c0e8e5b5b4c4a1491432c556994fb81312672d8e3529dc88b6f40cc8",
+            "b55fedeb30cc5960a7dbbe1f34aadfc498b941199cd15af429d85cbbeee235df"
+          ]
+        },
+        {
+          "id": "g2-multiply-01-v1-q3",
+          "topicId": "cnm_p038",
+          "topicName": "乘法的初步认识",
+          "type": "choice",
+          "prompt": "2+3+4可以直接改写成3×3，表示3个相同加数相加。",
+          "answer": "B",
+          "explanation": "2、3、4不是相同加数，虽然和也是9，但原来的分组意义不同。",
+          "promptAudioId": "098264694a28baeccabc3cd5cdc563d2f8fc78e4649adf52b6c469a5fa8f0781",
+          "explanationAudioId": "73772f1311f29f0879f7b901ab2bc5e5071b7e1bd9efcf369f0117e64ab139da",
+          "choices": [
+            {
+              "key": "A",
+              "text": "对"
+            },
+            {
+              "key": "B",
+              "text": "错"
+            }
+          ],
+          "choiceAudioIds": []
+        },
+        {
+          "id": "g2-multiply-01-v1-q4",
+          "topicId": "cnm_p038",
+          "topicName": "乘法的初步认识",
+          "type": "choice",
+          "prompt": "在2×5=10中，10叫什么？",
+          "answer": "A",
+          "explanation": "乘法计算的结果叫积。",
+          "promptAudioId": "59aa61658f8b415a368a6ce7b7a0add5c501713b451d7590ffd1eee272410ad5",
+          "explanationAudioId": "610280200a2a95691af2d1ebab3f53e2781a64b82e4006d12afd21374fba2300",
+          "choices": [
+            {
+              "key": "A",
+              "text": "积"
+            },
+            {
+              "key": "B",
+              "text": "和"
+            },
+            {
+              "key": "C",
+              "text": "差"
+            },
+            {
+              "key": "D",
+              "text": "乘数"
+            }
+          ],
+          "choiceAudioIds": [
+            "2ae63dc0c1200525624a85cf76cc902f9aae540d4dc03d50886b26fc4037bda2",
+            "36cc494d368c47da6a2f99b71235e3336de7491b5cd67d7c47fcd42706b5dac7",
+            "c387710b8fcbccc70f67b29a1f54505e08acf3e917c5e5a8d9942c022f6f036b",
+            "01f44c8a66158b6bf7c5185cbaee7212ebc369c3ed57387aed4211a6b7337ac8"
+          ]
+        },
+        {
+          "id": "g2-multiply-01-v1-q5",
+          "topicId": "cnm_p038",
+          "topicName": "乘法的初步认识",
+          "type": "numeric",
+          "prompt": "每盘有2个桃子，5盘一共有多少个？",
+          "answer": "10",
+          "explanation": "2×5=10。",
+          "promptAudioId": "36f10db1a0d2ca7e73b5fc2b2030596f1d05d62cf87384b032dd8c1d0b45a81d",
+          "explanationAudioId": "12316de4a680b44c4a7a1c6df4abbf029b47ec8fd1bd3f78a1925cb24c3fec48"
+        },
+        {
+          "id": "g2-multiply-01-v1-q6",
+          "topicId": "cnm_p038",
+          "topicName": "乘法的初步认识",
+          "type": "numeric",
+          "prompt": "6个1相加是多少？",
+          "answer": "6",
+          "explanation": "1×6=6。",
+          "promptAudioId": "8c364a3af58d049d786ad9447bd39d67b94db6afcf7c55d472ae87e6d205de35",
+          "explanationAudioId": "b8864966299f00923bdfffa1f50efa76e59bdef1c837d7f567f710eecd3f4b7d"
+        }
+      ],
+      "bindings": [
+        {
+          "assetId": "67709f78e3a103bc35bab6a3446a622160673fa2cdd0f2a71d572e19904644de",
+          "textSha256": "2e8b63f3e24825de8a78c9a42294dac6dc4fd0627cb01a29e150897d3c8696df",
+          "text": "求几个相同加数的和，可以用乘法表示。乘号两边是乘数，结果是积。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "2447c922a5eb2c81e58e2819b0837425c25fdcac32a745af1cd9624806f268c8",
+          "textSha256": "c316935cce20635656113990b84262c5045b4eced5149c221551177eaa4f34d5",
+          "text": "相同加数×相同加数的个数=总数。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "51e3750f324be9f208bfa8557cb5542b5d5e98f83952aa5edcbd993ddbdb7117",
+          "textSha256": "27d896d94a87f57f5e2ad297eff7132100ea2612856188a3c20609b10905da09",
+          "text": "先找每份几个，再找有几份。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "d9c1502d7f15e7f753c440d450980c3a9807e3812a4bb3326d36dae09f3ebfe6",
+          "textSha256": "2c8b91b34ba7444ffad21d87a23bd5a59daa3c13cccad2f6cb2fded1eeabfa81",
+          "text": "4+4+4的和是多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "42c98d611879ff657ed69b4369d72f5916db2c2d0442d164199a66409dd17022",
+          "textSha256": "1e5e2e11b0e443318787313ad608e4fbdd6f1439206d1cf3477b4f7ec8beacba",
+          "text": "3个4相加，4×3=12。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "cd4da8e198230ae4bf3e9d136b75c2a0636cd7eb50ad20749436405a607f3b08",
+          "textSha256": "a5a9f35d35f0f75971a888c3c9fa27375fb76df2a04894926d4fe3d39e961eb2",
+          "text": "3+3+3+3表示什么？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "858c7e5716bd3f615ec64007c57a34dc2f59ca776b9a731266c24e7ec606bd93",
+          "textSha256": "6e9d247021ce975eb58814820ab06e17192cd7d8e4a551807c87a197130168f7",
+          "text": "加数3出现了4次。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "b47b298513d9bce6dfd4d440efd479ac910843f97e9b974f20e0a8ff0806fbd3",
+          "textSha256": "6029d52f3707275628807036dee316cf02288eb3e0343b6423e34f539fa6e43d",
+          "text": "4个3相加",
+          "purpose": "option",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "3b6266fb996a12f309f5118a944bbc3473466973b17efd2cf4ae52480b589de5",
+          "textSha256": "3ffd5da04ac18b2abafa75b2740013d82ebd2575fcf4a5964417b0859b16c1b8",
+          "text": "3个4相加",
+          "purpose": "option",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "17ebf2e8c0e8e5b5b4c4a1491432c556994fb81312672d8e3529dc88b6f40cc8",
+          "textSha256": "5ff2f2542be35eb1f6852fd4966369e4750b6834afd62256e58a8b97d33cd62a",
+          "text": "4个4相加",
+          "purpose": "option",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "b55fedeb30cc5960a7dbbe1f34aadfc498b941199cd15af429d85cbbeee235df",
+          "textSha256": "16cd1c56c828e731fa5828635ec807d4f10279de408b1c9a93aaa404447f2b66",
+          "text": "3个3相加",
+          "purpose": "option",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "098264694a28baeccabc3cd5cdc563d2f8fc78e4649adf52b6c469a5fa8f0781",
+          "textSha256": "0b4508bd6a7aef1e0c27f1d45d691048260d83afa52d71503057bb72a1aa3bf9",
+          "text": "2+3+4可以直接改写成3×3，表示3个相同加数相加。",
+          "purpose": "question",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "73772f1311f29f0879f7b901ab2bc5e5071b7e1bd9efcf369f0117e64ab139da",
+          "textSha256": "b5f4dfeaf93236d0c0748476e2fe61e55fa032585279db94be867ccce904fdcc",
+          "text": "2、3、4不是相同加数，虽然和也是9，但原来的分组意义不同。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "59aa61658f8b415a368a6ce7b7a0add5c501713b451d7590ffd1eee272410ad5",
+          "textSha256": "f5b63fe85d9c9f5b7205ca7e4d40647ab3500821549e17cf3f5f0f7395164882",
+          "text": "在2×5=10中，10叫什么？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "610280200a2a95691af2d1ebab3f53e2781a64b82e4006d12afd21374fba2300",
+          "textSha256": "b4fa41beabf5e07e587a79e3eb7eb3201d11882d8b94905592b1e6cef754259e",
+          "text": "乘法计算的结果叫积。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "2ae63dc0c1200525624a85cf76cc902f9aae540d4dc03d50886b26fc4037bda2",
+          "textSha256": "ba4582d8ed82333c65adb3462a08b916ff8c8e49bda56ff58486df20598bb4ed",
+          "text": "积",
+          "purpose": "option",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "36cc494d368c47da6a2f99b71235e3336de7491b5cd67d7c47fcd42706b5dac7",
+          "textSha256": "3d7114281f5b59d9a7ab82c23fb0d9411eac84fa3b69aa9426edfad89098dda8",
+          "text": "和",
+          "purpose": "option",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "c387710b8fcbccc70f67b29a1f54505e08acf3e917c5e5a8d9942c022f6f036b",
+          "textSha256": "fc73c01de16319f749ffea76e854a062313f2c816e557728e57c1a20c3e3428c",
+          "text": "差",
+          "purpose": "option",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "01f44c8a66158b6bf7c5185cbaee7212ebc369c3ed57387aed4211a6b7337ac8",
+          "textSha256": "077008e5b4d8e00ea8026a5d6a1ddc322e33a5d207fab63151b8f986000af07f",
+          "text": "乘数",
+          "purpose": "option",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "36f10db1a0d2ca7e73b5fc2b2030596f1d05d62cf87384b032dd8c1d0b45a81d",
+          "textSha256": "75ed8bc7b3ab86c082b0986b7c28eb0d110b28cf3720e5331c17de53d9ab2412",
+          "text": "每盘有2个桃子，5盘一共有多少个？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "12316de4a680b44c4a7a1c6df4abbf029b47ec8fd1bd3f78a1925cb24c3fec48",
+          "textSha256": "23034394c145a4c4ef33ae170fa6f307e44134b109eaa4593ecfdc1f1f4686d1",
+          "text": "2×5=10。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "8c364a3af58d049d786ad9447bd39d67b94db6afcf7c55d472ae87e6d205de35",
+          "textSha256": "f66a45b7341a09ea238446ec34aa6f35b53abbf16e3454fec372facc1b878a15",
+          "text": "6个1相加是多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-01-v1"
+        },
+        {
+          "assetId": "b8864966299f00923bdfffa1f50efa76e59bdef1c837d7f567f710eecd3f4b7d",
+          "textSha256": "9037eda94435e85bfd40d827e511c4ae40867012e248e1a58c38693584853bf8",
+          "text": "1×6=6。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-01-v1"
+        }
+      ],
+      "status": "testing"
+    },
+    {
+      "id": "g2-multiply-02-v1",
+      "title": "5的乘法口诀",
+      "topicId": "cnm_p039",
+      "grade": 2,
+      "subject": "math",
+      "term": "上",
+      "sourceLessonId": "g2up-2026-u2-kp2",
+      "sourceContentSha256": "5169afccf285043434e135dd64f6585a50dec5952252dc5af9108cba8773a811",
+      "mappingNote": "Concept-level match to existing graph; a sublesson does not assert completion of the entire graph topic.",
+      "activity": "fives",
+      "blocks": [
+        {
+          "id": "core_concept",
+          "label": "一起发现",
+          "text": "5的乘法口诀表示几个5相加，积依次增加5。",
+          "audioId": "26f679a77de4650e87488c8d926036884802ea31a7448a5b943fc46abb36dee3"
+        },
+        {
+          "id": "key_formula",
+          "label": "小窍门",
+          "text": "一五得五，二五一十，三五十五，四五二十，五五二十五。",
+          "audioId": "dc65a5ed3448de42059dfb264db71600f5483657cd59877b3e9452ed22423c88"
+        },
+        {
+          "id": "tips",
+          "label": "试着这样想",
+          "text": "忘记一句时，可以从前一句的结果再加5。",
+          "audioId": "1c50d162d2a9beb003160ef37f543409d2751bf88e58b0de569ea8d0361c6c4b"
+        }
+      ],
+      "questions": [
+        {
+          "id": "g2-multiply-02-v1-q7",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "5×3等于多少？",
+          "answer": "15",
+          "explanation": "三五十五，所以5×3=15。",
+          "promptAudioId": "0a1b08f075e3ae825ad553066bf0b28f60f06b6fa00745b6add08911efd78bac",
+          "explanationAudioId": "cf85c2c50acad220ad5188a28ae3fa458f1432c0123a1bf649674ac258c4cdb9"
+        },
+        {
+          "id": "g2-multiply-02-v1-q8",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "4×5等于多少？",
+          "answer": "20",
+          "explanation": "四五二十。",
+          "promptAudioId": "5cb26ad88695cf6ea32dea83d1655f3d91f7cf28cbd173187ed9593d6cfb7178",
+          "explanationAudioId": "cc8c5d18b36da2ee5cfd9ed9112d20047ba901b2c822c87196a6b9562a1e8948"
+        },
+        {
+          "id": "g2-multiply-02-v1-q9",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "choice",
+          "prompt": "计算2×5可以用哪句口诀？",
+          "answer": "A",
+          "explanation": "2个5的和是10。",
+          "promptAudioId": "0326acf428008973d143992cd62d8aba08f71ffce79727f73049716539225ccc",
+          "explanationAudioId": "d5fa8eda2d776b903a5c471e5cd96d1645c769c9c86cca97f0ca46b08f23dc02",
+          "choices": [
+            {
+              "key": "A",
+              "text": "二五一十"
+            },
+            {
+              "key": "B",
+              "text": "二三得六"
+            },
+            {
+              "key": "C",
+              "text": "四五二十"
+            },
+            {
+              "key": "D",
+              "text": "五五二十五"
+            }
+          ],
+          "choiceAudioIds": [
+            "ddd4999ddc56bce6c3a3c1730cc1656a80d770619f9cdb3ed0fe1e2b6af43498",
+            "45d7f4d2fed7dd5432cb5bf2474b944de280978675547357edb5013de502c55c",
+            "cc8c5d18b36da2ee5cfd9ed9112d20047ba901b2c822c87196a6b9562a1e8948",
+            "b6b74ac796a51c2d221215ad06cae33433b3b0e50b1e16a91d1c4722be61a92d"
+          ]
+        },
+        {
+          "id": "g2-multiply-02-v1-q10",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "choice",
+          "prompt": "5×5=10。",
+          "answer": "B",
+          "explanation": "5个5相加是25，不是两个5相加。",
+          "promptAudioId": "c579668e077e1f577c0221da322afedc227dac8f9b2a7dc56e8db15f07e85b5f",
+          "explanationAudioId": "8bddef36134a8b15f817aab8e920e780c944eeb4383b5ff7452351c33b8547c4",
+          "choices": [
+            {
+              "key": "A",
+              "text": "对"
+            },
+            {
+              "key": "B",
+              "text": "错"
+            }
+          ],
+          "choiceAudioIds": []
+        },
+        {
+          "id": "g2-multiply-02-v1-q11",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "每盒5支彩笔，3盒共有几支？",
+          "answer": "15",
+          "explanation": "5×3=15。",
+          "promptAudioId": "24a0b4564212b59b71be89ff1dabad44d2592ab5198814b74f39e34de722a508",
+          "explanationAudioId": "9745393358c33e797904a34f4c49ce8c0a6716f16df3ab9958f29a566ba5cd8b"
+        },
+        {
+          "id": "g2-multiply-02-v1-q12",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "已知4个5是20，5个5比它多多少？",
+          "answer": "5",
+          "explanation": "增加一个5，就多5。",
+          "promptAudioId": "fb8351a085b1daea9ccd611985c496dab16bfa1c6132c58a67c35e449682c5d7",
+          "explanationAudioId": "67a4c453fa63a26a49d584b14ce70e31e14de36239aba87f34e844705fad7dfc"
+        }
+      ],
+      "bindings": [
+        {
+          "assetId": "26f679a77de4650e87488c8d926036884802ea31a7448a5b943fc46abb36dee3",
+          "textSha256": "4b40249d870f36c987348103c27c14f55482af1de9ad6c656d0f526d4445b73d",
+          "text": "5的乘法口诀表示几个5相加，积依次增加5。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "dc65a5ed3448de42059dfb264db71600f5483657cd59877b3e9452ed22423c88",
+          "textSha256": "c8a39db8ba578c56b85101be2921d19d02be5049bff22bada3687b7a59ccfbda",
+          "text": "一五得五，二五一十，三五十五，四五二十，五五二十五。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "1c50d162d2a9beb003160ef37f543409d2751bf88e58b0de569ea8d0361c6c4b",
+          "textSha256": "a5980adaeeb34fc53201431c75ea0df239f2829b0ceab54c720a611fdefa27ee",
+          "text": "忘记一句时，可以从前一句的结果再加5。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "0a1b08f075e3ae825ad553066bf0b28f60f06b6fa00745b6add08911efd78bac",
+          "textSha256": "573a79054d5cdb7109ee9223e7948078cd0375b2e6bfb4408f82f9e898905f2b",
+          "text": "5×3等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "cf85c2c50acad220ad5188a28ae3fa458f1432c0123a1bf649674ac258c4cdb9",
+          "textSha256": "8b0f3b2340cee37345862a6fd418c0d27cfbc7d34adb55bac8fda927f98a891d",
+          "text": "三五十五，所以5×3=15。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "5cb26ad88695cf6ea32dea83d1655f3d91f7cf28cbd173187ed9593d6cfb7178",
+          "textSha256": "9f351c9ac3c17f66b5d9a482ec429fed826cdf61a05130057ab41d4d5d643c42",
+          "text": "4×5等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "cc8c5d18b36da2ee5cfd9ed9112d20047ba901b2c822c87196a6b9562a1e8948",
+          "textSha256": "e548aee2ab3eb902f323176f8f3f27416d3384951f2717373d83e51a0470a159",
+          "text": "四五二十。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "0326acf428008973d143992cd62d8aba08f71ffce79727f73049716539225ccc",
+          "textSha256": "16b2b8c5a392c6617fd2d1235cb0f365362e08e5734cf4c58235c963fe457141",
+          "text": "计算2×5可以用哪句口诀？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "d5fa8eda2d776b903a5c471e5cd96d1645c769c9c86cca97f0ca46b08f23dc02",
+          "textSha256": "64a779fd6659ca6fe3e9c6e4ed3cac55ff44d0ffb6387b3f7199babffbed3423",
+          "text": "2个5的和是10。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "ddd4999ddc56bce6c3a3c1730cc1656a80d770619f9cdb3ed0fe1e2b6af43498",
+          "textSha256": "43cb8d5bbdffdf15238a698fd61b06560aa5167fe5b49a85cd81c972dc0cfe0c",
+          "text": "二五一十",
+          "purpose": "option",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "45d7f4d2fed7dd5432cb5bf2474b944de280978675547357edb5013de502c55c",
+          "textSha256": "cc08648db95b73b19bf7b621f7288b3bc60bbeda9ed389d7f9c6d93722b6d697",
+          "text": "二三得六",
+          "purpose": "option",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "cc8c5d18b36da2ee5cfd9ed9112d20047ba901b2c822c87196a6b9562a1e8948",
+          "textSha256": "d358a484a7f7ab0df9be794abdb20b30a0866a038d983f6c586f24083c824bcd",
+          "text": "四五二十",
+          "purpose": "option",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "b6b74ac796a51c2d221215ad06cae33433b3b0e50b1e16a91d1c4722be61a92d",
+          "textSha256": "ec0f4b3ed983765a4c4179ae670671e1590115d6f2341189aaf953f844d342da",
+          "text": "五五二十五",
+          "purpose": "option",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "c579668e077e1f577c0221da322afedc227dac8f9b2a7dc56e8db15f07e85b5f",
+          "textSha256": "c633c4a1c8c2f6f57037bb06ca3b899b0bb04d6b3d2db00e34297f1ac2d7c3c1",
+          "text": "5×5=10。",
+          "purpose": "question",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "8bddef36134a8b15f817aab8e920e780c944eeb4383b5ff7452351c33b8547c4",
+          "textSha256": "ac37ed74a81d4a9dbb82adaab34b251b732ade4ca0252e4c85f6d03ef3c821e0",
+          "text": "5个5相加是25，不是两个5相加。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "24a0b4564212b59b71be89ff1dabad44d2592ab5198814b74f39e34de722a508",
+          "textSha256": "c93b248bddb328ff777503556a54249b2191efac55b454256e222ba7a5db0701",
+          "text": "每盒5支彩笔，3盒共有几支？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "9745393358c33e797904a34f4c49ce8c0a6716f16df3ab9958f29a566ba5cd8b",
+          "textSha256": "a50734090a78d78bc3b084dffa1e1739ac96bc83f231cce9cc33a8087a7955c1",
+          "text": "5×3=15。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "fb8351a085b1daea9ccd611985c496dab16bfa1c6132c58a67c35e449682c5d7",
+          "textSha256": "bd935033dd863ea2cda2de13e03d8c56797b257b9c38bfa39a6dde4a2f4f7412",
+          "text": "已知4个5是20，5个5比它多多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-02-v1"
+        },
+        {
+          "assetId": "67a4c453fa63a26a49d584b14ce70e31e14de36239aba87f34e844705fad7dfc",
+          "textSha256": "8fb9021bc478c7ae7534370b86594313190f231874bf9f74aadc045b13b4fca1",
+          "text": "增加一个5，就多5。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-02-v1"
+        }
+      ],
+      "status": "testing"
+    },
+    {
+      "id": "g2-multiply-03-v1",
+      "title": "2、3、4的乘法口诀",
+      "topicId": "cnm_p039",
+      "grade": 2,
+      "subject": "math",
+      "term": "上",
+      "sourceLessonId": "g2up-2026-u2-kp3",
+      "sourceContentSha256": "5f1f0acccc46ae4254e12575d262e5f1a7137c9b6d56767000626f406f41405d",
+      "mappingNote": "Concept-level match to existing graph; a sublesson does not assert completion of the entire graph topic.",
+      "activity": "tables",
+      "blocks": [
+        {
+          "id": "core_concept",
+          "label": "一起发现",
+          "text": "用2、3、4的乘法口诀求相应的积。交换两个乘数的位置，积不变。",
+          "audioId": "56b9f456e49ac426724529b6539114f3a67757ed2cea3ad0e35b6d58cc57d812"
+        },
+        {
+          "id": "key_formula",
+          "label": "小窍门",
+          "text": "二三得六，三四十二，四四十六。",
+          "audioId": "263747da03a75dad1c0bb597e96313ca0396c2cdb775489958f541e160b050f5"
+        },
+        {
+          "id": "tips",
+          "label": "试着这样想",
+          "text": "可以用连续加相同的数检查口诀。",
+          "audioId": "645e1a34a774897c8ba74792c2dcf5d28b7db57ac17da4868803c04ac4f12924"
+        }
+      ],
+      "questions": [
+        {
+          "id": "g2-multiply-03-v1-q13",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "2×4等于多少？",
+          "answer": "8",
+          "explanation": "二四得八。",
+          "promptAudioId": "afd745d3274c916197891b0c93e2305d3d6b3388d1e2eaaedeab35f5b8f72e81",
+          "explanationAudioId": "c1f48340ec47f6329a4cd802dda978545b07863e6dbc7f295e41c7ba19dea57e"
+        },
+        {
+          "id": "g2-multiply-03-v1-q14",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "3×4等于多少？",
+          "answer": "12",
+          "explanation": "三四十二。",
+          "promptAudioId": "a12829b6d3bf6e4f6934c095564ca1db5bcdb1a44e3f0d7a206f4d9b77e0e083",
+          "explanationAudioId": "4ae86ddd16a7f21298bc7b1f688b0788b2899d743edb35a6b0912d82117fb698"
+        },
+        {
+          "id": "g2-multiply-03-v1-q15",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "4×4等于多少？",
+          "answer": "16",
+          "explanation": "四四十六。",
+          "promptAudioId": "46ed4ff4c2e1dfc75b9f7d02abd4fa9a3374e5c8372457c1f70860bb9da149b1",
+          "explanationAudioId": "a01b1c235bac34851ebc9aa8efb8675b68b1eada3ae03e87fa4393078247a3e9"
+        },
+        {
+          "id": "g2-multiply-03-v1-q16",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "choice",
+          "prompt": "哪一个算式的积是6？",
+          "answer": "A",
+          "explanation": "二三得六。",
+          "promptAudioId": "89f6763312ce50a91bbb9b01d366e0196a784daa0df61d07f4c30caa258f6c37",
+          "explanationAudioId": "3d3369efb8ebcb877c177d9817a94f2c1ff2c7e04c090de623e7f6d92ef9515f",
+          "choices": [
+            {
+              "key": "A",
+              "text": "2×3"
+            },
+            {
+              "key": "B",
+              "text": "2×2"
+            },
+            {
+              "key": "C",
+              "text": "3×3"
+            },
+            {
+              "key": "D",
+              "text": "4×2"
+            }
+          ],
+          "choiceAudioIds": [
+            "0f87d61f4d5ff7cd1f1352d7838a1e69fe9a56419e7b34eda33dac250a035333",
+            "13ca53d845b797e0fdf3671dda7db9def40e699dbf662963a65a084d206472c6",
+            "f51ee988f79a03b8eb321c8bb9484e0c647c1ac6b81ec3ecff7f9855e411e77e",
+            "732bb490bcd0dc8f4e6a8d81e6cad97198215321dc04e92520837931a8ef53ea"
+          ]
+        },
+        {
+          "id": "g2-multiply-03-v1-q17",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "choice",
+          "prompt": "3×2和2×3的积相同。",
+          "answer": "A",
+          "explanation": "两个算式的积都是6。",
+          "promptAudioId": "95d58c71b2c5ff6e476937871fd79a73ed8abc8b9d8b336748ae995e01de0888",
+          "explanationAudioId": "c212990819002c8e9936fa6b6cc6308dd1e108636b50aa9f0bd4ddbac7f43b2b",
+          "choices": [
+            {
+              "key": "A",
+              "text": "对"
+            },
+            {
+              "key": "B",
+              "text": "错"
+            }
+          ],
+          "choiceAudioIds": []
+        },
+        {
+          "id": "g2-multiply-03-v1-q18",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "每人拿3张纸，4人共拿几张？",
+          "answer": "12",
+          "explanation": "3×4=12。",
+          "promptAudioId": "861199b583915aea5c06c2742498ef97ce110dcf3a44ddbb5010a9b9ee4f2816",
+          "explanationAudioId": "8de89f8478589955af71d8d12cb265b051b1641ccc43c83425745a90102545cb"
+        }
+      ],
+      "bindings": [
+        {
+          "assetId": "56b9f456e49ac426724529b6539114f3a67757ed2cea3ad0e35b6d58cc57d812",
+          "textSha256": "e3f00c0aa46db66f723f1be376bec47dcacc57ba1652f6f0bc320812a21dbcea",
+          "text": "用2、3、4的乘法口诀求相应的积。交换两个乘数的位置，积不变。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "263747da03a75dad1c0bb597e96313ca0396c2cdb775489958f541e160b050f5",
+          "textSha256": "7743582b4d1f6c6fc04aed498f41e99a250724e41dfc559f31c4f8c328210b64",
+          "text": "二三得六，三四十二，四四十六。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "645e1a34a774897c8ba74792c2dcf5d28b7db57ac17da4868803c04ac4f12924",
+          "textSha256": "20d040eaf817694b46801df8eb90d6f0ae7140f4ceb04e3de6929038cfebafe6",
+          "text": "可以用连续加相同的数检查口诀。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "afd745d3274c916197891b0c93e2305d3d6b3388d1e2eaaedeab35f5b8f72e81",
+          "textSha256": "fdbe242a84ec918c02f2b1fe9e2a346fd3b053af6a3c0236ae1aec8853514e7c",
+          "text": "2×4等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "c1f48340ec47f6329a4cd802dda978545b07863e6dbc7f295e41c7ba19dea57e",
+          "textSha256": "de9899f0930be4d56022d979555ab0cb17638ce7709814ad7040477ee4a78d94",
+          "text": "二四得八。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "a12829b6d3bf6e4f6934c095564ca1db5bcdb1a44e3f0d7a206f4d9b77e0e083",
+          "textSha256": "9f987977962fc3b5d8ea0a2b5a1bc33b9db8b5d2717692138258b96e41412066",
+          "text": "3×4等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "4ae86ddd16a7f21298bc7b1f688b0788b2899d743edb35a6b0912d82117fb698",
+          "textSha256": "deaad4b65c455b65873c6b9e1848155c97b18e8fdb1e5bc6af912a85ba281d0c",
+          "text": "三四十二。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "46ed4ff4c2e1dfc75b9f7d02abd4fa9a3374e5c8372457c1f70860bb9da149b1",
+          "textSha256": "57e0da904f4179d75dcc0ac58241d2aa7df499e828095ad39bac1e72c16e8c4b",
+          "text": "4×4等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "a01b1c235bac34851ebc9aa8efb8675b68b1eada3ae03e87fa4393078247a3e9",
+          "textSha256": "9dcb9b632ebba1bef1451181e27e7d649eb419bfe5a3120103e08d0838ee121b",
+          "text": "四四十六。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "89f6763312ce50a91bbb9b01d366e0196a784daa0df61d07f4c30caa258f6c37",
+          "textSha256": "8a1f6888e04d5bad275cdb38c80e5b610a78efb2eaff0b468aac7e66e2bf480f",
+          "text": "哪一个算式的积是6？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "3d3369efb8ebcb877c177d9817a94f2c1ff2c7e04c090de623e7f6d92ef9515f",
+          "textSha256": "6cf011f9231e25c73a03fc38483549b797ca8a3ebd70c9b317d32532b2c2d513",
+          "text": "二三得六。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "0f87d61f4d5ff7cd1f1352d7838a1e69fe9a56419e7b34eda33dac250a035333",
+          "textSha256": "170fe67875e28d0c5ab1684e8441344d54e403a9269264fee13215597315ab8c",
+          "text": "2×3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "13ca53d845b797e0fdf3671dda7db9def40e699dbf662963a65a084d206472c6",
+          "textSha256": "d79984df94686a58664bd65b1ecb03e9cd8f1a1de233bbffaa0f062180e43ff8",
+          "text": "2×2",
+          "purpose": "option",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "f51ee988f79a03b8eb321c8bb9484e0c647c1ac6b81ec3ecff7f9855e411e77e",
+          "textSha256": "03d4035a400aafc110b6a48e5877ba61236c1700cc9c601dbe5e763aa439e9c9",
+          "text": "3×3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "732bb490bcd0dc8f4e6a8d81e6cad97198215321dc04e92520837931a8ef53ea",
+          "textSha256": "8a240e9aa063b8f2d3aefb083f6b4c9b5e676ab476ba41805fbfbcf18fda280c",
+          "text": "4×2",
+          "purpose": "option",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "95d58c71b2c5ff6e476937871fd79a73ed8abc8b9d8b336748ae995e01de0888",
+          "textSha256": "4299989e8b5c0cb10afda7307681785f46ab052b093053dbc0024a42262a33d9",
+          "text": "3×2和2×3的积相同。",
+          "purpose": "question",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "c212990819002c8e9936fa6b6cc6308dd1e108636b50aa9f0bd4ddbac7f43b2b",
+          "textSha256": "04ac8cb15c71b02809bf02d8fd1dd5cdaeacc32f6a1fb6504cb3c7bbee64682f",
+          "text": "两个算式的积都是6。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "861199b583915aea5c06c2742498ef97ce110dcf3a44ddbb5010a9b9ee4f2816",
+          "textSha256": "5e0e3d577ed64a6d18cbe861f9ff5a9d2273e606b91afd0d7c347caa7187689e",
+          "text": "每人拿3张纸，4人共拿几张？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-03-v1"
+        },
+        {
+          "assetId": "8de89f8478589955af71d8d12cb265b051b1641ccc43c83425745a90102545cb",
+          "textSha256": "6d9dbb7edc087ca67b87ff173d293fcb43333ea9063306e4896720f2cde6e434",
+          "text": "3×4=12。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-03-v1"
+        }
+      ],
+      "status": "testing"
+    },
+    {
+      "id": "g2-multiply-04-v1",
+      "title": "乘加、乘减",
+      "topicId": "cnm_p057",
+      "grade": 2,
+      "subject": "math",
+      "term": "上",
+      "sourceLessonId": "g2up-2026-u2-kp4",
+      "sourceContentSha256": "aa13b8b7a3e9bd90b7bf99709651b93de6fffb8c11fb4104bd8a14eefb0683d8",
+      "mappingNote": "Concept-level match to existing graph; a sublesson does not assert completion of the entire graph topic.",
+      "activity": "extra",
+      "blocks": [
+        {
+          "id": "core_concept",
+          "label": "一起发现",
+          "text": "规则排列中多出或少了几个，可以先算整齐部分，再加上或减去。",
+          "audioId": "1c379bda6156ac008801fced3c5ea61a667aac64a9952b7db448059199445870"
+        },
+        {
+          "id": "key_formula",
+          "label": "小窍门",
+          "text": "在不含括号的乘加、乘减算式中，先乘后加减。",
+          "audioId": "fdc86e274126fed2442197ebc5e814a9e2856a69ebea63451d1a7981e55b58d7"
+        },
+        {
+          "id": "tips",
+          "label": "试着这样想",
+          "text": "把完整的几组圈出来，再处理多余或缺少的部分。",
+          "audioId": "ec584c18716af0d1d9db040502acb063fec16404c4ebb877e0e96cc8b0f6eb9a"
+        }
+      ],
+      "questions": [
+        {
+          "id": "g2-multiply-04-v1-q19",
+          "topicId": "cnm_p057",
+          "topicName": "乘加、乘减",
+          "type": "numeric",
+          "prompt": "3×4+2等于多少？",
+          "answer": "14",
+          "explanation": "先算3×4=12，再算12+2=14。",
+          "promptAudioId": "cb8e74537145c02e65e090f9df844c08755d01d02ea1a0563932810a4d83adad",
+          "explanationAudioId": "66d62b3057ddeb7afc04e5bd25858de06c186e6c48b3610d4554ad96bbfbc57b"
+        },
+        {
+          "id": "g2-multiply-04-v1-q20",
+          "topicId": "cnm_p057",
+          "topicName": "乘加、乘减",
+          "type": "numeric",
+          "prompt": "5×3-4等于多少？",
+          "answer": "11",
+          "explanation": "先算5×3=15，再算15-4=11。",
+          "promptAudioId": "9f8f9a523f6e7dcf87c6b8662057d88acbe29bab43a1e09c24b054a68a0043d9",
+          "explanationAudioId": "06106b80a8d51a898b5a888effc1725ea490bcd4c6b81d9fd2f408619aea1bd9"
+        },
+        {
+          "id": "g2-multiply-04-v1-q21",
+          "topicId": "cnm_p057",
+          "topicName": "乘加、乘减",
+          "type": "choice",
+          "prompt": "2+4×3应先算哪一步？",
+          "answer": "A",
+          "explanation": "乘法先于加法。",
+          "promptAudioId": "8b1bf851a5fd4a59cd148e3c48c62c00fc0a875fe9ef80abb1a62bf077332cd1",
+          "explanationAudioId": "14a829f484e36bc6a78e4a4db6f8dea430ffd9fbf37255bda4a248417e1cc4c6",
+          "choices": [
+            {
+              "key": "A",
+              "text": "4×3"
+            },
+            {
+              "key": "B",
+              "text": "2+4"
+            },
+            {
+              "key": "C",
+              "text": "2+3"
+            },
+            {
+              "key": "D",
+              "text": "4+3"
+            }
+          ],
+          "choiceAudioIds": [
+            "a988c2474aa4066a7e2f103705074edcae54f9d815d95d0d17aed4d62989f825",
+            "552865ab3be4da6d2ff9d18453f07e9732a4f0ba1ac82eab2d64a631fa70f1f8",
+            "7788b2aa24b8951e52327831e8ec5719ec2a6bd76463dffdc65e98c06d1279ca",
+            "5a2f473ee9cce38047c0190659c8b84bda7016c8fa6690d6f6888765b0918898"
+          ]
+        },
+        {
+          "id": "g2-multiply-04-v1-q22",
+          "topicId": "cnm_p057",
+          "topicName": "乘加、乘减",
+          "type": "choice",
+          "prompt": "4×3-2=4×1。",
+          "answer": "B",
+          "explanation": "左边先算4×3=12，再减2得10；右边是4。",
+          "promptAudioId": "0b4905cbdbea3675a21906b091bb56d2358663ff9682d2530aa04bd743971b00",
+          "explanationAudioId": "fbf0366f60371ea8b8031d4ef718977e775af0fe4a66369241017a32e5c313a9",
+          "choices": [
+            {
+              "key": "A",
+              "text": "对"
+            },
+            {
+              "key": "B",
+              "text": "错"
+            }
+          ],
+          "choiceAudioIds": []
+        },
+        {
+          "id": "g2-multiply-04-v1-q23",
+          "topicId": "cnm_p057",
+          "topicName": "乘加、乘减",
+          "type": "numeric",
+          "prompt": "3盒每盒4支笔，另外还有1支，一共有几支？",
+          "answer": "13",
+          "explanation": "4×3+1=13。",
+          "promptAudioId": "35175f0de843c7427ba2c22ab46f68e26e0ceb4c14030a003c4069458d00be97",
+          "explanationAudioId": "f99980dbeaf9557f5495c37d6bc6d963de136131e960d4b0d3908af3a16af2e8"
+        },
+        {
+          "id": "g2-multiply-04-v1-q24",
+          "topicId": "cnm_p057",
+          "topicName": "乘加、乘减",
+          "type": "numeric",
+          "prompt": "4排椅子每排5把，搬走3把，还剩几把？",
+          "answer": "17",
+          "explanation": "5×4-3=17。",
+          "promptAudioId": "a88e24481c14f7f414a47ad1fd3beec72b3a8304c4eb3f862e8372b4c24654ae",
+          "explanationAudioId": "a8fbc2a84506e2f3d280ec1e0ef4119ba9debef913f9d66ea840d28e9c9535e8"
+        }
+      ],
+      "bindings": [
+        {
+          "assetId": "1c379bda6156ac008801fced3c5ea61a667aac64a9952b7db448059199445870",
+          "textSha256": "cd966b8d9efe75a93535cc7e63cf40db9c278e7cb268f2d546b54d1233ee5757",
+          "text": "规则排列中多出或少了几个，可以先算整齐部分，再加上或减去。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "fdc86e274126fed2442197ebc5e814a9e2856a69ebea63451d1a7981e55b58d7",
+          "textSha256": "2cae0eb7dfd20a33a8f39b9ce8e88806ce126502fcdbfda7e64542177c666ab6",
+          "text": "在不含括号的乘加、乘减算式中，先乘后加减。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "ec584c18716af0d1d9db040502acb063fec16404c4ebb877e0e96cc8b0f6eb9a",
+          "textSha256": "35e8d3d63ac9fca37a5f748b2f116a4d8393428353ffbed61b4fd18cbdb46c44",
+          "text": "把完整的几组圈出来，再处理多余或缺少的部分。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "cb8e74537145c02e65e090f9df844c08755d01d02ea1a0563932810a4d83adad",
+          "textSha256": "14e813b268d03818592e09d321d32b931f42a98d10830857d83cace70a61ca4c",
+          "text": "3×4+2等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "66d62b3057ddeb7afc04e5bd25858de06c186e6c48b3610d4554ad96bbfbc57b",
+          "textSha256": "93109d7e5f728d72ca5282ff25032bf45ed1eaa3b5eb2748eb9e780a32d37510",
+          "text": "先算3×4=12，再算12+2=14。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "9f8f9a523f6e7dcf87c6b8662057d88acbe29bab43a1e09c24b054a68a0043d9",
+          "textSha256": "5ba8f9f6803440d9acef842d4c89eaa2090aa12083d13e789db7985f8076ab28",
+          "text": "5×3-4等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "06106b80a8d51a898b5a888effc1725ea490bcd4c6b81d9fd2f408619aea1bd9",
+          "textSha256": "1a01cb99d581ce43017235e94afc2bbf682d33e5db04e59e1a492658df98505a",
+          "text": "先算5×3=15，再算15-4=11。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "8b1bf851a5fd4a59cd148e3c48c62c00fc0a875fe9ef80abb1a62bf077332cd1",
+          "textSha256": "8e3af5fd962164691daf927054baa414a853e942eed2d431939fbce6682cb335",
+          "text": "2+4×3应先算哪一步？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "14a829f484e36bc6a78e4a4db6f8dea430ffd9fbf37255bda4a248417e1cc4c6",
+          "textSha256": "7516061c3ec98daedeb1b3faed107115bf13bcf1faf313c56ec499afe2364beb",
+          "text": "乘法先于加法。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "a988c2474aa4066a7e2f103705074edcae54f9d815d95d0d17aed4d62989f825",
+          "textSha256": "4eb6efc6acdef6f0925b745f52ab82d01723612264b4257c34959814e147668d",
+          "text": "4×3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "552865ab3be4da6d2ff9d18453f07e9732a4f0ba1ac82eab2d64a631fa70f1f8",
+          "textSha256": "324b30f2565d8de8044fffd7807da6923218b475280aaba16a600bd7a6689daa",
+          "text": "2+4",
+          "purpose": "option",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "7788b2aa24b8951e52327831e8ec5719ec2a6bd76463dffdc65e98c06d1279ca",
+          "textSha256": "5d4b463cb15d83aac4d6990aefe248d9c6a43fed0a8bd6fc4d84763537edd190",
+          "text": "2+3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "5a2f473ee9cce38047c0190659c8b84bda7016c8fa6690d6f6888765b0918898",
+          "textSha256": "0812b5189a71b234d607ff54ad8f8868487564173556ebc1b1dc6fa608c47bc8",
+          "text": "4+3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "0b4905cbdbea3675a21906b091bb56d2358663ff9682d2530aa04bd743971b00",
+          "textSha256": "e3978efc9fe965fb3005681cb10c2165d4d3a078c741553fdd01bc9c65abd944",
+          "text": "4×3-2=4×1。",
+          "purpose": "question",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "fbf0366f60371ea8b8031d4ef718977e775af0fe4a66369241017a32e5c313a9",
+          "textSha256": "f1d613ed250cddf1991cf5cf05673fe8e8d8d3239c8e9c8ec907d74a9d3821ef",
+          "text": "左边先算4×3=12，再减2得10；右边是4。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "35175f0de843c7427ba2c22ab46f68e26e0ceb4c14030a003c4069458d00be97",
+          "textSha256": "a029f0395fe81aaea6c324495452c42b90c9f0421095725a302ed928c42c4b28",
+          "text": "3盒每盒4支笔，另外还有1支，一共有几支？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "f99980dbeaf9557f5495c37d6bc6d963de136131e960d4b0d3908af3a16af2e8",
+          "textSha256": "0b1c6534d9d2134351d1ee84d79be3b30cba8d665bc43f88ab1ea4140445aaf5",
+          "text": "4×3+1=13。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "a88e24481c14f7f414a47ad1fd3beec72b3a8304c4eb3f862e8372b4c24654ae",
+          "textSha256": "b0d1c25c2f485422c07613015b3a55f2332fde66b0ce6e68095b332465d4c1bf",
+          "text": "4排椅子每排5把，搬走3把，还剩几把？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-04-v1"
+        },
+        {
+          "assetId": "a8fbc2a84506e2f3d280ec1e0ef4119ba9debef913f9d66ea840d28e9c9535e8",
+          "textSha256": "93c0c0a61d0aad25d12b1f6e111f480021310c6fd47f910229780e6b796dce2f",
+          "text": "5×4-3=17。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-04-v1"
+        }
+      ],
+      "status": "testing"
+    },
+    {
+      "id": "g2-multiply-05-v1",
+      "title": "6的乘法口诀",
+      "topicId": "cnm_p039",
+      "grade": 2,
+      "subject": "math",
+      "term": "上",
+      "sourceLessonId": "g2up-2026-u2-kp5",
+      "sourceContentSha256": "30dd7034f28f3cafb083225c6f9682e5197d47bab049e6e8b4994a350a4c2447",
+      "mappingNote": "Concept-level match to existing graph; a sublesson does not assert completion of the entire graph topic.",
+      "activity": "sixes",
+      "blocks": [
+        {
+          "id": "core_concept",
+          "label": "一起发现",
+          "text": "用6的乘法口诀计算几个6相加的结果。",
+          "audioId": "57209bdbfa50134603018ab87b92e31195c52d16fc58d9695dc7b54efc08b1b1"
+        },
+        {
+          "id": "key_formula",
+          "label": "小窍门",
+          "text": "一六得六，二六十二，三六十八，四六二十四，五六三十，六六三十六。",
+          "audioId": "a2d4c4e8e9e5aaccdfc92a8eb71721461e4f4d7a3caf0eb5d5bd8e3dfc899197"
+        },
+        {
+          "id": "tips",
+          "label": "试着这样想",
+          "text": "相邻两个结果相差6，可以用加减6检查。",
+          "audioId": "b4c21ac6a07eeb9dec72ebcf1a5dd077efac8e626c8db33ef880d2eecfa7b625"
+        }
+      ],
+      "questions": [
+        {
+          "id": "g2-multiply-05-v1-q25",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "6×2等于多少？",
+          "answer": "12",
+          "explanation": "二六十二。",
+          "promptAudioId": "7f131ece2158a7a4806480bdb288cc1da2904dae5d141fa92763b607387be643",
+          "explanationAudioId": "8469e1ec1c3ead07a09199e1b8d91839521f38f82ed987dfd942380a755a933d"
+        },
+        {
+          "id": "g2-multiply-05-v1-q26",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "6×4等于多少？",
+          "answer": "24",
+          "explanation": "四六二十四。",
+          "promptAudioId": "79e375a7ca209bbbbc0c38b1eadecb597a66e046b7b842d55a79165500bbb9a0",
+          "explanationAudioId": "a2c6c1143b411e371b36e293b63893d636ab2ca1a4ee806b514fa08852e8c932"
+        },
+        {
+          "id": "g2-multiply-05-v1-q27",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "5×6等于多少？",
+          "answer": "30",
+          "explanation": "五六三十。",
+          "promptAudioId": "91d2d64875cc4d52c30f9dcca04b41e92180a43a0f18832cd360d1001b1de259",
+          "explanationAudioId": "b4ef1e3c601ebfd77fe7dd76073d42e3d03cbadec864e5035942d0e9a970c253"
+        },
+        {
+          "id": "g2-multiply-05-v1-q28",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "choice",
+          "prompt": "六六这句口诀的结果是多少？",
+          "answer": "A",
+          "explanation": "6个6相加是36。",
+          "promptAudioId": "3f8f05bdbb03b1d3baf89a20ad2733a6ad1125b4910cabf586126b9cd32a0a13",
+          "explanationAudioId": "c1e8c4a2b3ad823e97cdf96a4be20f9e7b6e099116e30e5b5f71e3c4a71dc28a",
+          "choices": [
+            {
+              "key": "A",
+              "text": "三十六"
+            },
+            {
+              "key": "B",
+              "text": "三十"
+            },
+            {
+              "key": "C",
+              "text": "二十四"
+            },
+            {
+              "key": "D",
+              "text": "四十二"
+            }
+          ],
+          "choiceAudioIds": [
+            "06fc26032690f24e92c64938e89aa0dbcd610451d9144bbf53a86b697897cff2",
+            "e998dd9b9c71e51afe0c688aecc7db74ef51fc29d397268ba5afaabe3ba9a0dc",
+            "32f353e7789cc3feb8b07f7956ba6700ecf33393b5ee1807f73ab4e0db769de6",
+            "4dd43febafbe7d1ac6e3f3c43404805d29e8482e9d6127fdb267db1b3ec918cb"
+          ]
+        },
+        {
+          "id": "g2-multiply-05-v1-q29",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "choice",
+          "prompt": "3×6比2×6多6。",
+          "answer": "A",
+          "explanation": "3个6比2个6多一个6。",
+          "promptAudioId": "34e7648ee9247c6db3096b27e12781db591e5130818c1239d478e5de51c12e1b",
+          "explanationAudioId": "365c46c2ceb3a81d0e2308d546e5bf390db3d5f85da0a96ea17ff4a61eab2913",
+          "choices": [
+            {
+              "key": "A",
+              "text": "对"
+            },
+            {
+              "key": "B",
+              "text": "错"
+            }
+          ],
+          "choiceAudioIds": []
+        },
+        {
+          "id": "g2-multiply-05-v1-q30",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "每组6人，4组共有几人？",
+          "answer": "24",
+          "explanation": "6×4=24。",
+          "promptAudioId": "1202b285860950bc4f56a628993e25304e5fec98d1213a9c9ab3c844ae2ba6e8",
+          "explanationAudioId": "83fed518efcdf3fc957ab4c5982a3fb502f918e22defdb5df0117db59233b38e"
+        }
+      ],
+      "bindings": [
+        {
+          "assetId": "57209bdbfa50134603018ab87b92e31195c52d16fc58d9695dc7b54efc08b1b1",
+          "textSha256": "6b6bae26032c3229132b9870c360888f204e32ff5470d5961b7129aee30b4c1f",
+          "text": "用6的乘法口诀计算几个6相加的结果。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "a2d4c4e8e9e5aaccdfc92a8eb71721461e4f4d7a3caf0eb5d5bd8e3dfc899197",
+          "textSha256": "34e7dd4fdb4f0665d49ece1ed7d6495f83e874e5f222fc36c881ce034545ed60",
+          "text": "一六得六，二六十二，三六十八，四六二十四，五六三十，六六三十六。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "b4c21ac6a07eeb9dec72ebcf1a5dd077efac8e626c8db33ef880d2eecfa7b625",
+          "textSha256": "d99932c816ec709f6c5807dac1046d6c0cb9ac996146834c06cbc02aa583cd11",
+          "text": "相邻两个结果相差6，可以用加减6检查。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "7f131ece2158a7a4806480bdb288cc1da2904dae5d141fa92763b607387be643",
+          "textSha256": "99ea60cad5573a5c01c0714e71b15d0d648d0834cc9941cb79aac576d5c6caf2",
+          "text": "6×2等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "8469e1ec1c3ead07a09199e1b8d91839521f38f82ed987dfd942380a755a933d",
+          "textSha256": "4f2f002839ff4b56e6e6b1315a274ce5fac53ee252945ff1e21634457faa330b",
+          "text": "二六十二。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "79e375a7ca209bbbbc0c38b1eadecb597a66e046b7b842d55a79165500bbb9a0",
+          "textSha256": "eeb53401284fea1e5caa76ca60a664e968b278337ff205e06c48c152d25f5c14",
+          "text": "6×4等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "a2c6c1143b411e371b36e293b63893d636ab2ca1a4ee806b514fa08852e8c932",
+          "textSha256": "81cc10f500e0893de6f07dda5516472d0418cd438efd6d3395ec4529274095dd",
+          "text": "四六二十四。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "91d2d64875cc4d52c30f9dcca04b41e92180a43a0f18832cd360d1001b1de259",
+          "textSha256": "0e6247578cfb4c8cb00eefcc212f36e7a9cf443673fc6c3200c3b11dc345c5d3",
+          "text": "5×6等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "b4ef1e3c601ebfd77fe7dd76073d42e3d03cbadec864e5035942d0e9a970c253",
+          "textSha256": "5975f6b0be8638673d075d09bc5802cbaaf87a0e44cef718dd35fbf96dcffbba",
+          "text": "五六三十。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "3f8f05bdbb03b1d3baf89a20ad2733a6ad1125b4910cabf586126b9cd32a0a13",
+          "textSha256": "0498dba18500156b173cd81ddb42abc60e93da14fe4208a46ed9b00749ea7ebd",
+          "text": "六六这句口诀的结果是多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "c1e8c4a2b3ad823e97cdf96a4be20f9e7b6e099116e30e5b5f71e3c4a71dc28a",
+          "textSha256": "3ed55954fa9c5aee05c629a385fd8bb96b5e5ce66cf5aa0eccf8d1a16bf02947",
+          "text": "6个6相加是36。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "06fc26032690f24e92c64938e89aa0dbcd610451d9144bbf53a86b697897cff2",
+          "textSha256": "0a16b41faa0a2e6ada265d48c852af764be7a6122f7abfa049da2882d0941c0a",
+          "text": "三十六",
+          "purpose": "option",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "e998dd9b9c71e51afe0c688aecc7db74ef51fc29d397268ba5afaabe3ba9a0dc",
+          "textSha256": "a70676fba2a260e89793ebcc9d613314244fbe982cbd0b62eabf558cf95ef778",
+          "text": "三十",
+          "purpose": "option",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "32f353e7789cc3feb8b07f7956ba6700ecf33393b5ee1807f73ab4e0db769de6",
+          "textSha256": "c0661086447e6de64c264c1d4d6c985b428d37dda7ba8debc1fdabdad2fb7f10",
+          "text": "二十四",
+          "purpose": "option",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "4dd43febafbe7d1ac6e3f3c43404805d29e8482e9d6127fdb267db1b3ec918cb",
+          "textSha256": "233791b5812ce9fd46fc86bdb35ebc1a4bc10fb20e9e82a67dbdbc708245bc92",
+          "text": "四十二",
+          "purpose": "option",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "34e7648ee9247c6db3096b27e12781db591e5130818c1239d478e5de51c12e1b",
+          "textSha256": "69b8ba2810b9e380c92b6abe5e7e6b106ced8f9297d7391458c9fad1f9e708d2",
+          "text": "3×6比2×6多6。",
+          "purpose": "question",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "365c46c2ceb3a81d0e2308d546e5bf390db3d5f85da0a96ea17ff4a61eab2913",
+          "textSha256": "bef84b81b316dc6bd3dd7471cba86f1f3c4101b49b7461882081c5040709c448",
+          "text": "3个6比2个6多一个6。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "1202b285860950bc4f56a628993e25304e5fec98d1213a9c9ab3c844ae2ba6e8",
+          "textSha256": "0e21313be480d279c08578ecec545cf70ba7dec19d6fab3e7462f2ff4eb205f4",
+          "text": "每组6人，4组共有几人？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-05-v1"
+        },
+        {
+          "assetId": "83fed518efcdf3fc957ab4c5982a3fb502f918e22defdb5df0117db59233b38e",
+          "textSha256": "d65b8dce8e6377b1735abb16a8530e78d704466ea100697cc3cf5ac64e007be4",
+          "text": "6×4=24。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-05-v1"
+        }
+      ],
+      "status": "testing"
+    },
+    {
+      "id": "g2-multiply-06-v1",
+      "title": "1～6乘法整理和复习",
+      "topicId": "cnm_p039",
+      "grade": 2,
+      "subject": "math",
+      "term": "上",
+      "sourceLessonId": "g2up-2026-u2-kp6",
+      "sourceContentSha256": "6ebc87cd925878e85951225b355b972afc6b22082063f92469945ce4ff37b5d5",
+      "mappingNote": "Concept-level match to existing graph; a sublesson does not assert completion of the entire graph topic.",
+      "activity": "groups",
+      "blocks": [
+        {
+          "id": "core_concept",
+          "label": "一起发现",
+          "text": "根据每份数和份数选择乘法，把算式、口诀与实际问题联系起来。",
+          "audioId": "b11bdc0a70704e46da83409148abe57e2d74d138fd18830d89c8b8c270f65c09"
+        },
+        {
+          "id": "key_formula",
+          "label": "小窍门",
+          "text": "每份数×份数=总数。",
+          "audioId": "36a06a4380f2c82f7eb61f4449f1aeb4c8ade2ea654927d350cd01ccdc1a354a"
+        },
+        {
+          "id": "tips",
+          "label": "试着这样想",
+          "text": "先说清每个数表示什么，再列式。",
+          "audioId": "84e45aadba738a375a95281a4e63aaa4a2951f073161405d9babc50b3d692654"
+        }
+      ],
+      "questions": [
+        {
+          "id": "g2-multiply-06-v1-q31",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "choice",
+          "prompt": "每袋4颗糖，买3袋，求共有几颗，应选哪个算式？",
+          "answer": "A",
+          "explanation": "每份4颗，共3份，用乘法。",
+          "promptAudioId": "27a97ea2b1f4ac7bf630d4ff516cfb88274d6d9c874d96ea250e86cd5d69d5ab",
+          "explanationAudioId": "c86fc260656ed4d2f31b243d423d801d3ad9bb9b88e3bb7a6e4f69a5b9ee9185",
+          "choices": [
+            {
+              "key": "A",
+              "text": "4×3"
+            },
+            {
+              "key": "B",
+              "text": "4+3"
+            },
+            {
+              "key": "C",
+              "text": "4-3"
+            },
+            {
+              "key": "D",
+              "text": "4×4"
+            }
+          ],
+          "choiceAudioIds": [
+            "a988c2474aa4066a7e2f103705074edcae54f9d815d95d0d17aed4d62989f825",
+            "5a2f473ee9cce38047c0190659c8b84bda7016c8fa6690d6f6888765b0918898",
+            "d2733d161b39b45d03b9a8cc377c0d9362490e139a817bbac635cbfe3c0b0011",
+            "c67a6950e3e49f78a441bd19990392f316e62207759da5f8da70079672f85196"
+          ]
+        },
+        {
+          "id": "g2-multiply-06-v1-q32",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "2×6+3等于多少？",
+          "answer": "15",
+          "explanation": "先乘后加：12+3=15。",
+          "promptAudioId": "f4b89b92d5595772420dd645a32ae1815aaeebd18c172d699a604bd83d427232",
+          "explanationAudioId": "37a52553279cd5bee09aeafc4083229f73e24a984acc3158b4f1420aac8fdc95"
+        },
+        {
+          "id": "g2-multiply-06-v1-q33",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "6×6-6等于多少？",
+          "answer": "30",
+          "explanation": "36-6=30，也就是5个6。",
+          "promptAudioId": "fba2da24f8ac945f98c4d4160534ebaa2a31c2c0424c95ffe268a196722e4f9c",
+          "explanationAudioId": "4c679a23106625abc0b475377dafd0b0e9d8806e6255d3f338de3bed3020fe2f"
+        },
+        {
+          "id": "g2-multiply-06-v1-q34",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "choice",
+          "prompt": "有5朵红花和3朵黄花，求总朵数应算5×3。",
+          "answer": "B",
+          "explanation": "两种花的数量相加，5+3=8。",
+          "promptAudioId": "839af6df89d46285d02277b1e66ba92e4b86f50b5ad9d26de97252f8a9f43237",
+          "explanationAudioId": "6aefeb2a20e50f9a9628694a1b5f72fb12f87f0d86672b7a2df7ce8a3ebab382",
+          "choices": [
+            {
+              "key": "A",
+              "text": "对"
+            },
+            {
+              "key": "B",
+              "text": "错"
+            }
+          ],
+          "choiceAudioIds": []
+        },
+        {
+          "id": "g2-multiply-06-v1-q35",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "numeric",
+          "prompt": "每条船坐4人，5条船全部坐满，共有几人？",
+          "answer": "20",
+          "explanation": "4×5=20。",
+          "promptAudioId": "4548c6d82041f7b90f715dddf96b1f1b634b971fece699131a341c925f431c73",
+          "explanationAudioId": "9efdf73932e29e10921b4aa0219abe0831dd6367e1a142e54d710089604452a1"
+        },
+        {
+          "id": "g2-multiply-06-v1-q36",
+          "topicId": "cnm_p039",
+          "topicName": "2～6的乘法口诀",
+          "type": "choice",
+          "prompt": "哪两个算式的结果相同？",
+          "answer": "A",
+          "explanation": "交换乘数位置，积不变。",
+          "promptAudioId": "42270a451f51bf82260c2f7105ad36d8404bd4907244f9b4589477a35ca0dbf7",
+          "explanationAudioId": "421b9817997f4d851134d9a79a7a91ae5bad4a7e8b5cca7ef13b48385cf0e05c",
+          "choices": [
+            {
+              "key": "A",
+              "text": "3×4和4×3"
+            },
+            {
+              "key": "B",
+              "text": "2×3和2+3"
+            },
+            {
+              "key": "C",
+              "text": "5×2和5+2"
+            },
+            {
+              "key": "D",
+              "text": "6×2和6-2"
+            }
+          ],
+          "choiceAudioIds": [
+            "8188de1db6b67cf91d470ca4ce8986e63f92eb929acf3e64cbfd59e7b46ac05a",
+            "66c364a5cef62de1ce726458656d2431a6bd03feb954f540bc7c1b0933ca7fd2",
+            "294752b2bdf42118aadddc495ceefe0b091c0175df4d0c372389300a6e829894",
+            "11d04ef839a431cfc924d8714cf87ac05c2542351015837fe9655eafc9614cad"
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "assetId": "b11bdc0a70704e46da83409148abe57e2d74d138fd18830d89c8b8c270f65c09",
+          "textSha256": "662086f124917e4f4e13707affafb83b539ec213c0db304f48ab92809996ec44",
+          "text": "根据每份数和份数选择乘法，把算式、口诀与实际问题联系起来。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "36a06a4380f2c82f7eb61f4449f1aeb4c8ade2ea654927d350cd01ccdc1a354a",
+          "textSha256": "7551d8e984bda0497479d8c8de97d3c246862d5e4d43dbb671045cd297a6c556",
+          "text": "每份数×份数=总数。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "84e45aadba738a375a95281a4e63aaa4a2951f073161405d9babc50b3d692654",
+          "textSha256": "2e78a0a9f91cec046fae37353500ec26da7e83bb4faa6d5a11da6712968dcfed",
+          "text": "先说清每个数表示什么，再列式。",
+          "purpose": "teaching",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "27a97ea2b1f4ac7bf630d4ff516cfb88274d6d9c874d96ea250e86cd5d69d5ab",
+          "textSha256": "21b54911f5e3731058b3c37cc81103328bf6fee6e101c40def9178a2baa7aa8f",
+          "text": "每袋4颗糖，买3袋，求共有几颗，应选哪个算式？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "c86fc260656ed4d2f31b243d423d801d3ad9bb9b88e3bb7a6e4f69a5b9ee9185",
+          "textSha256": "788d787ba7ab6b56b4ce1920da6ecab23659d9e4910fda0f5ce779c707d18159",
+          "text": "每份4颗，共3份，用乘法。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "a988c2474aa4066a7e2f103705074edcae54f9d815d95d0d17aed4d62989f825",
+          "textSha256": "4eb6efc6acdef6f0925b745f52ab82d01723612264b4257c34959814e147668d",
+          "text": "4×3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "5a2f473ee9cce38047c0190659c8b84bda7016c8fa6690d6f6888765b0918898",
+          "textSha256": "0812b5189a71b234d607ff54ad8f8868487564173556ebc1b1dc6fa608c47bc8",
+          "text": "4+3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "d2733d161b39b45d03b9a8cc377c0d9362490e139a817bbac635cbfe3c0b0011",
+          "textSha256": "2a17f163b5fe3845f9020d4c7b66eddd570a2465ca3b114a710f70d532828275",
+          "text": "4-3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "c67a6950e3e49f78a441bd19990392f316e62207759da5f8da70079672f85196",
+          "textSha256": "18f2b0a7496d481d36853b569b767db6331d51cc3197eac507790138535a4f89",
+          "text": "4×4",
+          "purpose": "option",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "f4b89b92d5595772420dd645a32ae1815aaeebd18c172d699a604bd83d427232",
+          "textSha256": "4903353d4cc3603f8695b657ee2ff33ed668f45cffc5c8bd1240a5b56c5a301a",
+          "text": "2×6+3等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "37a52553279cd5bee09aeafc4083229f73e24a984acc3158b4f1420aac8fdc95",
+          "textSha256": "5d3912dab9b232fc5be053952a36b11bbb577919e63c7fa579a89573f1bb2a25",
+          "text": "先乘后加：12+3=15。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "fba2da24f8ac945f98c4d4160534ebaa2a31c2c0424c95ffe268a196722e4f9c",
+          "textSha256": "3c22f76a07a16760ce2c459aacedfaad53e1cd0c5ebdd6c1b9838de4654152e6",
+          "text": "6×6-6等于多少？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "4c679a23106625abc0b475377dafd0b0e9d8806e6255d3f338de3bed3020fe2f",
+          "textSha256": "cabe93c927f41d3b0e6a0829e9adbd456a909874287f3f1ab38a2b20e179f5be",
+          "text": "36-6=30，也就是5个6。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "839af6df89d46285d02277b1e66ba92e4b86f50b5ad9d26de97252f8a9f43237",
+          "textSha256": "ca1c5c268d3a8765053660e575b7bfaed7038ad5a371792e0aadb922f38ef9e5",
+          "text": "有5朵红花和3朵黄花，求总朵数应算5×3。",
+          "purpose": "question",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "6aefeb2a20e50f9a9628694a1b5f72fb12f87f0d86672b7a2df7ce8a3ebab382",
+          "textSha256": "80d6cd2b813a8d0da2c35da2bc26f688a25c00e694aa5c7ab4fb6469ca551ce1",
+          "text": "两种花的数量相加，5+3=8。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "4548c6d82041f7b90f715dddf96b1f1b634b971fece699131a341c925f431c73",
+          "textSha256": "74a31468c119a80cf0ee94c615c4ff12dab1c044e0379231bf52f210dfa6cae5",
+          "text": "每条船坐4人，5条船全部坐满，共有几人？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "9efdf73932e29e10921b4aa0219abe0831dd6367e1a142e54d710089604452a1",
+          "textSha256": "fafe16ef0aebd889aa3a10efcf61bbaedaca5e7485c53e41b0a16117f1a2f6ba",
+          "text": "4×5=20。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "42270a451f51bf82260c2f7105ad36d8404bd4907244f9b4589477a35ca0dbf7",
+          "textSha256": "f65f1bbb7ca19de0aefd82c31c41a10197dedb172076057be8da33b1a10aedbd",
+          "text": "哪两个算式的结果相同？",
+          "purpose": "question",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "421b9817997f4d851134d9a79a7a91ae5bad4a7e8b5cca7ef13b48385cf0e05c",
+          "textSha256": "c49e915834697fe1440f71ebb1b60b37a46af892dfc078b18af5b2e900fcd5eb",
+          "text": "交换乘数位置，积不变。",
+          "purpose": "explanation",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "8188de1db6b67cf91d470ca4ce8986e63f92eb929acf3e64cbfd59e7b46ac05a",
+          "textSha256": "8d74069afbfcddc4520b21f746a5889e58edc52713e1cdd1dd00891b3bff3e75",
+          "text": "3×4和4×3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "66c364a5cef62de1ce726458656d2431a6bd03feb954f540bc7c1b0933ca7fd2",
+          "textSha256": "7c296465aa88b10143cba65e262a7a3c52be743d8f46c307878b7b5a90f8536b",
+          "text": "2×3和2+3",
+          "purpose": "option",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "294752b2bdf42118aadddc495ceefe0b091c0175df4d0c372389300a6e829894",
+          "textSha256": "defe853d5524962658134ca10f927d5569b9e8e988961e904d767414c42373cf",
+          "text": "5×2和5+2",
+          "purpose": "option",
+          "lessonId": "g2-multiply-06-v1"
+        },
+        {
+          "assetId": "11d04ef839a431cfc924d8714cf87ac05c2542351015837fe9655eafc9614cad",
+          "textSha256": "6727e9ed01b82f2e8dff62abc87dc12cc0bb1208b5cca7a16644a39c77772b8a",
+          "text": "6×2和6-2",
+          "purpose": "option",
+          "lessonId": "g2-multiply-06-v1"
+        }
+      ],
+      "status": "testing"
+    }
+  ],
+  "assets": [
+    {
+      "id": "67709f78e3a103bc35bab6a3446a622160673fa2cdd0f2a71d572e19904644de",
+      "key": "sha256/67709f78e3a103bc35bab6a3446a622160673fa2cdd0f2a71d572e19904644de.m4a",
+      "bytes": 23471,
+      "sha256": "67709f78e3a103bc35bab6a3446a622160673fa2cdd0f2a71d572e19904644de",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/7a/7a2953c0dc39f326c4efba52b2ba951ec31adf49.m4a"
+    },
+    {
+      "id": "2447c922a5eb2c81e58e2819b0837425c25fdcac32a745af1cd9624806f268c8",
+      "key": "sha256/2447c922a5eb2c81e58e2819b0837425c25fdcac32a745af1cd9624806f268c8.m4a",
+      "bytes": 12711,
+      "sha256": "2447c922a5eb2c81e58e2819b0837425c25fdcac32a745af1cd9624806f268c8",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/bd/bd0d4554c67526871b73a8a8127f201559334db9.m4a"
+    },
+    {
+      "id": "51e3750f324be9f208bfa8557cb5542b5d5e98f83952aa5edcbd993ddbdb7117",
+      "key": "sha256/51e3750f324be9f208bfa8557cb5542b5d5e98f83952aa5edcbd993ddbdb7117.m4a",
+      "bytes": 10035,
+      "sha256": "51e3750f324be9f208bfa8557cb5542b5d5e98f83952aa5edcbd993ddbdb7117",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/ad/ada2997ea79760d31e2d97c17226cc1f98b100de.m4a"
+    },
+    {
+      "id": "d9c1502d7f15e7f753c440d450980c3a9807e3812a4bb3326d36dae09f3ebfe6",
+      "key": "sha256/d9c1502d7f15e7f753c440d450980c3a9807e3812a4bb3326d36dae09f3ebfe6.m4a",
+      "bytes": 8317,
+      "sha256": "d9c1502d7f15e7f753c440d450980c3a9807e3812a4bb3326d36dae09f3ebfe6",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/ea/eabfb797b7d9d2abd8e9dab2b9e1dc1825ebbd47.m4a"
+    },
+    {
+      "id": "42c98d611879ff657ed69b4369d72f5916db2c2d0442d164199a66409dd17022",
+      "key": "sha256/42c98d611879ff657ed69b4369d72f5916db2c2d0442d164199a66409dd17022.m4a",
+      "bytes": 11186,
+      "sha256": "42c98d611879ff657ed69b4369d72f5916db2c2d0442d164199a66409dd17022",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/a1/a1d0c02f652eb2e412aaa3af43aad66d0802d0b1.m4a"
+    },
+    {
+      "id": "cd4da8e198230ae4bf3e9d136b75c2a0636cd7eb50ad20749436405a607f3b08",
+      "key": "sha256/cd4da8e198230ae4bf3e9d136b75c2a0636cd7eb50ad20749436405a607f3b08.m4a",
+      "bytes": 9103,
+      "sha256": "cd4da8e198230ae4bf3e9d136b75c2a0636cd7eb50ad20749436405a607f3b08",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/9c/9c989f91d49558b05f0ff76e70237671b9466c39.m4a"
+    },
+    {
+      "id": "858c7e5716bd3f615ec64007c57a34dc2f59ca776b9a731266c24e7ec606bd93",
+      "key": "sha256/858c7e5716bd3f615ec64007c57a34dc2f59ca776b9a731266c24e7ec606bd93.m4a",
+      "bytes": 6769,
+      "sha256": "858c7e5716bd3f615ec64007c57a34dc2f59ca776b9a731266c24e7ec606bd93",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/35/3538e1d02be1234116a57de5907b0053e757e3c9.m4a"
+    },
+    {
+      "id": "b47b298513d9bce6dfd4d440efd479ac910843f97e9b974f20e0a8ff0806fbd3",
+      "key": "sha256/b47b298513d9bce6dfd4d440efd479ac910843f97e9b974f20e0a8ff0806fbd3.m4a",
+      "bytes": 8031,
+      "sha256": "b47b298513d9bce6dfd4d440efd479ac910843f97e9b974f20e0a8ff0806fbd3",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/48/48c19413c6b4ce142ebeba4cd81134741d10df43.m4a"
+    },
+    {
+      "id": "3b6266fb996a12f309f5118a944bbc3473466973b17efd2cf4ae52480b589de5",
+      "key": "sha256/3b6266fb996a12f309f5118a944bbc3473466973b17efd2cf4ae52480b589de5.m4a",
+      "bytes": 6882,
+      "sha256": "3b6266fb996a12f309f5118a944bbc3473466973b17efd2cf4ae52480b589de5",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/ed/ed8888dc48b2d405e48ab8609c181ecca8a9fc4d.m4a"
+    },
+    {
+      "id": "17ebf2e8c0e8e5b5b4c4a1491432c556994fb81312672d8e3529dc88b6f40cc8",
+      "key": "sha256/17ebf2e8c0e8e5b5b4c4a1491432c556994fb81312672d8e3529dc88b6f40cc8.m4a",
+      "bytes": 8098,
+      "sha256": "17ebf2e8c0e8e5b5b4c4a1491432c556994fb81312672d8e3529dc88b6f40cc8",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/cf/cfa89750368f620d0101b807152896112f62460f.m4a"
+    },
+    {
+      "id": "b55fedeb30cc5960a7dbbe1f34aadfc498b941199cd15af429d85cbbeee235df",
+      "key": "sha256/b55fedeb30cc5960a7dbbe1f34aadfc498b941199cd15af429d85cbbeee235df.m4a",
+      "bytes": 7080,
+      "sha256": "b55fedeb30cc5960a7dbbe1f34aadfc498b941199cd15af429d85cbbeee235df",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/60/60b67882bdcd5e35658bcfe162e54e92165ef3b4.m4a"
+    },
+    {
+      "id": "098264694a28baeccabc3cd5cdc563d2f8fc78e4649adf52b6c469a5fa8f0781",
+      "key": "sha256/098264694a28baeccabc3cd5cdc563d2f8fc78e4649adf52b6c469a5fa8f0781.m4a",
+      "bytes": 20969,
+      "sha256": "098264694a28baeccabc3cd5cdc563d2f8fc78e4649adf52b6c469a5fa8f0781",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/98/98436a78b0e4a1bb0842b72303e249bfd1d0d16e.m4a"
+    },
+    {
+      "id": "73772f1311f29f0879f7b901ab2bc5e5071b7e1bd9efcf369f0117e64ab139da",
+      "key": "sha256/73772f1311f29f0879f7b901ab2bc5e5071b7e1bd9efcf369f0117e64ab139da.m4a",
+      "bytes": 23162,
+      "sha256": "73772f1311f29f0879f7b901ab2bc5e5071b7e1bd9efcf369f0117e64ab139da",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/55/55c97fcd7928fcfb0078939309aa7cfd72676ec2.m4a"
+    },
+    {
+      "id": "59aa61658f8b415a368a6ce7b7a0add5c501713b451d7590ffd1eee272410ad5",
+      "key": "sha256/59aa61658f8b415a368a6ce7b7a0add5c501713b451d7590ffd1eee272410ad5.m4a",
+      "bytes": 10561,
+      "sha256": "59aa61658f8b415a368a6ce7b7a0add5c501713b451d7590ffd1eee272410ad5",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/a2/a229ebf2c8241d1e3d3389dc8a406d42b17fe98c.m4a"
+    },
+    {
+      "id": "610280200a2a95691af2d1ebab3f53e2781a64b82e4006d12afd21374fba2300",
+      "key": "sha256/610280200a2a95691af2d1ebab3f53e2781a64b82e4006d12afd21374fba2300.m4a",
+      "bytes": 7607,
+      "sha256": "610280200a2a95691af2d1ebab3f53e2781a64b82e4006d12afd21374fba2300",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/41/41c3f72c88e44531e37315b6017cea99b3d91344.m4a"
+    },
+    {
+      "id": "2ae63dc0c1200525624a85cf76cc902f9aae540d4dc03d50886b26fc4037bda2",
+      "key": "sha256/2ae63dc0c1200525624a85cf76cc902f9aae540d4dc03d50886b26fc4037bda2.m4a",
+      "bytes": 2946,
+      "sha256": "2ae63dc0c1200525624a85cf76cc902f9aae540d4dc03d50886b26fc4037bda2",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/03/038e9ffa1ede71a4c2c94fd91adf96d846a0641b.m4a"
+    },
+    {
+      "id": "36cc494d368c47da6a2f99b71235e3336de7491b5cd67d7c47fcd42706b5dac7",
+      "key": "sha256/36cc494d368c47da6a2f99b71235e3336de7491b5cd67d7c47fcd42706b5dac7.m4a",
+      "bytes": 2388,
+      "sha256": "36cc494d368c47da6a2f99b71235e3336de7491b5cd67d7c47fcd42706b5dac7",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/9a/9a3eb340971ffc2dd9cf4da3994078519f53a568.m4a"
+    },
+    {
+      "id": "c387710b8fcbccc70f67b29a1f54505e08acf3e917c5e5a8d9942c022f6f036b",
+      "key": "sha256/c387710b8fcbccc70f67b29a1f54505e08acf3e917c5e5a8d9942c022f6f036b.m4a",
+      "bytes": 3398,
+      "sha256": "c387710b8fcbccc70f67b29a1f54505e08acf3e917c5e5a8d9942c022f6f036b",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/ca/ca49e01ddf4344bb7451da320fe46e14369b3874.m4a"
+    },
+    {
+      "id": "01f44c8a66158b6bf7c5185cbaee7212ebc369c3ed57387aed4211a6b7337ac8",
+      "key": "sha256/01f44c8a66158b6bf7c5185cbaee7212ebc369c3ed57387aed4211a6b7337ac8.m4a",
+      "bytes": 4966,
+      "sha256": "01f44c8a66158b6bf7c5185cbaee7212ebc369c3ed57387aed4211a6b7337ac8",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/14/145ced248b2aaa462c7db1855bce3d52046e8ef2.m4a"
+    },
+    {
+      "id": "36f10db1a0d2ca7e73b5fc2b2030596f1d05d62cf87384b032dd8c1d0b45a81d",
+      "key": "sha256/36f10db1a0d2ca7e73b5fc2b2030596f1d05d62cf87384b032dd8c1d0b45a81d.m4a",
+      "bytes": 12286,
+      "sha256": "36f10db1a0d2ca7e73b5fc2b2030596f1d05d62cf87384b032dd8c1d0b45a81d",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/e8/e8b3cb8bbc97ddd444349f1cf90ae186c1e04890.m4a"
+    },
+    {
+      "id": "12316de4a680b44c4a7a1c6df4abbf029b47ec8fd1bd3f78a1925cb24c3fec48",
+      "key": "sha256/12316de4a680b44c4a7a1c6df4abbf029b47ec8fd1bd3f78a1925cb24c3fec48.m4a",
+      "bytes": 5424,
+      "sha256": "12316de4a680b44c4a7a1c6df4abbf029b47ec8fd1bd3f78a1925cb24c3fec48",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/df/dfc7dd69d797a0e9d957196b1461e8bd0c80de00.m4a"
+    },
+    {
+      "id": "8c364a3af58d049d786ad9447bd39d67b94db6afcf7c55d472ae87e6d205de35",
+      "key": "sha256/8c364a3af58d049d786ad9447bd39d67b94db6afcf7c55d472ae87e6d205de35.m4a",
+      "bytes": 6759,
+      "sha256": "8c364a3af58d049d786ad9447bd39d67b94db6afcf7c55d472ae87e6d205de35",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/47/47d4c488fc1558c076d5bd773cad00fcd7be8e1e.m4a"
+    },
+    {
+      "id": "b8864966299f00923bdfffa1f50efa76e59bdef1c837d7f567f710eecd3f4b7d",
+      "key": "sha256/b8864966299f00923bdfffa1f50efa76e59bdef1c837d7f567f710eecd3f4b7d.m4a",
+      "bytes": 5393,
+      "sha256": "b8864966299f00923bdfffa1f50efa76e59bdef1c837d7f567f710eecd3f4b7d",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/af/affbd685a1a1bd677eb9f2f46b3863ec2b4fc329.m4a"
+    },
+    {
+      "id": "26f679a77de4650e87488c8d926036884802ea31a7448a5b943fc46abb36dee3",
+      "key": "sha256/26f679a77de4650e87488c8d926036884802ea31a7448a5b943fc46abb36dee3.m4a",
+      "bytes": 15273,
+      "sha256": "26f679a77de4650e87488c8d926036884802ea31a7448a5b943fc46abb36dee3",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/11/1150b79b013aa91b57bc89a6991becefdee30f53.m4a"
+    },
+    {
+      "id": "dc65a5ed3448de42059dfb264db71600f5483657cd59877b3e9452ed22423c88",
+      "key": "sha256/dc65a5ed3448de42059dfb264db71600f5483657cd59877b3e9452ed22423c88.m4a",
+      "bytes": 19280,
+      "sha256": "dc65a5ed3448de42059dfb264db71600f5483657cd59877b3e9452ed22423c88",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/3e/3e11c5b022a5df1e3f94aee7326fee250344615b.m4a"
+    },
+    {
+      "id": "1c50d162d2a9beb003160ef37f543409d2751bf88e58b0de569ea8d0361c6c4b",
+      "key": "sha256/1c50d162d2a9beb003160ef37f543409d2751bf88e58b0de569ea8d0361c6c4b.m4a",
+      "bytes": 14043,
+      "sha256": "1c50d162d2a9beb003160ef37f543409d2751bf88e58b0de569ea8d0361c6c4b",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/df/df665157a22b09cf8091265978938f50adaacc7e.m4a"
+    },
+    {
+      "id": "0a1b08f075e3ae825ad553066bf0b28f60f06b6fa00745b6add08911efd78bac",
+      "key": "sha256/0a1b08f075e3ae825ad553066bf0b28f60f06b6fa00745b6add08911efd78bac.m4a",
+      "bytes": 6219,
+      "sha256": "0a1b08f075e3ae825ad553066bf0b28f60f06b6fa00745b6add08911efd78bac",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/bb/bbdb63d8d258d7f3083c2988c61b1cbf94fbc55b.m4a"
+    },
+    {
+      "id": "cf85c2c50acad220ad5188a28ae3fa458f1432c0123a1bf649674ac258c4cdb9",
+      "key": "sha256/cf85c2c50acad220ad5188a28ae3fa458f1432c0123a1bf649674ac258c4cdb9.m4a",
+      "bytes": 11509,
+      "sha256": "cf85c2c50acad220ad5188a28ae3fa458f1432c0123a1bf649674ac258c4cdb9",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/f8/f87e01763a890631ec3e3a92afb3fbca1bcc7711.m4a"
+    },
+    {
+      "id": "5cb26ad88695cf6ea32dea83d1655f3d91f7cf28cbd173187ed9593d6cfb7178",
+      "key": "sha256/5cb26ad88695cf6ea32dea83d1655f3d91f7cf28cbd173187ed9593d6cfb7178.m4a",
+      "bytes": 6051,
+      "sha256": "5cb26ad88695cf6ea32dea83d1655f3d91f7cf28cbd173187ed9593d6cfb7178",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/f3/f323fe0baed9abca0020c6690879d870af8cad95.m4a"
+    },
+    {
+      "id": "cc8c5d18b36da2ee5cfd9ed9112d20047ba901b2c822c87196a6b9562a1e8948",
+      "key": "sha256/cc8c5d18b36da2ee5cfd9ed9112d20047ba901b2c822c87196a6b9562a1e8948.m4a",
+      "bytes": 4209,
+      "sha256": "cc8c5d18b36da2ee5cfd9ed9112d20047ba901b2c822c87196a6b9562a1e8948",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/5e/5eb37718c475b115fa0a30e6ab738f01752bd1dc.m4a"
+    },
+    {
+      "id": "0326acf428008973d143992cd62d8aba08f71ffce79727f73049716539225ccc",
+      "key": "sha256/0326acf428008973d143992cd62d8aba08f71ffce79727f73049716539225ccc.m4a",
+      "bytes": 9622,
+      "sha256": "0326acf428008973d143992cd62d8aba08f71ffce79727f73049716539225ccc",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/e1/e1e1e55c32a44f39ce605183e2c5ca6cd9eb0ad9.m4a"
+    },
+    {
+      "id": "d5fa8eda2d776b903a5c471e5cd96d1645c769c9c86cca97f0ca46b08f23dc02",
+      "key": "sha256/d5fa8eda2d776b903a5c471e5cd96d1645c769c9c86cca97f0ca46b08f23dc02.m4a",
+      "bytes": 5798,
+      "sha256": "d5fa8eda2d776b903a5c471e5cd96d1645c769c9c86cca97f0ca46b08f23dc02",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/ff/ff732fe12ee3354b66b70a4b5e45b9984b754cb3.m4a"
+    },
+    {
+      "id": "ddd4999ddc56bce6c3a3c1730cc1656a80d770619f9cdb3ed0fe1e2b6af43498",
+      "key": "sha256/ddd4999ddc56bce6c3a3c1730cc1656a80d770619f9cdb3ed0fe1e2b6af43498.m4a",
+      "bytes": 4101,
+      "sha256": "ddd4999ddc56bce6c3a3c1730cc1656a80d770619f9cdb3ed0fe1e2b6af43498",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/70/704e9c11d6a9855ae5fd5fd84643b3ef0a51b9f1.m4a"
+    },
+    {
+      "id": "45d7f4d2fed7dd5432cb5bf2474b944de280978675547357edb5013de502c55c",
+      "key": "sha256/45d7f4d2fed7dd5432cb5bf2474b944de280978675547357edb5013de502c55c.m4a",
+      "bytes": 4449,
+      "sha256": "45d7f4d2fed7dd5432cb5bf2474b944de280978675547357edb5013de502c55c",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/f8/f8217600cd87a778ecaa1259576210f5ef839d41.m4a"
+    },
+    {
+      "id": "b6b74ac796a51c2d221215ad06cae33433b3b0e50b1e16a91d1c4722be61a92d",
+      "key": "sha256/b6b74ac796a51c2d221215ad06cae33433b3b0e50b1e16a91d1c4722be61a92d.m4a",
+      "bytes": 4072,
+      "sha256": "b6b74ac796a51c2d221215ad06cae33433b3b0e50b1e16a91d1c4722be61a92d",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/b5/b541d0c4c99d85cad597f04a366a73fdfae3c318.m4a"
+    },
+    {
+      "id": "c579668e077e1f577c0221da322afedc227dac8f9b2a7dc56e8db15f07e85b5f",
+      "key": "sha256/c579668e077e1f577c0221da322afedc227dac8f9b2a7dc56e8db15f07e85b5f.m4a",
+      "bytes": 5277,
+      "sha256": "c579668e077e1f577c0221da322afedc227dac8f9b2a7dc56e8db15f07e85b5f",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/1f/1ff1688094280e54aae3042a655cf9425459c1cc.m4a"
+    },
+    {
+      "id": "8bddef36134a8b15f817aab8e920e780c944eeb4383b5ff7452351c33b8547c4",
+      "key": "sha256/8bddef36134a8b15f817aab8e920e780c944eeb4383b5ff7452351c33b8547c4.m4a",
+      "bytes": 12830,
+      "sha256": "8bddef36134a8b15f817aab8e920e780c944eeb4383b5ff7452351c33b8547c4",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/c9/c9d47512576cf30b59703d1e6665379a6b103f5a.m4a"
+    },
+    {
+      "id": "24a0b4564212b59b71be89ff1dabad44d2592ab5198814b74f39e34de722a508",
+      "key": "sha256/24a0b4564212b59b71be89ff1dabad44d2592ab5198814b74f39e34de722a508.m4a",
+      "bytes": 10941,
+      "sha256": "24a0b4564212b59b71be89ff1dabad44d2592ab5198814b74f39e34de722a508",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/39/39edbc412e7a25314f3f6d8f09965a9fbe61f43c.m4a"
+    },
+    {
+      "id": "9745393358c33e797904a34f4c49ce8c0a6716f16df3ab9958f29a566ba5cd8b",
+      "key": "sha256/9745393358c33e797904a34f4c49ce8c0a6716f16df3ab9958f29a566ba5cd8b.m4a",
+      "bytes": 6142,
+      "sha256": "9745393358c33e797904a34f4c49ce8c0a6716f16df3ab9958f29a566ba5cd8b",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/24/24fbd94216b63f1fe2329fbaa684a7d5314dd763.m4a"
+    },
+    {
+      "id": "fb8351a085b1daea9ccd611985c496dab16bfa1c6132c58a67c35e449682c5d7",
+      "key": "sha256/fb8351a085b1daea9ccd611985c496dab16bfa1c6132c58a67c35e449682c5d7.m4a",
+      "bytes": 12579,
+      "sha256": "fb8351a085b1daea9ccd611985c496dab16bfa1c6132c58a67c35e449682c5d7",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/e9/e9ec0b627dd4fcc9db5a4647978fd24394828879.m4a"
+    },
+    {
+      "id": "67a4c453fa63a26a49d584b14ce70e31e14de36239aba87f34e844705fad7dfc",
+      "key": "sha256/67a4c453fa63a26a49d584b14ce70e31e14de36239aba87f34e844705fad7dfc.m4a",
+      "bytes": 7383,
+      "sha256": "67a4c453fa63a26a49d584b14ce70e31e14de36239aba87f34e844705fad7dfc",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/48/48828074900d06e23d4753bea22d371f62b35cee.m4a"
+    },
+    {
+      "id": "56b9f456e49ac426724529b6539114f3a67757ed2cea3ad0e35b6d58cc57d812",
+      "key": "sha256/56b9f456e49ac426724529b6539114f3a67757ed2cea3ad0e35b6d58cc57d812.m4a",
+      "bytes": 23077,
+      "sha256": "56b9f456e49ac426724529b6539114f3a67757ed2cea3ad0e35b6d58cc57d812",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/1b/1b70a079cfdd6a89de17da118ed7fb9415bb1bde.m4a"
+    },
+    {
+      "id": "263747da03a75dad1c0bb597e96313ca0396c2cdb775489958f541e160b050f5",
+      "key": "sha256/263747da03a75dad1c0bb597e96313ca0396c2cdb775489958f541e160b050f5.m4a",
+      "bytes": 12033,
+      "sha256": "263747da03a75dad1c0bb597e96313ca0396c2cdb775489958f541e160b050f5",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/30/3017818532bd2d60118e9bf1a8aab35d41c6d213.m4a"
+    },
+    {
+      "id": "645e1a34a774897c8ba74792c2dcf5d28b7db57ac17da4868803c04ac4f12924",
+      "key": "sha256/645e1a34a774897c8ba74792c2dcf5d28b7db57ac17da4868803c04ac4f12924.m4a",
+      "bytes": 11388,
+      "sha256": "645e1a34a774897c8ba74792c2dcf5d28b7db57ac17da4868803c04ac4f12924",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/d7/d7ac697f815163a9ffebbbae0789506cb3e92ed6.m4a"
+    },
+    {
+      "id": "afd745d3274c916197891b0c93e2305d3d6b3388d1e2eaaedeab35f5b8f72e81",
+      "key": "sha256/afd745d3274c916197891b0c93e2305d3d6b3388d1e2eaaedeab35f5b8f72e81.m4a",
+      "bytes": 6324,
+      "sha256": "afd745d3274c916197891b0c93e2305d3d6b3388d1e2eaaedeab35f5b8f72e81",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/37/37303343be458d8e4fdccb5bb4668e9161b7d904.m4a"
+    },
+    {
+      "id": "c1f48340ec47f6329a4cd802dda978545b07863e6dbc7f295e41c7ba19dea57e",
+      "key": "sha256/c1f48340ec47f6329a4cd802dda978545b07863e6dbc7f295e41c7ba19dea57e.m4a",
+      "bytes": 3972,
+      "sha256": "c1f48340ec47f6329a4cd802dda978545b07863e6dbc7f295e41c7ba19dea57e",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/63/63724691cc6bcd764c4fc0e2d73fa6ec10d79f14.m4a"
+    },
+    {
+      "id": "a12829b6d3bf6e4f6934c095564ca1db5bcdb1a44e3f0d7a206f4d9b77e0e083",
+      "key": "sha256/a12829b6d3bf6e4f6934c095564ca1db5bcdb1a44e3f0d7a206f4d9b77e0e083.m4a",
+      "bytes": 6606,
+      "sha256": "a12829b6d3bf6e4f6934c095564ca1db5bcdb1a44e3f0d7a206f4d9b77e0e083",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/b6/b6b4cebbf248e4d52aeffb0470667f3fc60ddfa0.m4a"
+    },
+    {
+      "id": "4ae86ddd16a7f21298bc7b1f688b0788b2899d743edb35a6b0912d82117fb698",
+      "key": "sha256/4ae86ddd16a7f21298bc7b1f688b0788b2899d743edb35a6b0912d82117fb698.m4a",
+      "bytes": 4206,
+      "sha256": "4ae86ddd16a7f21298bc7b1f688b0788b2899d743edb35a6b0912d82117fb698",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/2e/2e6a73339697b589d45e7e3b3dfa4152be1157e1.m4a"
+    },
+    {
+      "id": "46ed4ff4c2e1dfc75b9f7d02abd4fa9a3374e5c8372457c1f70860bb9da149b1",
+      "key": "sha256/46ed4ff4c2e1dfc75b9f7d02abd4fa9a3374e5c8372457c1f70860bb9da149b1.m4a",
+      "bytes": 6469,
+      "sha256": "46ed4ff4c2e1dfc75b9f7d02abd4fa9a3374e5c8372457c1f70860bb9da149b1",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/71/71107bfb52d1300d6e1fd8c890ef5d3a4465f7ce.m4a"
+    },
+    {
+      "id": "a01b1c235bac34851ebc9aa8efb8675b68b1eada3ae03e87fa4393078247a3e9",
+      "key": "sha256/a01b1c235bac34851ebc9aa8efb8675b68b1eada3ae03e87fa4393078247a3e9.m4a",
+      "bytes": 4070,
+      "sha256": "a01b1c235bac34851ebc9aa8efb8675b68b1eada3ae03e87fa4393078247a3e9",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/7d/7ddf6675c08e28b09a1800dd209d7ad904f9f297.m4a"
+    },
+    {
+      "id": "89f6763312ce50a91bbb9b01d366e0196a784daa0df61d07f4c30caa258f6c37",
+      "key": "sha256/89f6763312ce50a91bbb9b01d366e0196a784daa0df61d07f4c30caa258f6c37.m4a",
+      "bytes": 7059,
+      "sha256": "89f6763312ce50a91bbb9b01d366e0196a784daa0df61d07f4c30caa258f6c37",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/7c/7cc481e97edd13e0fe117c6a2fdf14158aba6f37.m4a"
+    },
+    {
+      "id": "3d3369efb8ebcb877c177d9817a94f2c1ff2c7e04c090de623e7f6d92ef9515f",
+      "key": "sha256/3d3369efb8ebcb877c177d9817a94f2c1ff2c7e04c090de623e7f6d92ef9515f.m4a",
+      "bytes": 3945,
+      "sha256": "3d3369efb8ebcb877c177d9817a94f2c1ff2c7e04c090de623e7f6d92ef9515f",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/d1/d15f32723754a8313d66fb4f3e929d5845347ec2.m4a"
+    },
+    {
+      "id": "0f87d61f4d5ff7cd1f1352d7838a1e69fe9a56419e7b34eda33dac250a035333",
+      "key": "sha256/0f87d61f4d5ff7cd1f1352d7838a1e69fe9a56419e7b34eda33dac250a035333.m4a",
+      "bytes": 4863,
+      "sha256": "0f87d61f4d5ff7cd1f1352d7838a1e69fe9a56419e7b34eda33dac250a035333",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/28/2829ac85a98edeb8f4fb532cbd871cd70abf91ce.m4a"
+    },
+    {
+      "id": "13ca53d845b797e0fdf3671dda7db9def40e699dbf662963a65a084d206472c6",
+      "key": "sha256/13ca53d845b797e0fdf3671dda7db9def40e699dbf662963a65a084d206472c6.m4a",
+      "bytes": 3398,
+      "sha256": "13ca53d845b797e0fdf3671dda7db9def40e699dbf662963a65a084d206472c6",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/5e/5eaaea4b12fe633ab017b171b77fdf72c6164ca3.m4a"
+    },
+    {
+      "id": "f51ee988f79a03b8eb321c8bb9484e0c647c1ac6b81ec3ecff7f9855e411e77e",
+      "key": "sha256/f51ee988f79a03b8eb321c8bb9484e0c647c1ac6b81ec3ecff7f9855e411e77e.m4a",
+      "bytes": 3966,
+      "sha256": "f51ee988f79a03b8eb321c8bb9484e0c647c1ac6b81ec3ecff7f9855e411e77e",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/23/23dcf1675f4e52782a1121f398b086be0210ec20.m4a"
+    },
+    {
+      "id": "732bb490bcd0dc8f4e6a8d81e6cad97198215321dc04e92520837931a8ef53ea",
+      "key": "sha256/732bb490bcd0dc8f4e6a8d81e6cad97198215321dc04e92520837931a8ef53ea.m4a",
+      "bytes": 3523,
+      "sha256": "732bb490bcd0dc8f4e6a8d81e6cad97198215321dc04e92520837931a8ef53ea",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/9d/9df46ee80995473470e776ab490ba6dfb59ba667.m4a"
+    },
+    {
+      "id": "95d58c71b2c5ff6e476937871fd79a73ed8abc8b9d8b336748ae995e01de0888",
+      "key": "sha256/95d58c71b2c5ff6e476937871fd79a73ed8abc8b9d8b336748ae995e01de0888.m4a",
+      "bytes": 9418,
+      "sha256": "95d58c71b2c5ff6e476937871fd79a73ed8abc8b9d8b336748ae995e01de0888",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/88/88789d784166e68b072ba8a9a0bb0768eb834385.m4a"
+    },
+    {
+      "id": "c212990819002c8e9936fa6b6cc6308dd1e108636b50aa9f0bd4ddbac7f43b2b",
+      "key": "sha256/c212990819002c8e9936fa6b6cc6308dd1e108636b50aa9f0bd4ddbac7f43b2b.m4a",
+      "bytes": 6985,
+      "sha256": "c212990819002c8e9936fa6b6cc6308dd1e108636b50aa9f0bd4ddbac7f43b2b",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/bd/bd613d55c2ec89bc7e1a7ba2812677fa806d1878.m4a"
+    },
+    {
+      "id": "861199b583915aea5c06c2742498ef97ce110dcf3a44ddbb5010a9b9ee4f2816",
+      "key": "sha256/861199b583915aea5c06c2742498ef97ce110dcf3a44ddbb5010a9b9ee4f2816.m4a",
+      "bytes": 10553,
+      "sha256": "861199b583915aea5c06c2742498ef97ce110dcf3a44ddbb5010a9b9ee4f2816",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/15/15ce3941d5a280b9afdae0e56d5cce22ef030305.m4a"
+    },
+    {
+      "id": "8de89f8478589955af71d8d12cb265b051b1641ccc43c83425745a90102545cb",
+      "key": "sha256/8de89f8478589955af71d8d12cb265b051b1641ccc43c83425745a90102545cb.m4a",
+      "bytes": 6475,
+      "sha256": "8de89f8478589955af71d8d12cb265b051b1641ccc43c83425745a90102545cb",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/3f/3f1f314bb9455970201dbb22c36a30be730cb7d5.m4a"
+    },
+    {
+      "id": "1c379bda6156ac008801fced3c5ea61a667aac64a9952b7db448059199445870",
+      "key": "sha256/1c379bda6156ac008801fced3c5ea61a667aac64a9952b7db448059199445870.m4a",
+      "bytes": 22175,
+      "sha256": "1c379bda6156ac008801fced3c5ea61a667aac64a9952b7db448059199445870",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/3d/3db28d03de95f5173a672ee10853f36a9d277a5c.m4a"
+    },
+    {
+      "id": "fdc86e274126fed2442197ebc5e814a9e2856a69ebea63451d1a7981e55b58d7",
+      "key": "sha256/fdc86e274126fed2442197ebc5e814a9e2856a69ebea63451d1a7981e55b58d7.m4a",
+      "bytes": 17198,
+      "sha256": "fdc86e274126fed2442197ebc5e814a9e2856a69ebea63451d1a7981e55b58d7",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/fb/fb4ad0814a0360785f381815dc59b13523decd62.m4a"
+    },
+    {
+      "id": "ec584c18716af0d1d9db040502acb063fec16404c4ebb877e0e96cc8b0f6eb9a",
+      "key": "sha256/ec584c18716af0d1d9db040502acb063fec16404c4ebb877e0e96cc8b0f6eb9a.m4a",
+      "bytes": 16123,
+      "sha256": "ec584c18716af0d1d9db040502acb063fec16404c4ebb877e0e96cc8b0f6eb9a",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/44/44e4b656a63e70d572d30209406a0e478c7124e1.m4a"
+    },
+    {
+      "id": "cb8e74537145c02e65e090f9df844c08755d01d02ea1a0563932810a4d83adad",
+      "key": "sha256/cb8e74537145c02e65e090f9df844c08755d01d02ea1a0563932810a4d83adad.m4a",
+      "bytes": 7932,
+      "sha256": "cb8e74537145c02e65e090f9df844c08755d01d02ea1a0563932810a4d83adad",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/af/af356e982d09824d7f226086bb22b405223ddccc.m4a"
+    },
+    {
+      "id": "66d62b3057ddeb7afc04e5bd25858de06c186e6c48b3610d4554ad96bbfbc57b",
+      "key": "sha256/66d62b3057ddeb7afc04e5bd25858de06c186e6c48b3610d4554ad96bbfbc57b.m4a",
+      "bytes": 16812,
+      "sha256": "66d62b3057ddeb7afc04e5bd25858de06c186e6c48b3610d4554ad96bbfbc57b",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/4c/4c1209bf85c0a3fbafdf78912a5ccf7e199e73bc.m4a"
+    },
+    {
+      "id": "9f8f9a523f6e7dcf87c6b8662057d88acbe29bab43a1e09c24b054a68a0043d9",
+      "key": "sha256/9f8f9a523f6e7dcf87c6b8662057d88acbe29bab43a1e09c24b054a68a0043d9.m4a",
+      "bytes": 7804,
+      "sha256": "9f8f9a523f6e7dcf87c6b8662057d88acbe29bab43a1e09c24b054a68a0043d9",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/01/0108c85910da54906e0e75810c08a720ab07981e.m4a"
+    },
+    {
+      "id": "06106b80a8d51a898b5a888effc1725ea490bcd4c6b81d9fd2f408619aea1bd9",
+      "key": "sha256/06106b80a8d51a898b5a888effc1725ea490bcd4c6b81d9fd2f408619aea1bd9.m4a",
+      "bytes": 16501,
+      "sha256": "06106b80a8d51a898b5a888effc1725ea490bcd4c6b81d9fd2f408619aea1bd9",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/80/80b70ff0568f4a071d4e6a33479fd404fff6c51b.m4a"
+    },
+    {
+      "id": "8b1bf851a5fd4a59cd148e3c48c62c00fc0a875fe9ef80abb1a62bf077332cd1",
+      "key": "sha256/8b1bf851a5fd4a59cd148e3c48c62c00fc0a875fe9ef80abb1a62bf077332cd1.m4a",
+      "bytes": 9255,
+      "sha256": "8b1bf851a5fd4a59cd148e3c48c62c00fc0a875fe9ef80abb1a62bf077332cd1",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/79/79c5dff0061a3349bfe80e6f823eb4ec7baf9a96.m4a"
+    },
+    {
+      "id": "14a829f484e36bc6a78e4a4db6f8dea430ffd9fbf37255bda4a248417e1cc4c6",
+      "key": "sha256/14a829f484e36bc6a78e4a4db6f8dea430ffd9fbf37255bda4a248417e1cc4c6.m4a",
+      "bytes": 5796,
+      "sha256": "14a829f484e36bc6a78e4a4db6f8dea430ffd9fbf37255bda4a248417e1cc4c6",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/bf/bf2873f2b0021ef3cdb641c0c9554d38c2b0b2a0.m4a"
+    },
+    {
+      "id": "a988c2474aa4066a7e2f103705074edcae54f9d815d95d0d17aed4d62989f825",
+      "key": "sha256/a988c2474aa4066a7e2f103705074edcae54f9d815d95d0d17aed4d62989f825.m4a",
+      "bytes": 7031,
+      "sha256": "a988c2474aa4066a7e2f103705074edcae54f9d815d95d0d17aed4d62989f825",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/c7/c767b82e7c6401f34566e8103d6acf042b19cfd4.m4a"
+    },
+    {
+      "id": "552865ab3be4da6d2ff9d18453f07e9732a4f0ba1ac82eab2d64a631fa70f1f8",
+      "key": "sha256/552865ab3be4da6d2ff9d18453f07e9732a4f0ba1ac82eab2d64a631fa70f1f8.m4a",
+      "bytes": 3532,
+      "sha256": "552865ab3be4da6d2ff9d18453f07e9732a4f0ba1ac82eab2d64a631fa70f1f8",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/e6/e60eb8f141cc5f308eafd0d0b64866b6b6a40998.m4a"
+    },
+    {
+      "id": "7788b2aa24b8951e52327831e8ec5719ec2a6bd76463dffdc65e98c06d1279ca",
+      "key": "sha256/7788b2aa24b8951e52327831e8ec5719ec2a6bd76463dffdc65e98c06d1279ca.m4a",
+      "bytes": 3812,
+      "sha256": "7788b2aa24b8951e52327831e8ec5719ec2a6bd76463dffdc65e98c06d1279ca",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/62/627f3d7d895b4ad322ed814dd8997364a3858d52.m4a"
+    },
+    {
+      "id": "5a2f473ee9cce38047c0190659c8b84bda7016c8fa6690d6f6888765b0918898",
+      "key": "sha256/5a2f473ee9cce38047c0190659c8b84bda7016c8fa6690d6f6888765b0918898.m4a",
+      "bytes": 3674,
+      "sha256": "5a2f473ee9cce38047c0190659c8b84bda7016c8fa6690d6f6888765b0918898",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/1a/1a8574bc6f90182993da49aa35c93b18a22c4062.m4a"
+    },
+    {
+      "id": "0b4905cbdbea3675a21906b091bb56d2358663ff9682d2530aa04bd743971b00",
+      "key": "sha256/0b4905cbdbea3675a21906b091bb56d2358663ff9682d2530aa04bd743971b00.m4a",
+      "bytes": 8450,
+      "sha256": "0b4905cbdbea3675a21906b091bb56d2358663ff9682d2530aa04bd743971b00",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/54/54095488fa048e22709b8a00708146c9ce1b1c32.m4a"
+    },
+    {
+      "id": "fbf0366f60371ea8b8031d4ef718977e775af0fe4a66369241017a32e5c313a9",
+      "key": "sha256/fbf0366f60371ea8b8031d4ef718977e775af0fe4a66369241017a32e5c313a9.m4a",
+      "bytes": 18142,
+      "sha256": "fbf0366f60371ea8b8031d4ef718977e775af0fe4a66369241017a32e5c313a9",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/10/109bbb47fdf529a9981444b3c0e6580bf976d163.m4a"
+    },
+    {
+      "id": "35175f0de843c7427ba2c22ab46f68e26e0ceb4c14030a003c4069458d00be97",
+      "key": "sha256/35175f0de843c7427ba2c22ab46f68e26e0ceb4c14030a003c4069458d00be97.m4a",
+      "bytes": 15722,
+      "sha256": "35175f0de843c7427ba2c22ab46f68e26e0ceb4c14030a003c4069458d00be97",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/f8/f8f783546ef572b5e3dbb0eb1e6177ba650ea46e.m4a"
+    },
+    {
+      "id": "f99980dbeaf9557f5495c37d6bc6d963de136131e960d4b0d3908af3a16af2e8",
+      "key": "sha256/f99980dbeaf9557f5495c37d6bc6d963de136131e960d4b0d3908af3a16af2e8.m4a",
+      "bytes": 7950,
+      "sha256": "f99980dbeaf9557f5495c37d6bc6d963de136131e960d4b0d3908af3a16af2e8",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/3f/3fcd08cf4088a1ddd29a56538deb87df8e581bef.m4a"
+    },
+    {
+      "id": "a88e24481c14f7f414a47ad1fd3beec72b3a8304c4eb3f862e8372b4c24654ae",
+      "key": "sha256/a88e24481c14f7f414a47ad1fd3beec72b3a8304c4eb3f862e8372b4c24654ae.m4a",
+      "bytes": 14569,
+      "sha256": "a88e24481c14f7f414a47ad1fd3beec72b3a8304c4eb3f862e8372b4c24654ae",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/f3/f31b5f28ad82839bebac3ecfdf54460c2a6450fd.m4a"
+    },
+    {
+      "id": "a8fbc2a84506e2f3d280ec1e0ef4119ba9debef913f9d66ea840d28e9c9535e8",
+      "key": "sha256/a8fbc2a84506e2f3d280ec1e0ef4119ba9debef913f9d66ea840d28e9c9535e8.m4a",
+      "bytes": 7938,
+      "sha256": "a8fbc2a84506e2f3d280ec1e0ef4119ba9debef913f9d66ea840d28e9c9535e8",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/d1/d192a636fe72d6e5ddd3c82f04bb0efa1edbd929.m4a"
+    },
+    {
+      "id": "57209bdbfa50134603018ab87b92e31195c52d16fc58d9695dc7b54efc08b1b1",
+      "key": "sha256/57209bdbfa50134603018ab87b92e31195c52d16fc58d9695dc7b54efc08b1b1.m4a",
+      "bytes": 12814,
+      "sha256": "57209bdbfa50134603018ab87b92e31195c52d16fc58d9695dc7b54efc08b1b1",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/9a/9ae13f1b6198e709fccc8ae1c2528a8b4422739b.m4a"
+    },
+    {
+      "id": "a2d4c4e8e9e5aaccdfc92a8eb71721461e4f4d7a3caf0eb5d5bd8e3dfc899197",
+      "key": "sha256/a2d4c4e8e9e5aaccdfc92a8eb71721461e4f4d7a3caf0eb5d5bd8e3dfc899197.m4a",
+      "bytes": 24215,
+      "sha256": "a2d4c4e8e9e5aaccdfc92a8eb71721461e4f4d7a3caf0eb5d5bd8e3dfc899197",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/09/094388b3fb3a773dea9b0df21fc78a8c5d1118dc.m4a"
+    },
+    {
+      "id": "b4c21ac6a07eeb9dec72ebcf1a5dd077efac8e626c8db33ef880d2eecfa7b625",
+      "key": "sha256/b4c21ac6a07eeb9dec72ebcf1a5dd077efac8e626c8db33ef880d2eecfa7b625.m4a",
+      "bytes": 14715,
+      "sha256": "b4c21ac6a07eeb9dec72ebcf1a5dd077efac8e626c8db33ef880d2eecfa7b625",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/25/256447117ff93790637516be9b8ff5ec9559a75b.m4a"
+    },
+    {
+      "id": "7f131ece2158a7a4806480bdb288cc1da2904dae5d141fa92763b607387be643",
+      "key": "sha256/7f131ece2158a7a4806480bdb288cc1da2904dae5d141fa92763b607387be643.m4a",
+      "bytes": 6434,
+      "sha256": "7f131ece2158a7a4806480bdb288cc1da2904dae5d141fa92763b607387be643",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/a7/a7a26711bcc79086bed9c5b7b8006e4ec2125d59.m4a"
+    },
+    {
+      "id": "8469e1ec1c3ead07a09199e1b8d91839521f38f82ed987dfd942380a755a933d",
+      "key": "sha256/8469e1ec1c3ead07a09199e1b8d91839521f38f82ed987dfd942380a755a933d.m4a",
+      "bytes": 3693,
+      "sha256": "8469e1ec1c3ead07a09199e1b8d91839521f38f82ed987dfd942380a755a933d",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/8e/8e16f54f23a084be3b1308973d889d4087b51ff2.m4a"
+    },
+    {
+      "id": "79e375a7ca209bbbbc0c38b1eadecb597a66e046b7b842d55a79165500bbb9a0",
+      "key": "sha256/79e375a7ca209bbbbc0c38b1eadecb597a66e046b7b842d55a79165500bbb9a0.m4a",
+      "bytes": 6571,
+      "sha256": "79e375a7ca209bbbbc0c38b1eadecb597a66e046b7b842d55a79165500bbb9a0",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/0b/0b7befc285c2309765d5f8d71b093cba68e05c89.m4a"
+    },
+    {
+      "id": "a2c6c1143b411e371b36e293b63893d636ab2ca1a4ee806b514fa08852e8c932",
+      "key": "sha256/a2c6c1143b411e371b36e293b63893d636ab2ca1a4ee806b514fa08852e8c932.m4a",
+      "bytes": 4325,
+      "sha256": "a2c6c1143b411e371b36e293b63893d636ab2ca1a4ee806b514fa08852e8c932",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/b4/b4c23de40e6e90f56337e217d1d2fd920d89d41c.m4a"
+    },
+    {
+      "id": "91d2d64875cc4d52c30f9dcca04b41e92180a43a0f18832cd360d1001b1de259",
+      "key": "sha256/91d2d64875cc4d52c30f9dcca04b41e92180a43a0f18832cd360d1001b1de259.m4a",
+      "bytes": 6207,
+      "sha256": "91d2d64875cc4d52c30f9dcca04b41e92180a43a0f18832cd360d1001b1de259",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/2b/2b90725e25ac1f24aeb2d42dfee0f0c63f233a80.m4a"
+    },
+    {
+      "id": "b4ef1e3c601ebfd77fe7dd76073d42e3d03cbadec864e5035942d0e9a970c253",
+      "key": "sha256/b4ef1e3c601ebfd77fe7dd76073d42e3d03cbadec864e5035942d0e9a970c253.m4a",
+      "bytes": 4341,
+      "sha256": "b4ef1e3c601ebfd77fe7dd76073d42e3d03cbadec864e5035942d0e9a970c253",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/80/807473dcd92af136773de0d0a7d25684a1ca85fd.m4a"
+    },
+    {
+      "id": "3f8f05bdbb03b1d3baf89a20ad2733a6ad1125b4910cabf586126b9cd32a0a13",
+      "key": "sha256/3f8f05bdbb03b1d3baf89a20ad2733a6ad1125b4910cabf586126b9cd32a0a13.m4a",
+      "bytes": 9557,
+      "sha256": "3f8f05bdbb03b1d3baf89a20ad2733a6ad1125b4910cabf586126b9cd32a0a13",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/0c/0c4678abbb8757c023d326c74dfe1b98f38f458e.m4a"
+    },
+    {
+      "id": "c1e8c4a2b3ad823e97cdf96a4be20f9e7b6e099116e30e5b5f71e3c4a71dc28a",
+      "key": "sha256/c1e8c4a2b3ad823e97cdf96a4be20f9e7b6e099116e30e5b5f71e3c4a71dc28a.m4a",
+      "bytes": 7635,
+      "sha256": "c1e8c4a2b3ad823e97cdf96a4be20f9e7b6e099116e30e5b5f71e3c4a71dc28a",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/98/98dfa3b23d340fac93128f18c1e6b5ccfa76dc5f.m4a"
+    },
+    {
+      "id": "06fc26032690f24e92c64938e89aa0dbcd610451d9144bbf53a86b697897cff2",
+      "key": "sha256/06fc26032690f24e92c64938e89aa0dbcd610451d9144bbf53a86b697897cff2.m4a",
+      "bytes": 3536,
+      "sha256": "06fc26032690f24e92c64938e89aa0dbcd610451d9144bbf53a86b697897cff2",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/62/62774e84a6c42032484e9370dd661d7d5e8a08f9.m4a"
+    },
+    {
+      "id": "e998dd9b9c71e51afe0c688aecc7db74ef51fc29d397268ba5afaabe3ba9a0dc",
+      "key": "sha256/e998dd9b9c71e51afe0c688aecc7db74ef51fc29d397268ba5afaabe3ba9a0dc.m4a",
+      "bytes": 3392,
+      "sha256": "e998dd9b9c71e51afe0c688aecc7db74ef51fc29d397268ba5afaabe3ba9a0dc",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/49/49f37c4621962e8536e9a9bf2f40b1ad05f30d78.m4a"
+    },
+    {
+      "id": "32f353e7789cc3feb8b07f7956ba6700ecf33393b5ee1807f73ab4e0db769de6",
+      "key": "sha256/32f353e7789cc3feb8b07f7956ba6700ecf33393b5ee1807f73ab4e0db769de6.m4a",
+      "bytes": 3926,
+      "sha256": "32f353e7789cc3feb8b07f7956ba6700ecf33393b5ee1807f73ab4e0db769de6",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/1a/1ae620948d7233b942f99d02d8c927ca46d1b810.m4a"
+    },
+    {
+      "id": "4dd43febafbe7d1ac6e3f3c43404805d29e8482e9d6127fdb267db1b3ec918cb",
+      "key": "sha256/4dd43febafbe7d1ac6e3f3c43404805d29e8482e9d6127fdb267db1b3ec918cb.m4a",
+      "bytes": 3469,
+      "sha256": "4dd43febafbe7d1ac6e3f3c43404805d29e8482e9d6127fdb267db1b3ec918cb",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/0e/0eb291a7bc8c18095127f2c19aa6240950952bf4.m4a"
+    },
+    {
+      "id": "34e7648ee9247c6db3096b27e12781db591e5130818c1239d478e5de51c12e1b",
+      "key": "sha256/34e7648ee9247c6db3096b27e12781db591e5130818c1239d478e5de51c12e1b.m4a",
+      "bytes": 7833,
+      "sha256": "34e7648ee9247c6db3096b27e12781db591e5130818c1239d478e5de51c12e1b",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/b8/b86577c9c0d1fd6d3c71922f9acb92e9ed35b82c.m4a"
+    },
+    {
+      "id": "365c46c2ceb3a81d0e2308d546e5bf390db3d5f85da0a96ea17ff4a61eab2913",
+      "key": "sha256/365c46c2ceb3a81d0e2308d546e5bf390db3d5f85da0a96ea17ff4a61eab2913.m4a",
+      "bytes": 8264,
+      "sha256": "365c46c2ceb3a81d0e2308d546e5bf390db3d5f85da0a96ea17ff4a61eab2913",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/8f/8fede58e15e3b28172766ee48ee0d6452af5ba5c.m4a"
+    },
+    {
+      "id": "1202b285860950bc4f56a628993e25304e5fec98d1213a9c9ab3c844ae2ba6e8",
+      "key": "sha256/1202b285860950bc4f56a628993e25304e5fec98d1213a9c9ab3c844ae2ba6e8.m4a",
+      "bytes": 9503,
+      "sha256": "1202b285860950bc4f56a628993e25304e5fec98d1213a9c9ab3c844ae2ba6e8",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/9d/9d2de5323d59d0d773047bee6ca33e0abdbe9216.m4a"
+    },
+    {
+      "id": "83fed518efcdf3fc957ab4c5982a3fb502f918e22defdb5df0117db59233b38e",
+      "key": "sha256/83fed518efcdf3fc957ab4c5982a3fb502f918e22defdb5df0117db59233b38e.m4a",
+      "bytes": 6879,
+      "sha256": "83fed518efcdf3fc957ab4c5982a3fb502f918e22defdb5df0117db59233b38e",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/c8/c8152c5429de54cc3b8e2b6d1ec8dbf50ac3ffd2.m4a"
+    },
+    {
+      "id": "b11bdc0a70704e46da83409148abe57e2d74d138fd18830d89c8b8c270f65c09",
+      "key": "sha256/b11bdc0a70704e46da83409148abe57e2d74d138fd18830d89c8b8c270f65c09.m4a",
+      "bytes": 22349,
+      "sha256": "b11bdc0a70704e46da83409148abe57e2d74d138fd18830d89c8b8c270f65c09",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/02/020e8ea594d464233f5db0c910f67ced0a9deda9.m4a"
+    },
+    {
+      "id": "36a06a4380f2c82f7eb61f4449f1aeb4c8ade2ea654927d350cd01ccdc1a354a",
+      "key": "sha256/36a06a4380f2c82f7eb61f4449f1aeb4c8ade2ea654927d350cd01ccdc1a354a.m4a",
+      "bytes": 8437,
+      "sha256": "36a06a4380f2c82f7eb61f4449f1aeb4c8ade2ea654927d350cd01ccdc1a354a",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/7f/7f4450572b4c6e61d2bd4338a312e1cd9fbdf9cb.m4a"
+    },
+    {
+      "id": "84e45aadba738a375a95281a4e63aaa4a2951f073161405d9babc50b3d692654",
+      "key": "sha256/84e45aadba738a375a95281a4e63aaa4a2951f073161405d9babc50b3d692654.m4a",
+      "bytes": 11191,
+      "sha256": "84e45aadba738a375a95281a4e63aaa4a2951f073161405d9babc50b3d692654",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/f0/f0d32ebb9df48784e3a501078e85dd702e89da92.m4a"
+    },
+    {
+      "id": "27a97ea2b1f4ac7bf630d4ff516cfb88274d6d9c874d96ea250e86cd5d69d5ab",
+      "key": "sha256/27a97ea2b1f4ac7bf630d4ff516cfb88274d6d9c874d96ea250e86cd5d69d5ab.m4a",
+      "bytes": 18643,
+      "sha256": "27a97ea2b1f4ac7bf630d4ff516cfb88274d6d9c874d96ea250e86cd5d69d5ab",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/f5/f53f9f1b946aeeec66ce66af25fe6593ee633d7f.m4a"
+    },
+    {
+      "id": "c86fc260656ed4d2f31b243d423d801d3ad9bb9b88e3bb7a6e4f69a5b9ee9185",
+      "key": "sha256/c86fc260656ed4d2f31b243d423d801d3ad9bb9b88e3bb7a6e4f69a5b9ee9185.m4a",
+      "bytes": 10671,
+      "sha256": "c86fc260656ed4d2f31b243d423d801d3ad9bb9b88e3bb7a6e4f69a5b9ee9185",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/4a/4a75e95dce56021f309679417e40e4cb510a9b28.m4a"
+    },
+    {
+      "id": "d2733d161b39b45d03b9a8cc377c0d9362490e139a817bbac635cbfe3c0b0011",
+      "key": "sha256/d2733d161b39b45d03b9a8cc377c0d9362490e139a817bbac635cbfe3c0b0011.m4a",
+      "bytes": 5125,
+      "sha256": "d2733d161b39b45d03b9a8cc377c0d9362490e139a817bbac635cbfe3c0b0011",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/e6/e6f085d0f6de164669f148e96d3dd8ef54d58389.m4a"
+    },
+    {
+      "id": "c67a6950e3e49f78a441bd19990392f316e62207759da5f8da70079672f85196",
+      "key": "sha256/c67a6950e3e49f78a441bd19990392f316e62207759da5f8da70079672f85196.m4a",
+      "bytes": 3669,
+      "sha256": "c67a6950e3e49f78a441bd19990392f316e62207759da5f8da70079672f85196",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/83/83347105750c43ddcc47c817e1902032b7e08e51.m4a"
+    },
+    {
+      "id": "f4b89b92d5595772420dd645a32ae1815aaeebd18c172d699a604bd83d427232",
+      "key": "sha256/f4b89b92d5595772420dd645a32ae1815aaeebd18c172d699a604bd83d427232.m4a",
+      "bytes": 7910,
+      "sha256": "f4b89b92d5595772420dd645a32ae1815aaeebd18c172d699a604bd83d427232",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/a2/a274a107cd23b39a44a08831f8fc75f1f08575fc.m4a"
+    },
+    {
+      "id": "37a52553279cd5bee09aeafc4083229f73e24a984acc3158b4f1420aac8fdc95",
+      "key": "sha256/37a52553279cd5bee09aeafc4083229f73e24a984acc3158b4f1420aac8fdc95.m4a",
+      "bytes": 11538,
+      "sha256": "37a52553279cd5bee09aeafc4083229f73e24a984acc3158b4f1420aac8fdc95",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/f3/f33779518b5234c2e12bbe37c20326f8fb207f33.m4a"
+    },
+    {
+      "id": "fba2da24f8ac945f98c4d4160534ebaa2a31c2c0424c95ffe268a196722e4f9c",
+      "key": "sha256/fba2da24f8ac945f98c4d4160534ebaa2a31c2c0424c95ffe268a196722e4f9c.m4a",
+      "bytes": 7815,
+      "sha256": "fba2da24f8ac945f98c4d4160534ebaa2a31c2c0424c95ffe268a196722e4f9c",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/d2/d21ebe9286c273ef3916c5b554e2f42dfbb6e954.m4a"
+    },
+    {
+      "id": "4c679a23106625abc0b475377dafd0b0e9d8806e6255d3f338de3bed3020fe2f",
+      "key": "sha256/4c679a23106625abc0b475377dafd0b0e9d8806e6255d3f338de3bed3020fe2f.m4a",
+      "bytes": 12960,
+      "sha256": "4c679a23106625abc0b475377dafd0b0e9d8806e6255d3f338de3bed3020fe2f",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/aa/aa9dc16907f60b929913cc075748f09bf140b534.m4a"
+    },
+    {
+      "id": "839af6df89d46285d02277b1e66ba92e4b86f50b5ad9d26de97252f8a9f43237",
+      "key": "sha256/839af6df89d46285d02277b1e66ba92e4b86f50b5ad9d26de97252f8a9f43237.m4a",
+      "bytes": 16579,
+      "sha256": "839af6df89d46285d02277b1e66ba92e4b86f50b5ad9d26de97252f8a9f43237",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/77/7736845ccd3d986049a9b837d471d8fad236f30d.m4a"
+    },
+    {
+      "id": "6aefeb2a20e50f9a9628694a1b5f72fb12f87f0d86672b7a2df7ce8a3ebab382",
+      "key": "sha256/6aefeb2a20e50f9a9628694a1b5f72fb12f87f0d86672b7a2df7ce8a3ebab382.m4a",
+      "bytes": 12043,
+      "sha256": "6aefeb2a20e50f9a9628694a1b5f72fb12f87f0d86672b7a2df7ce8a3ebab382",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/11/1106c278e4f12f81fe3d072bf288427e156beb1e.m4a"
+    },
+    {
+      "id": "4548c6d82041f7b90f715dddf96b1f1b634b971fece699131a341c925f431c73",
+      "key": "sha256/4548c6d82041f7b90f715dddf96b1f1b634b971fece699131a341c925f431c73.m4a",
+      "bytes": 16215,
+      "sha256": "4548c6d82041f7b90f715dddf96b1f1b634b971fece699131a341c925f431c73",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/5b/5b11e4afc7e73404087c4a4f902f42badb16f4cc.m4a"
+    },
+    {
+      "id": "9efdf73932e29e10921b4aa0219abe0831dd6367e1a142e54d710089604452a1",
+      "key": "sha256/9efdf73932e29e10921b4aa0219abe0831dd6367e1a142e54d710089604452a1.m4a",
+      "bytes": 6061,
+      "sha256": "9efdf73932e29e10921b4aa0219abe0831dd6367e1a142e54d710089604452a1",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/0b/0bdf06d4a166ea8b9abde7853a578c1e500e8ce6.m4a"
+    },
+    {
+      "id": "42270a451f51bf82260c2f7105ad36d8404bd4907244f9b4589477a35ca0dbf7",
+      "key": "sha256/42270a451f51bf82260c2f7105ad36d8404bd4907244f9b4589477a35ca0dbf7.m4a",
+      "bytes": 8259,
+      "sha256": "42270a451f51bf82260c2f7105ad36d8404bd4907244f9b4589477a35ca0dbf7",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/02/026ae4ceedaa1ae2a830627a512b0f9e91c6aa07.m4a"
+    },
+    {
+      "id": "421b9817997f4d851134d9a79a7a91ae5bad4a7e8b5cca7ef13b48385cf0e05c",
+      "key": "sha256/421b9817997f4d851134d9a79a7a91ae5bad4a7e8b5cca7ef13b48385cf0e05c.m4a",
+      "bytes": 8488,
+      "sha256": "421b9817997f4d851134d9a79a7a91ae5bad4a7e8b5cca7ef13b48385cf0e05c",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/f8/f8c9f344c1584384cbdbd876644eed94b7aa2645.m4a"
+    },
+    {
+      "id": "8188de1db6b67cf91d470ca4ce8986e63f92eb929acf3e64cbfd59e7b46ac05a",
+      "key": "sha256/8188de1db6b67cf91d470ca4ce8986e63f92eb929acf3e64cbfd59e7b46ac05a.m4a",
+      "bytes": 7123,
+      "sha256": "8188de1db6b67cf91d470ca4ce8986e63f92eb929acf3e64cbfd59e7b46ac05a",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/eb/ebb71d30b8e865ceb989bd3705a778bb720303c3.m4a"
+    },
+    {
+      "id": "66c364a5cef62de1ce726458656d2431a6bd03feb954f540bc7c1b0933ca7fd2",
+      "key": "sha256/66c364a5cef62de1ce726458656d2431a6bd03feb954f540bc7c1b0933ca7fd2.m4a",
+      "bytes": 6794,
+      "sha256": "66c364a5cef62de1ce726458656d2431a6bd03feb954f540bc7c1b0933ca7fd2",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/c7/c749cf142c4649ee55a12404101d2d468d0d69f5.m4a"
+    },
+    {
+      "id": "294752b2bdf42118aadddc495ceefe0b091c0175df4d0c372389300a6e829894",
+      "key": "sha256/294752b2bdf42118aadddc495ceefe0b091c0175df4d0c372389300a6e829894.m4a",
+      "bytes": 5921,
+      "sha256": "294752b2bdf42118aadddc495ceefe0b091c0175df4d0c372389300a6e829894",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/ed/ede3dd5daf39bf5c43200f330c96549a2f6dff73.m4a"
+    },
+    {
+      "id": "11d04ef839a431cfc924d8714cf87ac05c2542351015837fe9655eafc9614cad",
+      "key": "sha256/11d04ef839a431cfc924d8714cf87ac05c2542351015837fe9655eafc9614cad.m4a",
+      "bytes": 6326,
+      "sha256": "11d04ef839a431cfc924d8714cf87ac05c2542351015837fe9655eafc9614cad",
+      "format": "audio/mp4",
+      "language": "zh-CN",
+      "sourcePath": "audio/c2/c2817f5d471631656689b061600fda3b0eae9ded.m4a"
+    }
+  ]
+}

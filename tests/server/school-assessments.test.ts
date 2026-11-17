@@ -1,5 +1,8 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+vi.mock('@/lib/curriculum/prepared-courses', () => ({
+  readablePreparedLesson: vi.fn().mockResolvedValue(null),
+}));
 const state = vi.hoisted(() => ({
   user: { id: '11111111-1111-4111-8111-111111111111' } as { id: string } | null,
   role: 'student',
