@@ -23,7 +23,9 @@ export interface ReviewedVideoStory {
       each?: number;
       groupSizes?: number[];
       formula?: string;
-      pause?: { friend?: { name: string; text: string } };
+      pause?: {
+        friend?: { name: string; text: string; misconception?: boolean; correction?: string };
+      };
     }[];
   }[];
 }
@@ -47,6 +49,7 @@ export function ReviewedLessonVideo({
   const [room, setRoom] = useState(true);
   const [frameHeight, setFrameHeight] = useState<number | null>(null);
   const [classmateTurn, setClassmateTurn] = useState<ClassmateTurn | null>(null);
+  const [teacherCorrecting, setTeacherCorrecting] = useState(false);
   const content = story.chapters.find((item) => item.id === chapter)!;
   useEffect(() => {
     if (fallback) return;
@@ -71,14 +74,19 @@ export function ReviewedLessonVideo({
       }
       if (event.data.event === 'activity') {
         const shot = content.shots.find((shot) => shot.id === event.data.shotId);
-        if (!shot?.pause || !['thinking', 'answer', 'done'].includes(event.data.stage)) return;
+        if (
+          !shot?.pause ||
+          !['thinking', 'answer', 'correction', 'corrected', 'done'].includes(event.data.stage)
+        )
+          return;
         const friend = shot.pause.friend;
+        setTeacherCorrecting(event.data.stage === 'correction');
         setClassmateTurn(
-          friend && event.data.stage !== 'done'
+          friend && !['done', 'corrected', 'correction'].includes(event.data.stage)
             ? {
                 name: friend.name,
                 text:
-                  event.data.stage === 'answer' ? friend.text : '我有个想法，想和你一起试一试！',
+                  event.data.stage === 'answer' ? friend.text : '我有个猜想，想请大家一起检查！',
                 answering: event.data.stage === 'answer',
               }
             : null,
@@ -131,7 +139,7 @@ export function ReviewedLessonVideo({
           >
             <LittleClassroom
               compact
-              speaking={status === 'play' && !fallback}
+              speaking={(status === 'play' || teacherCorrecting) && !fallback}
               classmateTurn={classmateTurn}
             />
           </Suspense>

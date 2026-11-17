@@ -203,6 +203,17 @@ try {
             .getByRole('button', { name: prompt.options[prompt.answer], exact: true })
             .click();
         }
+        if (prompt.friend?.misconception) {
+          await expect(turn.getByRole('button', { name: '准备好啦，继续' })).toBeDisabled();
+          await turn.getByRole('button', { name: '听老师帮忙检查' }).click();
+          await expect(
+            turn.getByText('小海老师：' + prompt.friend.correction, { exact: true }),
+          ).toBeVisible();
+          await expect
+            .poll(() => turn.locator('audio').evaluate((n) => !n.paused && n.currentTime > 0))
+            .toBe(true);
+          await turn.getByRole('button', { name: '我看懂老师的纠正啦' }).click();
+        }
         await expect(turn.getByText(prompt.success, { exact: true })).toBeVisible();
         await page.setViewportSize({ width: 390, height: 844 });
         if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth))

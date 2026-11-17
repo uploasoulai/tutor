@@ -64,7 +64,7 @@ const server = createServer((request, response) => {
     );
     response.end(readFileSync(join(root, 'public', path)));
   } else if (
-    path === '/lessons/multiplication-narrated-v5.html' ||
+    path === '/lessons/multiplication-narrated-v6.html' ||
     path === '/lessons/fractions-narrated-v2.html'
   ) {
     response.setHeader('Content-Type', 'text/html');
@@ -153,7 +153,7 @@ try {
   await page.getByRole('button', { name: '看老师讲一讲' }).click();
   await expect(page.locator('iframe')).toHaveAttribute(
     'src',
-    /multiplication-narrated-v5.html#chapter=explain$/,
+    /multiplication-narrated-v6.html#chapter=explain$/,
   );
   await page.frameLocator('iframe').getByRole('button', { name: '播放讲解', exact: true }).click();
   await expect(

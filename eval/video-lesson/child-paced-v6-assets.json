@@ -1,0 +1,147 @@
+{
+  "edition": 6,
+  "ttsModel": "FunAudioLLM/CosyVoice2-0.5B",
+  "asrModel": "FunAudioLLM/SenseVoiceSmall",
+  "newSpeechRequests": 17,
+  "activeLessonClips": 13,
+  "discardedNewDraftClips": 4,
+  "voiceInputPolicy": "Plain authored text only; remove instruction prefix after ASR exposed leakage/truncation.",
+  "reviewLimit": "ASR text checks are not a human pronunciation/naturalness assessment. Child testing remains required.",
+  "asset": {
+    "path": "/lessons/multiplication-narrated-v6.html",
+    "bytes": 3324221,
+    "sha256": "83477336431eebdb5b523a5a5a12f2cb1b3bc1838e9c1119749c6e39a1c444c1"
+  },
+  "clips": [
+    {
+      "id": "one-group",
+      "role": "teacher",
+      "text": "看，这个小盒里有两个圆片。一个盒子就是一组。轮到你来数啦！",
+      "seconds": 7.419,
+      "bytes": 119979,
+      "sha256": "c68520f20e2d52065de7618f4c272b68bbb2f0b1ddd43b801fc7c50ef4da1444",
+      "recognized": "看这这个小盒里有两个圆片，一个盒子就是一组，轮到你来数了。😊",
+      "normalizedTextSimilarity": 0.941
+    },
+    {
+      "id": "two-groups",
+      "role": "teacher",
+      "text": "又来一个小盒！每盒都有两个。我们说：有两个二。看看下面，哪句话说对了？",
+      "seconds": 8.568,
+      "bytes": 138369,
+      "sha256": "a19693490a6d84f53ff7af6762cc5bac421c56ba50f22597eb1f3f18f3a4b0b1",
+      "recognized": "又来一个小盒，每盒都有两个，我们说有两个2，看看下面哪句话说对了。",
+      "normalizedTextSimilarity": 1.0
+    },
+    {
+      "id": "three-groups",
+      "role": "teacher",
+      "text": "三个盒子排好队，每盒都放两个。你来当整理小帮手，把下面的小盒装好吧！",
+      "seconds": 9.221,
+      "bytes": 148818,
+      "sha256": "de8aae4241d9a17f627f22d65511e0d4154bd59d87a248c82668ffb071cd9449",
+      "recognized": "三个盒子排好队，每盒都放两个，你来当整理小帮手，把下面的小盒装好吧。",
+      "normalizedTextSimilarity": 1.0
+    },
+    {
+      "id": "shorter",
+      "role": "teacher",
+      "text": "两个加两个，再加两个，有点长，对吧？我们给它换个短写法：二乘三。你来找一找！",
+      "seconds": 9.169,
+      "bytes": 147982,
+      "sha256": "dff54ef4d4473e6cd8232904886efe89e0b31bc360dc1f1c973f1ad53626dc1a",
+      "recognized": "两个加两个，再加两个有点长，对吧？我们给他换个短写法，2乘3，你来找一找。",
+      "normalizedTextSimilarity": 0.968
+    },
+    {
+      "id": "meaning",
+      "role": "teacher",
+      "text": "二乘三，里面的二说每盒两个，三说有三盒。别急着背，找一找下面的数字在说什么。",
+      "seconds": 9.3,
+      "bytes": 150072,
+      "sha256": "f735265c93dd9d3f2af03c3ee8e4e05e44301c1014ee4f3f14fda8ef53eb309c",
+      "recognized": "2乘3里面的二说每盒两个，三说有三盒，别急着背，找一找下面的数字在说什么。",
+      "normalizedTextSimilarity": 1.0
+    },
+    {
+      "id": "unequal",
+      "role": "teacher",
+      "text": "咦，中间的盒子多了一片！这回每盒还一样多吗？请你当小侦探，找出不一样的盒子。",
+      "seconds": 9.587,
+      "bytes": 154670,
+      "sha256": "abec59b1dd288d41e6132b7ccc688142d4247580236b21c68208a32755032e03",
+      "recognized": "咦中间的盒子多了一片，这回每盒还一样多吗？请你当小侦探找出不一样的盒子。",
+      "normalizedTextSimilarity": 1.0
+    },
+    {
+      "id": "remember-groups",
+      "role": "teacher",
+      "text": "今天的小秘诀：先看一盒几个，再数有几盒。下面的小盒，你还能摆好吗？",
+      "seconds": 8.046,
+      "bytes": 130010,
+      "sha256": "2420a9c3e029f63d282ff25e294ca673f416e985265246cb42ce93bf6e1c0108",
+      "recognized": "今天的小秘诀先看一盒几个，再数有几盒，下面的小盒你还能摆好吗？😊",
+      "normalizedTextSimilarity": 1.0
+    },
+    {
+      "id": "new-groups",
+      "role": "teacher",
+      "text": "换个新挑战：现在有四盒，每盒三个。慢慢数，也可以把四个三加起来。你来试试！",
+      "seconds": 9.326,
+      "bytes": 150490,
+      "sha256": "b90a9bb6a7ae12e19e614f04d0c4146cb57c8439ac1150f3d25b21a81b2ce116",
+      "recognized": "换个新挑战，现在有4盒，每盒3个，慢慢数，也可以把4个3加起来，你来试试。😊",
+      "normalizedTextSimilarity": 1.0
+    },
+    {
+      "id": "two-groups-friend",
+      "role": "classmate",
+      "text": "我猜，两盒就是两个圆片吧？我只数了盒子，没有数里面的小圆片。",
+      "seconds": 6.896,
+      "bytes": 111620,
+      "sha256": "f2e460db12548c3c2523db8fa1cfc29824bb100f05c4ec704ec2560b52e92817",
+      "recognized": "我猜两盒就是两个圆片吧，我只数了盒子，没有数里面的小圆片。",
+      "normalizedTextSimilarity": 1.0
+    },
+    {
+      "id": "two-groups-correction",
+      "role": "teacher-correction",
+      "text": "谢谢朵朵大胆说出想法！盒子有两个，每盒还有两个圆片。我们指着数：二、四。一共有四个，可不是两个哦。",
+      "seconds": 13.375,
+      "bytes": 215274,
+      "sha256": "677a2e39051fa9a4efa4595e71daeb4c3a01dca07a189ab8f9054a2809334da5",
+      "recognized": "谢谢朵朵大胆说出想法，盒子有两个每盒还有两个圆片，我们指着数24，一共有4个，可不是两个哦。😊",
+      "normalizedTextSimilarity": 1.0
+    },
+    {
+      "id": "meaning-friend",
+      "role": "classmate",
+      "text": "我先看一盒，里面有两个。再数盒子，有三个。原来二和三各有自己的工作呀！",
+      "seconds": 8.855,
+      "bytes": 142967,
+      "sha256": "b707df0b4d8a98d413f3a885d2bdef09769ead84f4e2940f60a228359c69eb63",
+      "recognized": "我先看一盒，里面有两个再数盒子有3个，原来二和三各有自己的工作呀。",
+      "normalizedTextSimilarity": 1.0
+    },
+    {
+      "id": "unequal-friend",
+      "role": "classmate",
+      "text": "有三个盒子，我就写二乘三啦！中间多出来一个，应该也没关系吧？",
+      "seconds": 6.949,
+      "bytes": 112456,
+      "sha256": "55a73208eafa46d73c459b4e87d271beee14f6f92e703ae16bb3dd21431e116f",
+      "recognized": "有3个盒子，我就写2乘3了，中间多出来一个，应该也没关系吧。",
+      "normalizedTextSimilarity": 0.962
+    },
+    {
+      "id": "unequal-correction",
+      "role": "teacher-correction",
+      "text": "乐乐数对了盒子，不过我们还要检查每盒一样多吗。中间有三个，旁边有两个，不能把这幅图当成三个二。多的那个也要算上哦！",
+      "seconds": 13.61,
+      "bytes": 219035,
+      "sha256": "d410639ed85eff2bbbd00acb65608c732b74446344b13d3909360173d5fef3f7",
+      "recognized": "乐乐数对了盒子，不过我们还要检查每盒一样多吗？中间有3个，旁边有两个，不能把这幅图当成三个2多的那个也要算上哦。",
+      "normalizedTextSimilarity": 1.0
+    }
+  ]
+}

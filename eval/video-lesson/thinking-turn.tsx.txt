@@ -2,18 +2,20 @@ import React, {useEffect, useRef, useState} from 'react';
 export type ThinkingPrompt = {
   kind: 'choice' | 'groups'; question: string; options?: string[]; answer?: number;
   groups?: number; each?: number; hint: string; success: string;
-  friend?: {name: string; text: string};
+  friend?: {name: string; text: string; misconception?: boolean; correction?: string};
 };
-export function ThinkingTurn({prompt, audio, onFriend, onContinue}: {
-  prompt: ThinkingPrompt; audio?: string; onFriend: ()=>void; onContinue: ()=>void;
+export function ThinkingTurn({prompt, audio, correctionAudio, onFriend, onContinue}: {
+  prompt: ThinkingPrompt; audio?: string; correctionAudio?: string; onFriend: (stage?: 'answer'|'correction'|'corrected')=>void; onContinue: ()=>void;
 }) {
   const [attempted,setAttempted]=useState(false), [solved,setSolved]=useState(false), [revealed,setRevealed]=useState(false);
   const [boxes,setBoxes]=useState(()=>Array(prompt.groups??0).fill(0));
   const voice=useRef<HTMLAudioElement>(null);
+  const [corrected,setCorrected]=useState(false), [correctionOpen,setCorrectionOpen]=useState(false), [speaker,setSpeaker]=useState<'friend'|'teacher'|null>(null), [soundFailed,setSoundFailed]=useState(false);
+  const explain=()=>{setCorrectionOpen(true);setSpeaker('teacher');onFriend('correction');const clip=voice.current;if(clip&&correctionAudio){clip.pause();clip.src=correctionAudio;clip.currentTime=0;void clip.play().catch(()=>{setSoundFailed(true);setSpeaker(null)})}else{setSoundFailed(true);setSpeaker(null)}};
   useEffect(()=>{const clip=voice.current;const hide=()=>{if(document.hidden)clip?.pause()};document.addEventListener('visibilitychange',hide);return()=>{clip?.pause();document.removeEventListener('visibilitychange',hide)}},[]);
   const check=(correct:boolean)=>{setAttempted(true);setSolved(correct)};
   return <section className="thinking-turn" aria-label="停下来想一想">
-    <h2>轮到你啦！不用着急</h2><p>{prompt.question}</p>
+    <h2>轮到你啦！不用着急</h2><p>{prompt.question}</p><p className="turn-note">探索任务 · 先试一试，答错也能发现新办法。没有倒计时，不扣星星。</p>
     {prompt.kind==='choice' ? <div className="turn-choices">{prompt.options?.map((option,i)=><button key={option} disabled={solved} onClick={()=>check(i===prompt.answer)}>{option}</button>)}</div> : <>
       <div className="turn-choices">{boxes.map((count,i)=><button key={i} disabled={solved} aria-label={`小盒${i+1}，有${count}个圆片，点击加一个`} onClick={()=>{setAttempted(false);setBoxes(values=>values.map((n,j)=>j===i?(n+1)%4:n))}}>
         第{i+1}盒<span className="turn-counters" aria-hidden="true">{Array.from({length:count},(_,j)=><span key={j}>●</span>)}</span><span>{count}个 · 点一点</span>
@@ -21,11 +23,13 @@ export function ThinkingTurn({prompt, audio, onFriend, onContinue}: {
     </>}
     {attempted && <p role="status">{solved?prompt.success:prompt.hint}</p>}
     {prompt.friend && <>
-      <button disabled={!attempted} onClick={()=>{setRevealed(true);onFriend();const clip=voice.current;if(clip){clip.currentTime=0;void clip.play().catch(()=>{})}}}>听{prompt.friend.name}怎么想</button>
+      <button disabled={!attempted||correctionOpen} onClick={()=>{setRevealed(true);setSpeaker('friend');onFriend('answer');const clip=voice.current;if(clip&&audio){clip.pause();clip.src=audio;clip.currentTime=0;void clip.play().catch(()=>{setSoundFailed(true);setSpeaker(null)})}}}>听{prompt.friend.name}怎么想</button>
       {!attempted && <p className="turn-note">同学也举手啦！你先试一试，再请同学帮忙。</p>}
       {revealed && <p role="status" className="friend-reply">{prompt.friend.name}：{prompt.friend.text}</p>}
-      {audio && <audio ref={voice} src={audio} preload="none"/>}
+      {revealed && prompt.friend.misconception && <div className="teacher-correction"><p>同学的猜想也可能出错。先看看图，再听老师一起检查。</p><button onClick={explain}>听老师帮忙检查</button>{correctionOpen&&<><p role="status">小海老师：{prompt.friend.correction}</p><button onClick={()=>{voice.current?.pause();setSpeaker(null);setCorrected(true);onFriend('corrected')}}>我看懂老师的纠正啦</button></>}</div>}
+      {(audio||correctionAudio) && <audio ref={voice} preload="none" onEnded={()=>{if(speaker==='teacher'){setCorrected(true);onFriend('corrected')}setSpeaker(null)}} onError={()=>{setSoundFailed(true);setSpeaker(null)}}/>}
+      {soundFailed&&<p className="turn-note">声音暂时没有播放出来，可以看文字，慢慢想明白。</p>}
     </>}
-    <button className="turn-continue" disabled={!solved&&!revealed} onClick={()=>{voice.current?.pause();onContinue()}}>准备好啦，继续</button>
+    <button className="turn-continue" disabled={(!solved&&!revealed)||(revealed&&!!prompt.friend?.misconception&&!corrected)} onClick={()=>{voice.current?.pause();onContinue()}}>准备好啦，继续</button>
   </section>;
 }

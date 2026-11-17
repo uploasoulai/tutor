@@ -19,7 +19,7 @@ function App() {
   const pending=useRef<string|null>(null), lastFrame=useRef(chapter.start), cleared=useRef(new Set<string>());
   const prompts=Object.fromEntries(story.chapters.flatMap(c=>c.shots).filter(s=>'pause' in s).map(s=>[s.id,(s as typeof s & {pause:ThinkingPrompt}).pause]));
   const turn=thinking?prompts[thinking]:null;
-  const activity=(shotId:string,stage:'thinking'|'answer'|'done')=>parent.postMessage({channel:'coastaltutor-reviewed-video',version:2,chapter:chapter.id,event:'activity',shotId,stage},'*');
+  const activity=(shotId:string,stage:'thinking'|'answer'|'correction'|'corrected'|'done')=>parent.postMessage({channel:'coastaltutor-reviewed-video',version:2,chapter:chapter.id,event:'activity',shotId,stage},'*');
   useEffect(() => {
     const p=player.current;
     if (!p) return;
@@ -55,7 +55,8 @@ function App() {
       errorFallback={()=> <p role="alert">讲解暂时无法播放，请返回课程查看图解。</p>}
       style={{width:'100%',aspectRatio:'4/3',maxHeight:'calc(100vh - 100px)'}}/>
     <p data-lesson-caption className={'readable-caption'+(('captionLayout' in manifest && manifest.captionLayout==='below-player')?' external-caption':'')} aria-live="off">{frame>=(current?.audioStart??0)?caption:"点击播放，听听老师怎么解释。"}</p>
-    {turn&&thinking&&<ThinkingTurn key={thinking} prompt={turn} audio={(companionAudio as Record<string,{src:string}>)[thinking]?.src} onFriend={()=>activity(thinking,'answer')} onContinue={()=>{
+    {manifest.version>=6&&<p className="adventure-stamps" aria-label="本章探索印章">{Array.from({length:story.chapters.find(c=>c.id===chapter.id)!.shots.length},(_,i)=><span key={i} data-stamp={i<cleared.current.size?'collected':'waiting'}>{i<cleared.current.size?'★':'☆'}</span>)} · 一步一个小发现（动手探索，不代表测验成绩）</p>}
+    {turn&&thinking&&<ThinkingTurn key={thinking} prompt={turn} audio={(companionAudio as Record<string,{src:string}>)[thinking]?.src} correctionAudio={(companionAudio as Record<string,{correctionSrc?:string}>)[thinking]?.correctionSrc} onFriend={(stage)=>activity(thinking,stage??'answer')} onContinue={()=>{
       const timing=manifest.shots.find(s=>s.id===thinking)!;cleared.current.add(thinking);activity(thinking,'done');pending.current=null;setThinking(null);
       const next=Math.min(chapter.end,timing.end+1);lastFrame.current=next;player.current?.seekTo(next);setFrame(next);
       if(next<chapter.end)player.current?.play();else notify('ended');

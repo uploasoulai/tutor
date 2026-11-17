@@ -1,5 +1,5 @@
 """Explicit operator recording of the approved revised Grade-2 lesson. No learner data.
-Eleven short clips maximum; successful/ambiguous requests never auto-resubmit.
+Thirteen short clips maximum; successful/ambiguous requests never auto-resubmit.
 Existing illustration, opener and welcome are reused. Run with --record.
 """
 import argparse
@@ -12,7 +12,7 @@ import urllib.request
 import urllib.error
 
 ROOT = Path(__file__).resolve().parents[1]
-WORK = ROOT / "data/child-paced-v5"
+WORK = ROOT / "data/child-paced-v6"
 MODEL = "FunAudioLLM/CosyVoice2-0.5B"
 
 
@@ -31,6 +31,12 @@ def main():
     WORK.mkdir(exist_ok=True)
     state_path = WORK / "recording.json"
     state = json.loads(state_path.read_text()) if state_path.exists() else {}
+    old = ROOT / "data/child-paced-v5"
+    if not state and (old / "recording.json").exists():
+        import shutil
+        state = json.loads((old / "recording.json").read_text())
+        for clip in old.glob("*.mp3"):
+            shutil.copyfile(clip, WORK / clip.name)
     if record:
         with urllib.request.urlopen(urllib.request.Request("https://api.siliconflow.cn/v1/models", headers=headers), timeout=30) as response:
             assert MODEL in [item["id"] for item in json.load(response)["data"]], "Configured speech model is unavailable"
@@ -40,9 +46,10 @@ def main():
         friend = shot["pause"].get("friend")
         if friend:
             entries.append((shot["id"] + "-friend", friend["text"], "david" if friend["name"] == "小宇" else "claire", True))
+            if friend.get("correction"):
+                entries.append((shot["id"] + "-correction", friend["correction"], "diana", True))
         for clip_id, text, preset, is_friend in entries:
-            instruction = "用亲切活泼的语气，像和二年级小朋友面对面聊天。短句说清楚，不要赶。<|endofprompt|>"
-            payload = {"model": MODEL, "voice": MODEL + ":" + preset, "input": instruction + text,
+            payload = {"model": MODEL, "voice": MODEL + ":" + preset, "input": text,
                        "response_format": "mp3", "sample_rate": 44100, "speed": 0.9}
             digest = hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
             target = WORK / (digest + ".mp3")
@@ -68,7 +75,11 @@ def main():
             seconds = MP3(target).info.length
             clip = {"text": text, "frames": math.ceil(seconds * 30), "captions": [],
                     "src": "data:audio/mpeg;base64," + base64.b64encode(target.read_bytes()).decode()}
-            (companions if is_friend else voice)[shot["id"]] = clip
+            if clip_id.endswith("-correction"):
+                companions[shot["id"]]["correctionSrc"] = clip["src"]
+                companions[shot["id"]]["correctionText"] = text
+            else:
+                (companions if is_friend else voice)[shot["id"]] = clip
             print(json.dumps({"clip": clip_id, "seconds": round(seconds, 2), "cached": was_cached}), flush=True)
     output = ROOT / "data/narrated-multiplication-siliconflow"
     (output / "voice.ts").write_text("export const VOICE = " + json.dumps(voice, ensure_ascii=False) + ";\n", encoding="utf-8")

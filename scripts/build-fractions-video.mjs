@@ -9,7 +9,7 @@ const premium = name === 'multiplication' && process.argv.includes('--siliconflo
 const work = join(root, 'data/narrated-' + name + (premium ? '-siliconflow' : ''));
 const asset =
   name === 'multiplication'
-    ? `/lessons/multiplication-narrated-v${premium ? 5 : 2}.html`
+    ? `/lessons/multiplication-narrated-v${premium ? 6 : 2}.html`
     : '/lessons/fractions-narrated-v2.html';
 const kit = join(
   root,
@@ -49,7 +49,7 @@ const chapters = story.chapters.map((chapter) => {
   return { id: chapter.id, title: chapter.title, start, end: offset - 1 };
 });
 const manifest = {
-  version: premium ? 5 : 2,
+  version: premium ? 6 : 2,
   ...(premium ? { captionLayout: 'below-player' } : {}),
   asset,
   fps: story.fps,
@@ -76,19 +76,19 @@ const groupingPicture = `function Picture({shot}){const counts=shot.groupSizes??
 `;
 const adventurePicture = premium
   ? `const ART='data:image/webp;base64,${readFileSync(join(root, 'public/lessons/multiplication-demo-v3/welcome.webp')).toString('base64')}';
-function Picture({shot}){const counts=shot.groupSizes??Array(shot.groups).fill(shot.each);return <AbsoluteFill style={{background:'#fff8e6',fontFamily:'system-ui,sans-serif',color:'#173e49'}}>
+function Picture({shot}){const frame=useCurrentFrame();const still=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;const counts=shot.groupSizes??Array(shot.groups).fill(shot.each);return <AbsoluteFill style={{background:'#fff8e6',fontFamily:'system-ui,sans-serif',color:'#173e49'}}>
 <img src={ART} style={{position:'absolute',width:'100%',height:'100%',objectFit:'cover',opacity:0.12}}/>
 <div style={{position:'absolute',inset:'22px 30px 152px',borderRadius:30,background:'rgba(255,255,255,0.95)',boxShadow:'0 10px 35px #173e4910'}}/>
 <div style={{position:'absolute',top:40,left:64,fontSize:22,color:'#126e75',fontWeight:700}}>CoastalTutor · 海边数学乐园</div>
 <h1 style={{position:'absolute',top:82,left:64,right:64,margin:0,fontSize:40}}>{shot.title}</h1>
 <p style={{position:'absolute',top:145,left:64,right:64,margin:0,fontSize:29,color:'#52716e'}}>{shot.cue}</p>
-<div style={{position:'absolute',left:64,right:64,top:216,display:'flex',justifyContent:'center',gap:18}}>{counts.map((count,i)=><div key={i} style={{width:Math.min(220,760/counts.length),height:174,border:'3px solid '+(shot.groupSizes&&count!==shot.each?'#db9744':'#23948e'),borderRadius:24,background:shot.groupSizes&&count!==shot.each?'#fff0cc':['#e7f7f1','#eaf4ff','#fff4da','#faeef3'][i%4],display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,boxShadow:'0 5px 0 #173e4910'}}><span style={{fontSize:24,fontWeight:600}}>第 {i+1} 组</span><div style={{display:'grid',gridTemplateColumns:'repeat(2,46px)',gap:10}}>{Array.from({length:count},(_,j)=><span key={j} style={{width:44,height:44,borderRadius:'50%',background:'radial-gradient(circle at 32% 28%,#b3f2d8,#39ad97)',border:'2px solid #126e75',boxShadow:'0 3px 0 #126e7530'}}/>)}</div></div>)}</div>
+<div style={{position:'absolute',left:64,right:64,top:216,display:'flex',justifyContent:'center',gap:18}}>{counts.map((count,i)=><div key={i} style={{width:Math.min(220,760/counts.length),height:174,transform:'translateY('+(still?0:Math.sin(frame/15+i)*3)+'px)',border:'3px solid '+(shot.groupSizes&&count!==shot.each?'#db9744':'#23948e'),borderRadius:24,background:shot.groupSizes&&count!==shot.each?'#fff0cc':['#e7f7f1','#eaf4ff','#fff4da','#faeef3'][i%4],display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,boxShadow:'0 5px 0 #173e4910'}}><span style={{fontSize:24,fontWeight:600}}>第 {i+1} 组</span><div style={{display:'grid',gridTemplateColumns:'repeat(2,46px)',gap:10}}>{Array.from({length:count},(_,j)=><span key={j} style={{width:44,height:44,borderRadius:'50%',background:'radial-gradient(circle at 32% 28%,#b3f2d8,#39ad97)',border:'2px solid #126e75',boxShadow:'0 3px 0 #126e7530'}}/>)}</div></div>)}</div>
 <div style={{position:'absolute',left:64,right:64,top:416,borderRadius:20,background:'#fff4ce',padding:14,textAlign:'center',fontSize:40,fontWeight:800}}>{shot.formula}</div>
 <p style={{position:'absolute',left:64,right:64,top:503,fontSize:22,color:'#52716e',textAlign:'center'}}>看每组有几个 · 数一数有几组 · 暂停说说你的发现</p>
 </AbsoluteFill>}
 `
   : groupingPicture;
-let source = `import React from 'react';import {AbsoluteFill} from 'remotion';import {Scenes,lessonLength} from './kit';
+let source = `import React from 'react';import {AbsoluteFill,useCurrentFrame} from 'remotion';import {Scenes,lessonLength} from './kit';
 const SHOTS=${JSON.stringify(shots)};
 function Picture({shot}){return <AbsoluteFill style={{background:'#f2f8f5',fontFamily:'system-ui,sans-serif',color:'#173e49'}}>
   <div style={{position:'absolute',top:28,left:70,fontSize:24,color:'#427d78'}}>CoastalTutor · 分数小课堂</div>
@@ -145,7 +145,7 @@ require('esbuild').buildSync({
 const js = readFileSync(join(work, 'player.js'), 'utf8').replaceAll('</script', '<\\/script');
 const html = `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; media-src data: blob:; connect-src data: blob:; base-uri 'none'; form-action 'none'">
-<title>CoastalTutor 数学讲解</title><style>*{box-sizing:border-box}body{margin:0;background:#f2f8f5;color:#173e49;font:16px system-ui,sans-serif}#player{max-width:960px;margin:auto}.readable-caption{display:none}.readable-caption.external-caption{display:block;margin:0;padding:16px 18px;background:#fff8e6;color:#173e49;font-size:18px;line-height:1.8;overflow-wrap:anywhere;border-top:1px solid #e5d4b0}@media(max-width:600px){.readable-caption{display:block;margin:0;padding:10px 14px;background:#e7f1ec;font-size:16px;line-height:1.65}}.thinking-turn{padding:18px;background:#e9f6ee;border-top:2px solid #95c7af;font-size:18px;line-height:1.65}.thinking-turn h2{font-size:22px;margin:0 0 8px}.thinking-turn p{margin:10px 0}.thinking-turn button{min-height:48px;padding:10px 14px;margin:4px}.thinking-turn button:disabled{opacity:.55;cursor:default}.turn-choices{display:flex;flex-wrap:wrap;gap:8px}.turn-counters{display:block;min-height:32px;color:#126e75;font-size:25px}.turn-continue{display:block;background:#126e75;color:white}.turn-note{font-size:14px}.friend-reply{padding:12px;background:#fff8e6;border-radius:12px}.tools{padding:8px 12px;background:white}.seek{display:flex;align-items:center;gap:10px;font-size:14px}.seek input{flex:1;min-width:60px;min-height:28px}.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}button{min-height:44px;border:1px solid #126e75;border-radius:10px;color:#173e49;background:#f2f8f5;font:600 14px system-ui,sans-serif;cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #d38d19;outline-offset:1px}output{display:block;font-size:12px;margin-top:3px;color:#52716e}</style><div id="player"></div><script>${js}</script></html>`;
+<title>CoastalTutor 数学讲解</title><style>*{box-sizing:border-box}body{margin:0;background:#f2f8f5;color:#173e49;font:16px system-ui,sans-serif}#player{max-width:960px;margin:auto}.readable-caption{display:none}.readable-caption.external-caption{display:block;margin:0;padding:16px 18px;background:#fff8e6;color:#173e49;font-size:18px;line-height:1.8;overflow-wrap:anywhere;border-top:1px solid #e5d4b0}@media(max-width:600px){.readable-caption{display:block;margin:0;padding:10px 14px;background:#e7f1ec;font-size:16px;line-height:1.65}}.thinking-turn{padding:18px;background:#e9f6ee;border-top:2px solid #95c7af;font-size:18px;line-height:1.65}.thinking-turn h2{font-size:22px;margin:0 0 8px}.thinking-turn p{margin:10px 0}.thinking-turn button{min-height:48px;padding:10px 14px;margin:4px}.thinking-turn button:disabled{opacity:.55;cursor:default}.turn-choices{display:flex;flex-wrap:wrap;gap:8px}.turn-counters{display:block;min-height:32px;color:#126e75;font-size:25px}.turn-continue{display:block;background:#126e75;color:white}.turn-note{font-size:14px}.friend-reply{padding:14px;background:#fff0ce;border:2px solid #ecc36b;border-radius:16px}.teacher-correction{padding:14px;background:#e6f4ff;border:2px solid #94c6e1;border-radius:16px}.adventure-stamps{padding:12px 18px;background:#fff1bd;font-size:14px;line-height:1.7;margin:0}.adventure-stamps span{font-size:26px;color:#a96510}.turn-choices button{background:#fffaf0;border:2px solid #b4d9cf;border-radius:18px;box-shadow:0 4px 0 #cde5da}.turn-choices button:nth-child(2n){background:#f0edff;border-color:#c9c0ed}.turn-choices button:nth-child(3n){background:#fff1df;border-color:#edcc99}.turn-counters span{display:inline-block;color:#ee9b56;text-shadow:1px 2px #e1cda0}.thinking-turn .turn-choices button:disabled{opacity:1;cursor:default}.turn-choices>button{min-width:108px}.turn-counters{min-height:48px;font-size:34px}.turn-counters span:nth-child(2n){color:#8466c3}@keyframes coastal-token-pop{from{transform:scale(.5)}to{transform:scale(1)}}@media(prefers-reduced-motion:no-preference){.turn-counters span{animation:coastal-token-pop .3s ease-out}}.tools{padding:8px 12px;background:white}.seek{display:flex;align-items:center;gap:10px;font-size:14px}.seek input{flex:1;min-width:60px;min-height:28px}.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}button{min-height:44px;border:1px solid #126e75;border-radius:10px;color:#173e49;background:#f2f8f5;font:600 14px system-ui,sans-serif;cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #d38d19;outline-offset:1px}output{display:block;font-size:12px;margin-top:3px;color:#52716e}</style><div id="player"></div><script>${js}</script></html>`;
 // Native kit CSS templates contain trailing spaces; normalize this generated asset.
 const cleanHtml = html
   .split('\n')

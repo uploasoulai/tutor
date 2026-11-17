@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { ReviewedLessonVideo } from './fractions-lesson-video';
 import media from '@/lib/curriculum/multiplication-media.json';
 import story from '@/lib/curriculum/multiplication-storyboard.json';
@@ -9,6 +9,9 @@ import { HYBRID_PHASES, type HybridPhase } from '@/lib/curriculum/hybrid-fractio
 import { GROUPING_ACTIVITY_HTML } from '@/lib/curriculum/grouping-activity';
 import { MultiplicationWelcome } from './multiplication-welcome';
 import { CourseLibraryFeedback } from './course-library-feedback';
+const LittleClassroom = lazy(() =>
+  import('./little-classroom').then((m) => ({ default: m.LittleClassroom })),
+);
 
 type Question = { id: string; prompt: string };
 const endpoint = '/api/china-curriculum/multiplication-pilot';
@@ -166,6 +169,8 @@ export function MultiplicationPilot({
     { id: 'check', label: '试一试' },
     { id: 'recap', label: '记一记' },
   ];
+  const roomAroundActivity =
+    !loading && ['question', 'practice', 'check', 'completed'].includes(phase);
   const prompt = question
     ? `我正在学习二年级“乘法的初步认识”。题目：${question.prompt}\n我的回答：${answer}\n请先用一个小问题引导我，不要直接给答案。请用你的错题流程帮助我理解，并记录供复习。`
     : '';
@@ -208,313 +213,327 @@ export function MultiplicationPilot({
             </button>
           </div>
         )}
-        <section className="rounded-3xl border border-[#d9e7df] bg-white p-5 shadow-sm sm:p-8">
-          {loading ? (
-            <p role="status">正在保存试课、读取你的学习档案…</p>
-          ) : phase === 'intro' ? (
-            <>
-              <MultiplicationWelcome />
-              <h2 className="text-xl font-bold">
-                {reviewOnly
-                  ? '再去海边数学乐园探索一次'
-                  : preview
-                    ? '欢迎来到小海老师的数学教室'
-                    : sessionId.current
-                      ? '这节试课已存入你的学习档案'
-                      : '暂时还没有保存这节试课'}
-              </h2>
-              <p className="my-4 leading-8">
-                {reviewOnly
-                  ? '这是回看模式：可以重新看开场、听讲解、动手摆一摆，不会新增答题记录或改动原来的成绩。'
-                  : preview
-                    ? '讲解和练习都已经准备好，跟着小海老师看一看、摆一摆吧。这是体验模式，不会写入任何学生的学习档案；学生账号进入后会保存自己的进度。'
-                    : sessionId.current
-                      ? '目前标记为“已保存、未开始”。点开始以后，才会记录学习和答题进度。讲解已经准备好，反复观看不需要重新生成。'
-                      : '请重新读取学习档案。保存成功后就可以开始，已有的学习记录仍会保留。'}
-              </p>
-              {!preview && questions.length !== 2 && (
-                <p role="alert" className="mb-4 text-amber-800">
-                  理解检查题目暂时未就绪，请稍后重新打开。
+        <section
+          className={`rounded-3xl border-2 border-[#d9e7df] bg-white p-4 shadow-sm sm:p-6 ${roomAroundActivity ? 'lg:grid lg:grid-cols-[210px_minmax(0,1fr)] lg:items-start lg:gap-5' : ''}`}
+        >
+          {roomAroundActivity && (
+            <Suspense fallback={<p>小海老师正在准备教室…</p>}>
+              <LittleClassroom compact speaking={false} />
+            </Suspense>
+          )}
+          <div className="min-w-0">
+            {loading ? (
+              <p role="status">正在保存试课、读取你的学习档案…</p>
+            ) : phase === 'intro' ? (
+              <>
+                <MultiplicationWelcome />
+                <h2 className="text-xl font-bold">
+                  {reviewOnly
+                    ? '再去海边数学乐园探索一次'
+                    : preview
+                      ? '欢迎来到小海老师的数学教室'
+                      : sessionId.current
+                        ? '这节试课已存入你的学习档案'
+                        : '暂时还没有保存这节试课'}
+                </h2>
+                <p className="my-4 leading-8">
+                  {reviewOnly
+                    ? '这是回看模式：可以重新看开场、听讲解、动手摆一摆，不会新增答题记录或改动原来的成绩。'
+                    : preview
+                      ? '讲解和练习都已经准备好，跟着小海老师看一看、摆一摆吧。这是体验模式，不会写入任何学生的学习档案；学生账号进入后会保存自己的进度。'
+                      : sessionId.current
+                        ? '目前标记为“已保存、未开始”。点开始以后，才会记录学习和答题进度。讲解已经准备好，反复观看不需要重新生成。'
+                        : '请重新读取学习档案。保存成功后就可以开始，已有的学习记录仍会保留。'}
                 </p>
-              )}
-              <button
-                className={button}
-                disabled={busy || (!preview && (!sessionId.current || questions.length !== 2))}
-                onClick={() => void advance('question')}
-              >
-                {reviewOnly ? '从头回看这节课' : preview ? '开始二年级体验' : '开始二年级试课'}
-              </button>
-            </>
-          ) : phase === 'question' ? (
-            <>
-              <h2 className="text-xl font-bold">哪幅图的每组同样多？</h2>
-              <p className="my-4 leading-7">先看看每组有几个。这一步不计分。</p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {[true, false].map((equal) => (
-                  <button
-                    key={String(equal)}
-                    aria-label={equal ? '图形一' : '图形二'}
-                    aria-pressed={choice === equal}
-                    className="min-h-32 rounded-2xl border-2 border-[#aac9bd] p-4"
-                    onClick={() => setChoice(equal)}
-                  >
-                    <span className="font-bold">{equal ? '图形一' : '图形二'}</span>
-                    <span className="mt-3 flex justify-center gap-3">
-                      {(equal ? [2, 2, 2] : [2, 3, 2]).map((n, i) => (
-                        <span
-                          key={i}
-                          className="flex min-h-20 flex-wrap items-center justify-center gap-1 rounded-xl border border-[#126e75] p-2"
-                          aria-label={`第${i + 1}组有${n}个`}
-                        >
-                          {Array.from({ length: n }, (_, j) => (
-                            <span
-                              key={j}
-                              className="inline-block size-4 rounded-full bg-[#126e75]"
-                            />
-                          ))}
-                        </span>
-                      ))}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              {choice !== null && (
-                <p role="status" className="my-4 rounded-xl bg-[#edf6ee] p-4">
-                  {choice
-                    ? '找得真仔细！每组都是 2 个。我们一起看看几组放在一起会怎样。'
-                    : '看看中间一组，它有 3 个。再找找每组同样多的那幅图。'}
-                </p>
-              )}
-              <button
-                className={`${button} mt-5`}
-                disabled={busy || choice !== true}
-                onClick={() => void advance('video')}
-              >
-                看老师讲一讲 →
-              </button>
-            </>
-          ) : phase === 'video' || phase === 'reasoning' || phase === 'recap' ? (
-            <>
-              <ReviewedLessonVideo
-                key={phase}
-                chapter={phase === 'video' ? 'explain' : phase === 'reasoning' ? 'reason' : 'recap'}
-                media={media}
-                story={story}
-                playful
-              />
-              <div className="mt-5 flex justify-end">
+                {!preview && questions.length !== 2 && (
+                  <p role="alert" className="mb-4 text-amber-800">
+                    理解检查题目暂时未就绪，请稍后重新打开。
+                  </p>
+                )}
                 <button
                   className={button}
-                  disabled={
-                    busy ||
-                    (phase === 'recap' &&
-                      !preview &&
-                      !reviewOnly &&
-                      !hasReviewedAssessment(MULTIPLICATION_PILOT, correctIds))
-                  }
-                  onClick={() =>
-                    void advance(
-                      phase === 'video'
-                        ? 'practice'
-                        : phase === 'reasoning'
-                          ? reviewOnly
-                            ? 'recap'
-                            : 'check'
-                          : 'completed',
-                    )
-                  }
+                  disabled={busy || (!preview && (!sessionId.current || questions.length !== 2))}
+                  onClick={() => void advance('question')}
                 >
-                  {phase === 'video'
-                    ? '我来摆一摆 →'
-                    : phase === 'reasoning'
-                      ? reviewOnly
-                        ? '回看今天的发现 →'
-                        : preview
-                          ? '试试一个小问题 →'
-                          : '试试两个新问题 →'
-                      : reviewOnly
-                        ? '结束回看'
-                        : preview
-                          ? '结束体验'
-                          : '完成并保存学习记录'}
+                  {reviewOnly ? '从头回看这节课' : preview ? '开始二年级体验' : '开始二年级试课'}
                 </button>
-              </div>
-            </>
-          ) : phase === 'practice' ? (
-            <>
-              <h2 className="text-xl font-bold">亲手摆出 3 个 2</h2>
-              <p className="my-3 leading-7">先点圆片，再点盒子。让三个盒子每个都有两个圆片。</p>
-              <iframe
-                ref={activity}
-                srcDoc={GROUPING_ACTIVITY_HTML}
-                title="二年级乘法分组练习"
-                sandbox="allow-scripts"
-                className="h-[700px] w-full rounded-2xl border-0 sm:h-[560px]"
-              />
-              {practiceDone && (
-                <p role="status" className="my-3 rounded-xl bg-[#edf6ee] p-4">
-                  你摆出了三组，每组两个。现在听听为什么能用乘法表示。
-                </p>
-              )}
-              <button
-                className={`${button} mt-4`}
-                disabled={busy || (!practiceDone && !reviewOnly)}
-                onClick={() => void advance('reasoning')}
-              >
-                看看为什么这样写 →
-              </button>
-            </>
-          ) : phase === 'check' ? (
-            preview ? (
+              </>
+            ) : phase === 'question' ? (
               <>
-                <h2 className="text-xl font-bold">体验小练习：摆出几个几</h2>
-                <p className="my-4 text-lg leading-8">
-                  每组有 2 颗星星，有这样的 3 组。一共有几颗星星？
-                </p>
-                <p className="mb-4 text-sm text-[#72531d]">这是体验练习，不写入学习档案。</p>
-                <div className="flex flex-wrap gap-3">
-                  {[4, 6, 8].map((value) => (
+                <h2 className="text-xl font-bold">哪幅图的每组同样多？</h2>
+                <p className="my-4 leading-7">先看看每组有几个。这一步不计分。</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {[true, false].map((equal) => (
                     <button
-                      key={value}
-                      type="button"
-                      aria-pressed={previewAnswer === value}
-                      onClick={() => setPreviewAnswer(value)}
-                      className="min-h-14 min-w-20 rounded-2xl border-2 border-[#d9b975] bg-[#fff5db] px-6 text-2xl font-bold"
+                      key={String(equal)}
+                      aria-label={equal ? '图形一' : '图形二'}
+                      aria-pressed={choice === equal}
+                      className="min-h-32 rounded-2xl border-2 border-[#aac9bd] p-4"
+                      onClick={() => setChoice(equal)}
                     >
-                      {value}
+                      <span className="font-bold">{equal ? '图形一' : '图形二'}</span>
+                      <span className="mt-3 flex justify-center gap-3">
+                        {(equal ? [2, 2, 2] : [2, 3, 2]).map((n, i) => (
+                          <span
+                            key={i}
+                            className="flex min-h-20 flex-wrap items-center justify-center gap-1 rounded-xl border border-[#126e75] p-2"
+                            aria-label={`第${i + 1}组有${n}个`}
+                          >
+                            {Array.from({ length: n }, (_, j) => (
+                              <span
+                                key={j}
+                                className="inline-block size-4 rounded-full bg-[#126e75]"
+                              />
+                            ))}
+                          </span>
+                        ))}
+                      </span>
                     </button>
                   ))}
                 </div>
-                {previewAnswer !== null && (
+                {choice !== null && (
                   <p role="status" className="my-4 rounded-xl bg-[#edf6ee] p-4">
-                    {previewAnswer === 6
-                      ? '找到了！3 个 2 是 6。试着说说你是怎么数的吧。'
-                      : '不着急，摆出三组小物品，每组两个，再一起数一数。'}
+                    {choice
+                      ? '找得真仔细！每组都是 2 个。我们一起看看几组放在一起会怎样。'
+                      : '看看中间一组，它有 3 个。再找找每组同样多的那幅图。'}
+                  </p>
+                )}
+                <button
+                  className={`${button} mt-5`}
+                  disabled={busy || choice !== true}
+                  onClick={() => void advance('video')}
+                >
+                  看老师讲一讲 →
+                </button>
+              </>
+            ) : phase === 'video' || phase === 'reasoning' || phase === 'recap' ? (
+              <>
+                <ReviewedLessonVideo
+                  key={phase}
+                  chapter={
+                    phase === 'video' ? 'explain' : phase === 'reasoning' ? 'reason' : 'recap'
+                  }
+                  media={media}
+                  story={story}
+                  playful
+                />
+                <div className="mt-5 flex justify-end">
+                  <button
+                    className={button}
+                    disabled={
+                      busy ||
+                      (phase === 'recap' &&
+                        !preview &&
+                        !reviewOnly &&
+                        !hasReviewedAssessment(MULTIPLICATION_PILOT, correctIds))
+                    }
+                    onClick={() =>
+                      void advance(
+                        phase === 'video'
+                          ? 'practice'
+                          : phase === 'reasoning'
+                            ? reviewOnly
+                              ? 'recap'
+                              : 'check'
+                            : 'completed',
+                      )
+                    }
+                  >
+                    {phase === 'video'
+                      ? '我来摆一摆 →'
+                      : phase === 'reasoning'
+                        ? reviewOnly
+                          ? '回看今天的发现 →'
+                          : preview
+                            ? '试试一个小问题 →'
+                            : '试试两个新问题 →'
+                        : reviewOnly
+                          ? '结束回看'
+                          : preview
+                            ? '结束体验'
+                            : '完成并保存学习记录'}
+                  </button>
+                </div>
+              </>
+            ) : phase === 'practice' ? (
+              <>
+                <h2 className="text-xl font-bold">亲手摆出 3 个 2</h2>
+                <p className="my-3 leading-7">先点圆片，再点盒子。让三个盒子每个都有两个圆片。</p>
+                <iframe
+                  ref={activity}
+                  srcDoc={GROUPING_ACTIVITY_HTML}
+                  title="二年级乘法分组练习"
+                  sandbox="allow-scripts"
+                  className="h-[700px] w-full rounded-2xl border-0 sm:h-[560px]"
+                />
+                {practiceDone && (
+                  <p role="status" className="my-3 rounded-xl bg-[#edf6ee] p-4">
+                    你摆出了三组，每组两个。现在听听为什么能用乘法表示。
                   </p>
                 )}
                 <button
                   className={`${button} mt-4`}
-                  disabled={previewAnswer !== 6}
-                  onClick={() => void advance('recap')}
+                  disabled={busy || (!practiceDone && !reviewOnly)}
+                  onClick={() => void advance('reasoning')}
                 >
-                  记住今天的发现 →
+                  看看为什么这样写 →
                 </button>
               </>
-            ) : (
-              <>
-                <h2 className="text-xl font-bold">我能说清楚几个几</h2>
-                <p className="my-4 leading-7">
-                  已完成{' '}
-                  {MULTIPLICATION_PILOT.questionIds.filter((id) => correctIds.includes(id)).length}{' '}
-                  / 2 道理解检查。
-                </p>
-                {feedback === true && (
-                  <p role="status" className="my-3 rounded-xl bg-[#edf6ee] p-4">
-                    这道题答对了！
+            ) : phase === 'check' ? (
+              preview ? (
+                <>
+                  <h2 className="text-xl font-bold">体验小练习：摆出几个几</h2>
+                  <p className="my-4 text-lg leading-8">
+                    每组有 2 颗星星，有这样的 3 组。一共有几颗星星？
                   </p>
-                )}
-                {question ? (
-                  <>
-                    <form
-                      onSubmit={(event) => {
-                        event.preventDefault();
-                        void submit();
-                      }}
-                    >
-                      <label
-                        htmlFor="multiplication-answer"
-                        className="block text-lg font-bold leading-8"
+                  <p className="mb-4 text-sm text-[#72531d]">这是体验练习，不写入学习档案。</p>
+                  <div className="flex flex-wrap gap-3">
+                    {[4, 6, 8].map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        aria-pressed={previewAnswer === value}
+                        onClick={() => setPreviewAnswer(value)}
+                        className="min-h-14 min-w-20 rounded-2xl border-2 border-[#d9b975] bg-[#fff5db] px-6 text-2xl font-bold"
                       >
-                        {question.prompt}
-                      </label>
-                      <div className="my-4 flex flex-wrap gap-3">
-                        <input
-                          id="multiplication-answer"
-                          inputMode="numeric"
-                          autoComplete="off"
-                          maxLength={40}
-                          value={answer}
-                          onChange={(event) => {
-                            setAnswer(event.target.value);
-                            setFeedback(null);
-                          }}
-                          placeholder="写下你的答案"
-                          className="min-h-12 w-44 rounded-xl border border-[#aac9bd] px-4 text-xl"
-                        />
-                        <button className={button} disabled={busy || !answer.trim()}>
-                          提交答案
-                        </button>
-                      </div>
-                    </form>
-                    {feedback === false && (
-                      <div className="rounded-xl bg-amber-50 p-4">
-                        <p role="status">
-                          先找每组有几个，再找有几组。需要帮助时，可以请家教引导你。
-                        </p>
-                        <form
-                          method="post"
-                          action="/api/learning/launch"
-                          target="_blank"
-                          rel="noopener"
-                        >
-                          <input type="hidden" name="mode" value="personal" />
-                          <input type="hidden" name="prompt" value={prompt} />
-                          <button className="mt-3 min-h-11 rounded-xl border bg-white px-4">
-                            请我的家教引导一下 ↗
-                          </button>
-                        </form>
-                      </div>
-                    )}
-                  </>
-                ) : (
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                  {previewAnswer !== null && (
+                    <p role="status" className="my-4 rounded-xl bg-[#edf6ee] p-4">
+                      {previewAnswer === 6
+                        ? '找到了！3 个 2 是 6。试着说说你是怎么数的吧。'
+                        : '不着急，摆出三组小物品，每组两个，再一起数一数。'}
+                    </p>
+                  )}
                   <button
-                    className={button}
-                    disabled={busy || !hasReviewedAssessment(MULTIPLICATION_PILOT, correctIds)}
+                    className={`${button} mt-4`}
+                    disabled={previewAnswer !== 6}
                     onClick={() => void advance('recap')}
                   >
                     记住今天的发现 →
                   </button>
-                )}
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl font-bold">我能说清楚几个几</h2>
+                  <p className="my-4 leading-7">
+                    已完成{' '}
+                    {
+                      MULTIPLICATION_PILOT.questionIds.filter((id) => correctIds.includes(id))
+                        .length
+                    }{' '}
+                    / 2 道理解检查。
+                  </p>
+                  {feedback === true && (
+                    <p role="status" className="my-3 rounded-xl bg-[#edf6ee] p-4">
+                      这道题答对了！
+                    </p>
+                  )}
+                  {question ? (
+                    <>
+                      <form
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          void submit();
+                        }}
+                      >
+                        <label
+                          htmlFor="multiplication-answer"
+                          className="block text-lg font-bold leading-8"
+                        >
+                          {question.prompt}
+                        </label>
+                        <div className="my-4 flex flex-wrap gap-3">
+                          <input
+                            id="multiplication-answer"
+                            inputMode="numeric"
+                            autoComplete="off"
+                            maxLength={40}
+                            value={answer}
+                            onChange={(event) => {
+                              setAnswer(event.target.value);
+                              setFeedback(null);
+                            }}
+                            placeholder="写下你的答案"
+                            className="min-h-12 w-44 rounded-xl border border-[#aac9bd] px-4 text-xl"
+                          />
+                          <button className={button} disabled={busy || !answer.trim()}>
+                            提交答案
+                          </button>
+                        </div>
+                      </form>
+                      {feedback === false && (
+                        <div className="rounded-xl bg-amber-50 p-4">
+                          <p role="status">
+                            先找每组有几个，再找有几组。需要帮助时，可以请家教引导你。
+                          </p>
+                          <form
+                            method="post"
+                            action="/api/learning/launch"
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            <input type="hidden" name="mode" value="personal" />
+                            <input type="hidden" name="prompt" value={prompt} />
+                            <button className="mt-3 min-h-11 rounded-xl border bg-white px-4">
+                              请我的家教引导一下 ↗
+                            </button>
+                          </form>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <button
+                      className={button}
+                      disabled={busy || !hasReviewedAssessment(MULTIPLICATION_PILOT, correctIds)}
+                      onClick={() => void advance('recap')}
+                    >
+                      记住今天的发现 →
+                    </button>
+                  )}
+                </>
+              )
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold">
+                  {preview ? '二年级课堂体验完成了！' : '二年级试课完成了！'}
+                </h2>
+                <p className="my-4 leading-8">
+                  {preview
+                    ? '你已经体验了讲解、分组操作和小练习。这里没有写入任何学生记录；使用学生账号学习，就可以保存自己的进度。'
+                    : '这节课和两道理解检查已经保存在你的学习档案中。以后可以从学习空间再次打开。'}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    className="min-h-12 rounded-2xl border-2 border-[#e9bf58] bg-[#ffdc79] px-5 py-3 font-bold text-[#593f13]"
+                    onClick={() => {
+                      setReviewOnly(true);
+                      setPhase('intro');
+                    }}
+                  >
+                    重看欢迎动画
+                  </button>
+                  <button
+                    className={button}
+                    onClick={() => {
+                      setReviewOnly(true);
+                      setPhase('video');
+                    }}
+                  >
+                    回看讲解和操作
+                  </button>
+                  <Link
+                    href={preview ? '/' : '/student'}
+                    className="min-h-12 rounded-2xl border border-[#aac9bd] px-5 py-3 font-bold"
+                  >
+                    {preview ? '回到平台首页 →' : '回到我的学习档案 →'}
+                  </Link>
+                </div>
               </>
-            )
-          ) : (
-            <>
-              <h2 className="text-2xl font-bold">
-                {preview ? '二年级课堂体验完成了！' : '二年级试课完成了！'}
-              </h2>
-              <p className="my-4 leading-8">
-                {preview
-                  ? '你已经体验了讲解、分组操作和小练习。这里没有写入任何学生记录；使用学生账号学习，就可以保存自己的进度。'
-                  : '这节课和两道理解检查已经保存在你的学习档案中。以后可以从学习空间再次打开。'}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  className="min-h-12 rounded-2xl border-2 border-[#e9bf58] bg-[#ffdc79] px-5 py-3 font-bold text-[#593f13]"
-                  onClick={() => {
-                    setReviewOnly(true);
-                    setPhase('intro');
-                  }}
-                >
-                  重看欢迎动画
-                </button>
-                <button
-                  className={button}
-                  onClick={() => {
-                    setReviewOnly(true);
-                    setPhase('video');
-                  }}
-                >
-                  回看讲解和操作
-                </button>
-                <Link
-                  href={preview ? '/' : '/student'}
-                  className="min-h-12 rounded-2xl border border-[#aac9bd] px-5 py-3 font-bold"
-                >
-                  {preview ? '回到平台首页 →' : '回到我的学习档案 →'}
-                </Link>
-              </div>
-            </>
-          )}
+            )}
+          </div>
         </section>
         {!preview && phase === 'completed' && (
           <div className="mt-5">
